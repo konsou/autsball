@@ -205,6 +205,8 @@ class BallSprite(game_object.GameObject):
         self.attached_player = None
         self.mass = 1
         self.max_speed = 10
+        # Tämä tekee sen että tarkistetaan törmäys maaliin
+        self.is_ball = 1
 
     def update(self, viewscreen_rect):
         """ Päivittää palloa. Vaatii viewscreen_rect:in että osaa laskea näyttämisen oikein. """
@@ -226,7 +228,7 @@ class BallSprite(game_object.GameObject):
             self.update_movement()
 
         self.check_out_of_bounds()
-        self.check_collision_with_wall()
+        self.check_collision_with_wall_and_goal()
         self.check_collision_with_bullets()
 
     def reset(self):
@@ -238,42 +240,13 @@ class BallSprite(game_object.GameObject):
         self.detach()
 
     def shoot(self, direction=0, speed=0, x=0, y=0):
-        # TODO: korjaa tämä - direktio miten sattuu
         # print("Ball shoot - direction, speed:", direction, speed)
+        # Jostain syystä vaatii direktion korjauksen tässä
         self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
         self.x = int(x)
         self.y = int(y)
         self.update_rect()
         # print("ball.shoot - magnitude, angle:", self.move_vector.get_magnitude_angle())
-
-    def check_collision_with_wall(self):
-        """ Tarkastaa törkmäyksen seiniin ja maaliin (eli juttuihin level-taustassa) """
-        # Katotaan mikä väri on levelissä tässä pisteessä
-        try:
-            current_point = self.level.image.get_at((self.x, self.y))
-        except IndexError as e:
-            print("IndexError ballin wall-collision-metodissa:", e)
-            print("x ja y:", self.x, self.y)
-
-        # print("Ball: x, y", self.x, self.y)
-        # print("Ball: current point color", current_point)
-        # Jos taustakuvan pisteessä alfa muuta kuin 0 niin on seinä
-        # POIKKEUS: jos väri on punainen ta vihreä niin on maali
-        if current_point[:3] != black and current_point[:3] != red and current_point[:3] != green:
-            self.move_vector.set_magnitude(0)
-            # self.speed = 0
-            # self.vx = 0
-            # self.vy = 0
-        # Katsotaan onko maalissa
-        else:
-            # Punainen maali - piste vihreälle
-            if current_point[:3] == red:
-                self.parent.score('green')
-                self.reset()
-            # Vihreä maali - piste punaiselle
-            elif current_point[:3] == green:
-                self.parent.score('red')
-                self.reset()
 
     def check_collision_with_bullets(self):
         collide_list = pygame.sprite.spritecollide(self, BulletGroup, True)
@@ -284,9 +257,6 @@ class BallSprite(game_object.GameObject):
             # TODO: ota huomioon suhteelliset kulmat, ota huomioon objektien massat
             self.move_vector.set_vx(self.move_vector.get_vx() + collide_list[0].vx * collide_list[0].explosion_force)
             self.move_vector.set_vy(self.move_vector.get_vy() + collide_list[0].vy * collide_list[0].explosion_force)
-            # self.vx += collide_list[0].vx * collide_list[0].explosion_force
-            # self.vy += collide_list[0].vy * collide_list[0].explosion_force
-            # self.speed = math.hypot(self.vx, self.vy)
             # print("vx, vy:", self.vx, self.vy)
 
     def attach_to_player(self, player):

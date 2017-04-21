@@ -1,10 +1,16 @@
 import pygame, vector
 
+red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (0, 0, 255)
+black = (0, 0, 0)
+white = (255, 255, 255)
+
 
 class GameObject(pygame.sprite.Sprite):
     """ Classi joka perii pygamen Spriten ja lisää yleisiä peliobjektin käyttäytymiseen liittyviä juttuja """
     def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None,
-                 gravity_affects=1):
+                 gravity_affects=1, is_ball=0):
         # Spriten init
         pygame.sprite.Sprite.__init__(self, group)
         # parent on itse peliobjekti
@@ -30,7 +36,9 @@ class GameObject(pygame.sprite.Sprite):
         self.x_previous, self.y_previous = self.start_position
         self.mass = 1
         self.move_vector = vector.MoveVector()
+
         self.gravity_affects = gravity_affects
+        self.is_ball = is_ball
 
         self.viewscreen_rect = None
 
@@ -80,3 +88,30 @@ class GameObject(pygame.sprite.Sprite):
         self.x = min(self.level.size_x - 1, self.x)
         self.y = max(0, self.y)
         self.y = min(self.level.size_y - 1, self.y)
+
+    def check_collision_with_wall_and_goal(self):
+        """ Tarkastaa törkmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
+        # Katotaan mikä väri on levelissä tässä pisteessä - skipataan alfa
+        try:
+            current_point = self.level.image.get_at((self.x, self.y))[:3]
+        except IndexError as e:
+            print("IndexError wall-collision-metodissa:", e)
+            print("x ja y:", self.x, self.y)
+
+        # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys
+        if current_point != black and current_point != green and current_point != red:
+            self.move_vector.set_magnitude(0)
+
+        # Jos objekti on pallo niin katsotaan onko maalissa
+        if self.is_ball:
+            # Punainen maali - piste vihreälle
+            if current_point == red:
+                self.parent.score('green')
+                self.reset()
+            # Vihreä maali - piste punaiselle
+            elif current_point == green:
+                self.parent.score('red')
+                self.reset()
+
+
+
