@@ -237,12 +237,6 @@ class BallSprite(game_object.GameObject):
         game_object.GameObject.reset(self)
         self.detach()
 
-    def check_out_of_bounds(self):
-        self.x = max(0, self.x)
-        self.x = min(self.level.size_x - 1, self.x)
-        self.y = max(0, self.y)
-        self.y = min(self.level.size_y - 1, self.y)
-
     def shoot(self, direction=0, speed=0, x=0, y=0):
         # TODO: korjaa tämä - direktio miten sattuu
         # print("Ball shoot - direction, speed:", direction, speed)

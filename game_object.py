@@ -74,4 +74,9 @@ class GameObject(pygame.sprite.Sprite):
         rot_image = rot_image.subsurface(rot_rect).copy()
         self.image = rot_image
 
-
+    def check_out_of_bounds(self):
+        """ Pitää objektin pelialueen sisällä """
+        self.x = max(0, self.x)
+        self.x = min(self.level.size_x - 1, self.x)
+        self.y = max(0, self.y)
+        self.y = min(self.level.size_y - 1, self.y)
