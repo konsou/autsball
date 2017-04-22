@@ -11,8 +11,7 @@ class GameObject(pygame.sprite.Sprite):
     """ Classi joka perii pygamen Spriten ja lisää yleisiä peliobjektin käyttäytymiseen liittyviä juttuja """
     # TODO: muuta nämä niin että vakioarvot ei tule tässä argumentteina vaan selkeämmin alempana asetetaan arvoihinsa
     # ja sitten instansioinnissa voi tarvittaessa overrideta
-    def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None,
-                 gravity_affects=1, is_ball=0, is_bullet=0, max_speed=20, mass=1):
+    def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None):
         # Pygame-Spriten init
         pygame.sprite.Sprite.__init__(self, group)
 
@@ -22,7 +21,7 @@ class GameObject(pygame.sprite.Sprite):
         # level-objekti
         self.level = level
 
-        # Jos image on kuva niin napataan kuva siitä
+        # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
         if image is not None:
             self.image = image
             self.rect = self.image.get_rect()
@@ -50,12 +49,12 @@ class GameObject(pygame.sprite.Sprite):
         # Liikkumisvektori - sisältää sekä vx/vy että magnitude/angle (radiaaneina)
         self.move_vector = vector.MoveVector()
 
-        # Peliobjektin ominaisuuksia
-        self.mass = mass
-        self.max_speed = max_speed
-        self.gravity_affects = gravity_affects
-        self.is_ball = is_ball
-        self.is_bullet = is_bullet
+        # Peliobjektin ominaisuuksia - oletusarvot
+        self.mass = 1
+        self.max_speed = 30
+        self.gravity_affects = 1
+        self.is_ball = 0
+        self.is_bullet = 0
         self.is_centered_on_screen = 0
 
         # Tämä päivitetään myöhemmin, initoidaan kuitenkin ettei PyCharm herjaa
@@ -82,7 +81,7 @@ class GameObject(pygame.sprite.Sprite):
         """
         # Gravityn vaikutus
         if self.gravity_affects:
-            self.move_vector.set_vy(self.move_vector.get_vy() + self.parent.Constants.gravity)
+            self.move_vector.set_vy(self.move_vector.get_vy() + self.parent.gravity)
 
         # Max speed rajoittaa
         self.move_vector.set_magnitude(min(self.move_vector.get_magnitude(), self.max_speed))
@@ -98,6 +97,7 @@ class GameObject(pygame.sprite.Sprite):
 
     def rot_self_image_keep_size(self, angle):
         """rotate an image while keeping its center and size"""
+        # Tämä copypastettu jostain netistä. Loppujen lopuksi en ole varma onko tarpeen vai ei.
         orig_rect = self.rect
         rot_image = pygame.transform.rotate(self.original_image, angle)
         rot_rect = orig_rect.copy()
@@ -153,6 +153,7 @@ class GameObject(pygame.sprite.Sprite):
         collide_list = pygame.sprite.spritecollide(self, BulletGroup, True)
         if len(collide_list) > 0:
             # TODO: laske massojen vaikutukset törmäyksessä
+            # TODO: laske vektorit oikein objektien suhteellisten kulmien mukaan
             self.move_vector.set_vx(self.move_vector.get_vx() + collide_list[0].move_vector.get_vx() * collide_list[0].explosion_force)
             self.move_vector.set_vy(self.move_vector.get_vy() + collide_list[0].move_vector.get_vy() * collide_list[0].explosion_force)
 

@@ -1,5 +1,4 @@
-import pygame, math, time, sys, vector, game_object
-import numpy as np # onko loppujen lopuksi tarpeen?
+import pygame, math, sys, game_object
 
 red = (255, 0, 0)
 green = (0, 255, 0)
@@ -10,22 +9,29 @@ white = (255, 255, 255)
 
 class AUTSBallGame:
     def __init__(self):
+        # Vakioita
+        self.gravity = 0.1
+        self.screen_size_x = 800
+        self.screen_size_y = 600
+        self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
+
+        # Pygamen inittejä
         pygame.init()
-        self.win = pygame.display.set_mode((800, 600))
+        self.win = pygame.display.set_mode((self.screen_size_x, self.screen_size_y))
         pygame.display.set_caption("AUTSball")
         self.clock = pygame.time.Clock()
 
-        # Latauskuva koska levelin latauksessa kestää jonkin aikaa
+        # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
         self.loading_image = pygame.image.load('loading.png').convert_alpha()
         self.win.blit(self.loading_image, self.loading_image.get_rect())
         pygame.display.update()
 
+        # TODO: tähän assettien esilataus
         # Instansioidaan leveli, tämä lataa myös level-kuvan joka voi olla iiisooo
         self.current_level = Level()
         # Instansioidaan pelaaja ja pallo
         self.player = { 0: PlayerSprite(level=self.current_level, parent=self) }
         self.ball = BallSprite(level=self.current_level, parent=self)
-        # print(dir(self.ball))
 
         self.viewscreen_rect = None
         self.background_view_rect = None
@@ -36,13 +42,6 @@ class AUTSBallGame:
         self.quit_game = False
         self.frame_counter = 0
 
-    class Constants:
-        """ Sisältää vakioita kuten voi nimestä päätellä """
-        gravity = 0.1
-        screen_size_x = 800
-        screen_size_y = 600
-        screen_center_point = screen_size_x // 2, screen_size_y // 2
-        # gravity_vector = np.array([math.pi, gravity])
 
     def update(self):
         # Tämä estää errorin quitattaessa
@@ -64,19 +63,16 @@ class AUTSBallGame:
                 self.player[0].shoot()
 
             # Viewscreen rect: viewscreen absoluuttisissa koordinaateissa
-            self.viewscreen_rect = (self.player[0].x - self.Constants.screen_size_x // 2,
-                                    self.player[0].y - self.Constants.screen_size_y // 2,
-                                    self.Constants.screen_size_x,
-                                    self.Constants.screen_size_y)
+            self.viewscreen_rect = (self.player[0].x - self.screen_size_x // 2,
+                                    self.player[0].y - self.screen_size_y // 2,
+                                    self.screen_size_x,
+                                    self.screen_size_y)
 
             # Background view rect: näytetään levelistä oikea kohta
-            self.background_view_rect = (self.Constants.screen_size_x // 2 - self.player[0].x,
-                                         self.Constants.screen_size_y // 2 - self.player[0].y,
-                                         self.Constants.screen_size_x,
-                                         self.Constants.screen_size_y)
-
-            # print("Viewscreen rect:", viewscreen_rect_1)
-            # print("Player coordinates:", player[0].x, player[0].y)
+            self.background_view_rect = (self.screen_size_x // 2 - self.player[0].x,
+                                         self.screen_size_y // 2 - self.player[0].y,
+                                         self.screen_size_x,
+                                         self.screen_size_y)
 
             # Spritejen päivitykset tässä
             BulletGroup.update(self.viewscreen_rect)
@@ -110,29 +106,34 @@ class AUTSBallGame:
 
         # HUD
         # self.show_text((10, 10), "Speed: " + str(math.hypot(self.player[0].vx, self.player[0].vy)))
-        self.show_text((10, 30), "FPS: " + str(self.clock.get_fps()))
+        self.show_text((10, 50), "FPS: " + str(self.clock.get_fps()))
         self.show_text((10, 10), str(self.score_green), color=green, font_size=40)
         self.show_text((750, 10), str(self.score_red), color=red, font_size=40)
 
         # Näytetään pallonsuuntamarkkeri
+        # TODO: muuta pallon sijaan nuoli joka osoittaa oikeaan suuntaan
+        # TODO: tee niin että jos pallo on lähempänä kuin 100 pikseliä niin markkeri on pallon päällä
         if self.player[0].attached_ball is None:
             ball_angle = self.get_ball_angle_in_radians(self.ball)
             vx = int(100 * math.cos(ball_angle))
             vy = int(100 * math.sin(ball_angle))
             pygame.draw.circle(self.win, (0, 0, 255),
-                               (self.Constants.screen_size_x // 2 + vx, self.Constants.screen_size_y // 2 + vy), 5)
+                               (self.screen_size_x // 2 + vx, self.screen_size_y // 2 + vy), 5)
 
         # Displayn update
         pygame.display.update()
 
     def score(self, scoring_team):
+        """ Tätä kutsutaan kun tulee maali """
+        # TODO: näytä keskellä ruutua iso "GOAL!", joka näkyy siinä tietyn ajan
         if scoring_team == 'red':
             self.score_red += 1
         elif scoring_team == 'green':
             self.score_green += 1
 
     def get_ball_angle_in_radians(self, ball):
-        point2 = (self.Constants.screen_size_x // 2, self.Constants.screen_size_y // 2)
+        """ Tämä auttaa pallon suuntamarkkerin piirrossa """
+        point2 = (self.screen_size_x // 2, self.screen_size_y // 2)
         point1 = ball.rect.center
         x_difference = point1[0] - point2[0]
         y_difference = point1[1] - point2[1]
@@ -152,6 +153,7 @@ class AUTSBallGame:
 
 
 # Sprite-ryhmät
+# TODO: siirrä peliclassin sisälle
 PlayerGroup = pygame.sprite.Group()
 LevelGroup = pygame.sprite.Group()
 BulletGroup = pygame.sprite.Group()
@@ -198,8 +200,6 @@ class BallSprite(game_object.GameObject):
     """ Pallo. Osaa liittää itsensä pelaajaan ja poistaa liitoksen. """
     def __init__(self, level=None, parent=None):
         game_object.GameObject.__init__(self, group=BallGroup, image_file='ball_50.png', level=level, parent=parent)
-        # self.image = pygame.image.load('ball_50.png').convert_alpha()
-        # self.rect = self.image.get_rect()
         self.start_position = self.level.center_point
         self.x, self.y = self.start_position
         self.attached_player = None
@@ -219,7 +219,6 @@ class BallSprite(game_object.GameObject):
 
         # Jos on liitetty pelaajaan niin koordinaatit ja rect on samat kuin pelaajalla
         if self.attached_player is not None:
-            # print("Ball update. Attached to player. Player x,y:", self.attached_player.x, self.attached_player.y)
             self.x = self.attached_player.x
             self.y = self.attached_player.y
             self.rect.center = self.attached_player.rect.center
@@ -229,7 +228,7 @@ class BallSprite(game_object.GameObject):
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
-        self.check_collision_with_bullets()
+        self.check_collision_with_bullets(BulletGroup)
 
     def reset(self):
         """ 
@@ -240,24 +239,15 @@ class BallSprite(game_object.GameObject):
         self.detach()
 
     def shoot(self, direction=0, speed=0, x=0, y=0):
-        # print("Ball shoot - direction, speed:", direction, speed)
+        """ 
+        Ampuu itsensä määritettyyn suuntaan, määritetyllä nopeudella, alkaen määritetyistä koordinaateista.
+        Tätä kutsuu PlayerSpriten shoot-metodi, joka hoitaa detachauksen ja antaa tarvittavat tiedot
+        """
         # Jostain syystä vaatii direktion korjauksen tässä
         self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
         self.x = int(x)
         self.y = int(y)
         self.update_rect()
-        # print("ball.shoot - magnitude, angle:", self.move_vector.get_magnitude_angle())
-
-    def check_collision_with_bullets(self):
-        collide_list = pygame.sprite.spritecollide(self, BulletGroup, True)
-        if len(collide_list) > 0:
-            # print("Ball collision with bullet")
-            # print("vx, vy:",self.vx, self.vy)
-            # Törmäyksessä lisätään bulletin liikemäärä palloon
-            # TODO: ota huomioon suhteelliset kulmat, ota huomioon objektien massat
-            self.move_vector.set_vx(self.move_vector.get_vx() + collide_list[0].move_vector.get_vx() * collide_list[0].explosion_force)
-            self.move_vector.set_vy(self.move_vector.get_vy() + collide_list[0].move_vector.get_vy() * collide_list[0].explosion_force)
-            # print("vx, vy:", self.vx, self.vy)
 
     def attach_to_player(self, player):
         """ 
@@ -312,29 +302,19 @@ class PlayerSprite(game_object.GameObject):
         # Lisätään PlayerGroup-ryhmään
         game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent, image_file='ship1_20px.png')
 
-        # Parent
-        # self.parent = parent
-
         # Graffat
-        # self.original_image = pygame.image.load('ship1_20px.png').convert_alpha()
         self.motor_flame_image = pygame.image.load('motor_flame_10.png').convert_alpha()
         self.thrust_gfx = EffectSprite(attached_player=self, image=self.motor_flame_image,
                                        effect_type='motorflame', visible=0)
-        # self.level = level # level-objekti
-        # self.image = self.original_image
-        # self.rect = self.image.get_rect()
-        self.rect.center = self.parent.Constants.screen_center_point
+        self.rect.center = self.parent.screen_center_point
         self.is_centered_on_screen = 1
 
         # Koordinaatit
-        self.x = 800
-        self.y = 600
-        self.x_previous = 800
-        self.y_previous = 600
+        self.start_position = (800, 600)
+        self.x, self.y = self.start_position
+        self.x_previous, self.y_previous = self.x, self.y
 
-        # Liikevektori
-        # TODO: ota käyttöön myös muissa kuin PlayerSpritessä
-        # self.move_vector = vector.MoveVector()
+        # Heading ja thrust
         self.heading = 0
         self.thrust = 0
 
@@ -343,11 +323,11 @@ class PlayerSprite(game_object.GameObject):
 
         # Shipin ominaisuudet
         self.handling = int(5) # kuinka monta astetta kääntyy per frame
-        self.max_thrust = 0.35 # kun FPS 60 ja ei weightiä niin 0.5 on tässä aika hyvä
+        self.max_thrust = 0.35 # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
         self.max_speed = 10
         self.mass = 1
         self.cooldown_basic_shot = 5 # framea
-        self.cooldown_ball_attached = 60 # cooldown sen jälkeen kun pallo on ammuttu
+        self.cooldown_after_ball_shot = 60 # cooldown sen jälkeen kun pallo on ammuttu
         self.cooldown_counter = 0 # cooldown-counter1
 
     def update(self):
@@ -363,14 +343,12 @@ class PlayerSprite(game_object.GameObject):
         self.check_collision_with_bullets(BulletGroup)
 
         # Lasketaan cooldownia
-        if self.cooldown_counter != 0:
+        if self.cooldown_counter > 0:
             self.cooldown_counter -= 1
 
         # Jos on pallo kytkettynä niin lisätään paljon cooldownia
         if self.attached_ball is not None:
-            self.cooldown_counter = self.cooldown_ball_attached
-
-        # print("Player x,y:", self.x, self.y)
+            self.cooldown_counter = self.cooldown_after_ball_shot
 
     def attach_ball(self, ball):
         self.attached_ball = ball
@@ -388,7 +366,7 @@ class PlayerSprite(game_object.GameObject):
 
     def rotate_right(self):
         self.heading -= self.handling
-        if self.heading < -360:
+        if self.heading < 0:
             self.heading += 360
         # TODO: laske rotaatiot latausvaiheessa valmiiksi
         self.rot_self_image_keep_size(self.heading)
@@ -405,16 +383,16 @@ class PlayerSprite(game_object.GameObject):
         # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
         if self.cooldown_counter == 0:
-            bullet_x = int(10 * math.sin(np.deg2rad(self.heading)) * -1 + self.x)
-            bullet_y = int(10 * math.cos(np.deg2rad(self.heading)) * -1 + self.y)
-            bullet = BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
+            bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
+            bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
+            BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
                                   speed=10 + self.move_vector.get_magnitude())
             self.cooldown_counter = self.cooldown_basic_shot
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
-            ball_x = self.attached_ball.image.get_width() * math.sin(np.deg2rad(self.heading)) * -1 + self.x
-            ball_y = self.attached_ball.image.get_height() * math.cos(np.deg2rad(self.heading)) * -1 + self.y
+            ball_x = self.attached_ball.image.get_width() * math.sin(math.radians(self.heading)) * -1 + self.x
+            ball_y = self.attached_ball.image.get_height() * math.cos(math.radians(self.heading)) * -1 + self.y
 
             self.attached_ball.shoot(x=ball_x, y=ball_y, direction=self.heading, speed=10)
             self.attached_ball.detach()
