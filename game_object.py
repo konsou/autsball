@@ -9,6 +9,8 @@ white = (255, 255, 255)
 
 class GameObject(pygame.sprite.Sprite):
     """ Classi joka perii pygamen Spriten ja lisää yleisiä peliobjektin käyttäytymiseen liittyviä juttuja """
+    # TODO: muuta nämä niin että vakioarvot ei tule tässä argumentteina vaan selkeämmin alempana asetetaan arvoihinsa
+    # ja sitten instansioinnissa voi tarvittaessa overrideta
     def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None,
                  gravity_affects=1, is_ball=0, is_bullet=0, max_speed=20, mass=1):
         # Pygame-Spriten init
@@ -29,7 +31,8 @@ class GameObject(pygame.sprite.Sprite):
             self.image = pygame.image.load(image_file).convert_alpha()
             self.rect = self.image.get_rect()
         # Tämä tarvitaan rotaatioita varten
-        self.original_image = image
+        self.original_image = self.image
+        self.size = (self.image.get_width() + self.image.get_height()) // 2
 
         # Start positio on levelin keskellä jos muuta ei ole määritetty
         if start_position is None:
@@ -53,6 +56,7 @@ class GameObject(pygame.sprite.Sprite):
         self.gravity_affects = gravity_affects
         self.is_ball = is_ball
         self.is_bullet = is_bullet
+        self.is_centered_on_screen = 0
 
         # Tämä päivitetään myöhemmin, initoidaan kuitenkin ettei PyCharm herjaa
         self.viewscreen_rect = None
@@ -68,8 +72,9 @@ class GameObject(pygame.sprite.Sprite):
         Päivittää objektin rectin ottamaan huomioon viewscreenin 
         Tämä metodi on tärkeää muistaa kutsua kun liikuttelee objektia! Muuten sekoaa. 
         """
-        self.rect.center = (self.x - self.viewscreen_rect[0],
-                            self.y - self.viewscreen_rect[1])
+        if not self.is_centered_on_screen:
+            self.rect.center = (self.x - self.viewscreen_rect[0],
+                                self.y - self.viewscreen_rect[1])
 
     def update_movement(self):
         """
@@ -102,10 +107,17 @@ class GameObject(pygame.sprite.Sprite):
 
     def check_out_of_bounds(self):
         """ Pitää objektin pelialueen sisällä """
+        x_before = self.x
+        y_before = self.y
         self.x = max(0, self.x)
         self.x = min(self.level.size_x - 1, self.x)
         self.y = max(0, self.y)
         self.y = min(self.level.size_y - 1, self.y)
+        # Jos koordinaatteja muutettiin (eli oli out of bounds) niin muutetaan liikemäärää
+        if self.x != x_before:
+            self.move_vector.set_vx(0)
+        elif self.y != y_before:
+            self.move_vector.set_vy(0)
 
     def check_collision_with_wall_and_goal(self):
         """ Tarkastaa törkmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
@@ -119,7 +131,12 @@ class GameObject(pygame.sprite.Sprite):
                 pygame.draw.circle(self.level.image, black, (self.x, self.y), self.size - 1)
                 self.kill()
             else:
+                # Vauhti loppuu kuin seinään
                 self.move_vector.set_magnitude(0)
+                # Vähän estetään seinän sisään menemistä tällä
+                self.x = self.x_previous
+                self.y = self.y_previous
+
 
         # Jos objekti on pallo niin katsotaan onko maalissa
         if self.is_ball:
@@ -132,5 +149,11 @@ class GameObject(pygame.sprite.Sprite):
                 self.parent.score('red')
                 self.reset()
 
+    def check_collision_with_bullets(self, BulletGroup):
+        collide_list = pygame.sprite.spritecollide(self, BulletGroup, True)
+        if len(collide_list) > 0:
+            # TODO: laske massojen vaikutukset törmäyksessä
+            self.move_vector.set_vx(self.move_vector.get_vx() + collide_list[0].move_vector.get_vx() * collide_list[0].explosion_force)
+            self.move_vector.set_vy(self.move_vector.get_vy() + collide_list[0].move_vector.get_vy() * collide_list[0].explosion_force)
 
 

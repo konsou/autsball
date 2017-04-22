@@ -286,7 +286,6 @@ class BulletSprite(game_object.GameObject):
         self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
         self.max_speed = 20
         self.explosion_force = 1
-        self.size = self.image.get_width()
 
         self.is_bullet = 1
 
@@ -301,30 +300,31 @@ class BulletSprite(game_object.GameObject):
             self.update_rect()
 
     def check_out_of_bounds(self):
-        """ Overrideaa game_objectin metodin koska pitää tuhota bulletti jos on out of bounds """
+        """ Overrideaa GameObjectin metodin koska pitää tuhota bulletti jos on out of bounds """
         if self.x < 0 or self.y < 0 or self.x >= self.level.size_x or self.y >= self.level.size_y:
             self.x = 0
             self.y = 0
             self.kill()
 
 
-class PlayerSprite(pygame.sprite.Sprite):
+class PlayerSprite(game_object.GameObject):
     def __init__(self, level=None, parent=None):
         # Lisätään PlayerGroup-ryhmään
-        pygame.sprite.Sprite.__init__(self, PlayerGroup)
+        game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent, image_file='ship1_20px.png')
 
         # Parent
-        self.parent = parent
+        # self.parent = parent
 
         # Graffat
-        self.original_image = pygame.image.load('ship1_20px.png').convert_alpha()
+        # self.original_image = pygame.image.load('ship1_20px.png').convert_alpha()
         self.motor_flame_image = pygame.image.load('motor_flame_10.png').convert_alpha()
         self.thrust_gfx = EffectSprite(attached_player=self, image=self.motor_flame_image,
                                        effect_type='motorflame', visible=0)
-        self.level = level # level-objekti
-        self.image = self.original_image
-        self.rect = self.image.get_rect()
+        # self.level = level # level-objekti
+        # self.image = self.original_image
+        # self.rect = self.image.get_rect()
         self.rect.center = self.parent.Constants.screen_center_point
+        self.is_centered_on_screen = 1
 
         # Koordinaatit
         self.x = 800
@@ -334,7 +334,7 @@ class PlayerSprite(pygame.sprite.Sprite):
 
         # Liikevektori
         # TODO: ota käyttöön myös muissa kuin PlayerSpritessä
-        self.move_vector = vector.MoveVector()
+        # self.move_vector = vector.MoveVector()
         self.heading = 0
         self.thrust = 0
 
@@ -348,37 +348,27 @@ class PlayerSprite(pygame.sprite.Sprite):
         self.mass = 1
         self.cooldown_basic_shot = 5 # framea
         self.cooldown_ball_attached = 60 # cooldown sen jälkeen kun pallo on ammuttu
-        self.cooldown_active = 0 # cooldown-counter1
+        self.cooldown_counter = 0 # cooldown-counter1
 
     def update(self):
-        # Gravityn vaikutus
-        self.move_vector.set_vy(self.move_vector.get_vy() + self.parent.Constants.gravity)
-
         # Lisätään liikemäärään thrust-vektori
+        # Tässä jopa ottaa jo massan huomioon!
         self.move_vector.set_vx(self.move_vector.get_vx() + (self.thrust / self.mass * math.sin(math.radians(self.heading)) * -1))
         self.move_vector.set_vy(self.move_vector.get_vy() + (self.thrust / self.mass * math.cos(math.radians(self.heading)) * -1))
 
-        # Max speed rajoittaa
-        self.move_vector.set_magnitude(min(self.move_vector.get_magnitude(), self.max_speed))
+        self.update_movement()
 
-        # Muutetaan koordinaatteja liikemäärän mukaan
-        self.x_previous = int(self.x)
-        self.y_previous = int(self.y)
-        self.x = int(self.move_vector.get_vx() + self.x)
-        self.y = int(self.move_vector.get_vy() + self.y)
-
-        # Out of bounds -check
         self.check_out_of_bounds()
-        self.check_collision_with_wall()
-        self.check_collision_with_bullets()
+        self.check_collision_with_wall_and_goal()
+        self.check_collision_with_bullets(BulletGroup)
 
         # Lasketaan cooldownia
-        if self.cooldown_active != 0:
-            self.cooldown_active -= 1
+        if self.cooldown_counter != 0:
+            self.cooldown_counter -= 1
 
         # Jos on pallo kytkettynä niin lisätään paljon cooldownia
         if self.attached_ball is not None:
-            self.cooldown_active = self.cooldown_ball_attached
+            self.cooldown_counter = self.cooldown_ball_attached
 
         # print("Player x,y:", self.x, self.y)
 
@@ -388,35 +378,6 @@ class PlayerSprite(pygame.sprite.Sprite):
     def detach_ball(self):
         self.attached_ball = None
 
-    def check_collision_with_bullets(self):
-        collide_list = pygame.sprite.spritecollide(self, BulletGroup, True)
-        if len(collide_list) > 0:
-            # TODO: laske massojen vaikutukset törmäyksessä
-            # self.move_vector.set_vx(self.move_vector.get_vx() + collide_list[0].vx * collide_list[0].explosion_force)
-            # self.move_vector.set_vy(self.move_vector.get_vy() + collide_list[0].vy * collide_list[0].explosion_force)
-            self.move_vector.set_vx(self.move_vector.get_vx() + collide_list[0].move_vector.get_vx() * collide_list[0].explosion_force)
-            self.move_vector.set_vy(self.move_vector.get_vy() + collide_list[0].move_vector.get_vy() * collide_list[0].explosion_force)
-
-    def check_out_of_bounds(self):
-        self.x = max(0, self.x)
-        self.x = min(self.level.size_x - 1, self.x)
-        self.y = max(0, self.y)
-        self.y = min(self.level.size_y - 1, self.y)
-
-    def check_collision_with_wall(self):
-        current_point = self.level.image.get_at((self.x, self.y))
-        # Jos taustakuvan pisteessä alfa muuta kuin 0 niin on seinä
-        # POIKKEUS: jos väri on punainen ta vihreä niin on maali
-        if current_point[:3] != black and current_point[:3] != red and current_point[:3] != green:
-            # Tuhoaa seinää törmätessä jos vauhti on kova
-            if self.move_vector.get_magnitude() >= 20:
-                pygame.draw.circle(self.level.image, black, (self.x_previous, self.y_previous), 25)
-            # Vauhti loppuu kuin seinään
-            self.move_vector.set_vx_vy(0, 0)
-            # Vähän estetään seinän sisään menemistä tällä
-            self.x = self.x_previous
-            self.y = self.y_previous
-
     def accelerate(self):
         self.thrust = self.max_thrust
         self.thrust_gfx.visible = 1
@@ -424,15 +385,6 @@ class PlayerSprite(pygame.sprite.Sprite):
     def stop_acceleration(self):
         self.thrust = 0
         self.thrust_gfx.visible = 0
-
-    def rot_self_image_keep_size(self, angle):
-        """rotate an image while keeping its center and size"""
-        orig_rect = self.rect
-        rot_image = pygame.transform.rotate(self.original_image, angle)
-        rot_rect = orig_rect.copy()
-        rot_rect.center = rot_image.get_rect().center
-        rot_image = rot_image.subsurface(rot_rect).copy()
-        self.image = rot_image
 
     def rotate_right(self):
         self.heading -= self.handling
@@ -452,12 +404,12 @@ class PlayerSprite(pygame.sprite.Sprite):
         # Pelaajan nopeus vaikuttaa ammuksen vauhtiin
         # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
-        if self.cooldown_active == 0:
+        if self.cooldown_counter == 0:
             bullet_x = int(10 * math.sin(np.deg2rad(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(np.deg2rad(self.heading)) * -1 + self.y)
             bullet = BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
                                   speed=10 + self.move_vector.get_magnitude())
-            self.cooldown_active = self.cooldown_basic_shot
+            self.cooldown_counter = self.cooldown_basic_shot
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
