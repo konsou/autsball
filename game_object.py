@@ -10,21 +10,28 @@ white = (255, 255, 255)
 class GameObject(pygame.sprite.Sprite):
     """ Classi joka perii pygamen Spriten ja lisää yleisiä peliobjektin käyttäytymiseen liittyviä juttuja """
     def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None,
-                 gravity_affects=1, is_ball=0):
-        # Spriten init
+                 gravity_affects=1, is_ball=0, is_bullet=0, max_speed=20, mass=1):
+        # Pygame-Spriten init
         pygame.sprite.Sprite.__init__(self, group)
+
         # parent on itse peliobjekti
         self.parent = parent
+
         # level-objekti
         self.level = level
+
+        # Jos image on kuva niin napataan kuva siitä
         if image is not None:
             self.image = image
             self.rect = self.image.get_rect()
+        # Jos on annettu kuvatiedosto niin luetaan se
         elif image_file is not None:
             self.image = pygame.image.load(image_file).convert_alpha()
             self.rect = self.image.get_rect()
+        # Tämä tarvitaan rotaatioita varten
         self.original_image = image
 
+        # Start positio on levelin keskellä jos muuta ei ole määritetty
         if start_position is None:
             if level is not None:
                 self.start_position = self.level.center_point
@@ -32,14 +39,22 @@ class GameObject(pygame.sprite.Sprite):
                 self.start_position = 0, 0
         else:
             self.start_position = start_position
+
+        # Koordinaattien määritys
         self.x, self.y = self.start_position
         self.x_previous, self.y_previous = self.start_position
-        self.mass = 1
+
+        # Liikkumisvektori - sisältää sekä vx/vy että magnitude/angle (radiaaneina)
         self.move_vector = vector.MoveVector()
 
+        # Peliobjektin ominaisuuksia
+        self.mass = mass
+        self.max_speed = max_speed
         self.gravity_affects = gravity_affects
         self.is_ball = is_ball
+        self.is_bullet = is_bullet
 
+        # Tämä päivitetään myöhemmin, initoidaan kuitenkin ettei PyCharm herjaa
         self.viewscreen_rect = None
 
     def reset(self):
@@ -61,7 +76,8 @@ class GameObject(pygame.sprite.Sprite):
         Päivittää spriten koordinaatit move_vectorin ja gravityn pohjalta 
         """
         # Gravityn vaikutus
-        self.move_vector.set_vy(self.move_vector.get_vy() + self.parent.Constants.gravity)
+        if self.gravity_affects:
+            self.move_vector.set_vy(self.move_vector.get_vy() + self.parent.Constants.gravity)
 
         # Max speed rajoittaa
         self.move_vector.set_magnitude(min(self.move_vector.get_magnitude(), self.max_speed))
@@ -71,6 +87,8 @@ class GameObject(pygame.sprite.Sprite):
         self.y_previous = int(self.y)
         self.x = int(self.move_vector.get_vx() + self.x)
         self.y = int(self.move_vector.get_vy() + self.y)
+
+        # Päivitetään rect että ottaa viewscreenin huomioon
         self.update_rect()
 
     def rot_self_image_keep_size(self, angle):
@@ -92,15 +110,16 @@ class GameObject(pygame.sprite.Sprite):
     def check_collision_with_wall_and_goal(self):
         """ Tarkastaa törkmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
         # Katotaan mikä väri on levelissä tässä pisteessä - skipataan alfa
-        try:
-            current_point = self.level.image.get_at((self.x, self.y))[:3]
-        except IndexError as e:
-            print("IndexError wall-collision-metodissa:", e)
-            print("x ja y:", self.x, self.y)
+        current_point = self.level.image.get_at((self.x, self.y))[:3]
 
-        # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys
+        # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys ja vauhti menee nollaan
         if current_point != black and current_point != green and current_point != red:
-            self.move_vector.set_magnitude(0)
+            if self.is_bullet:
+                # Tuhoaa seinää törmätessä jos on bullet
+                pygame.draw.circle(self.level.image, black, (self.x, self.y), self.size - 1)
+                self.kill()
+            else:
+                self.move_vector.set_magnitude(0)
 
         # Jos objekti on pallo niin katsotaan onko maalissa
         if self.is_ball:
