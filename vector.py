@@ -5,7 +5,27 @@ class MoveVector:
     """ 
     Classi johon voi tallettaa liikevektorin joko kulma- tai summamuodossa ja tekee konversiot automaattisesti.
     HUOM! Angle radiaaneina!
-    Paitsi ettei oikein toimi ainakaan käytäntöön sovellettuna. Keksipä miten saa toimimaan kun olisi kätevä.
+    
+    Sisältää seuraavat metodit:
+        -set_vx, set_vy, set_vx_vy - nämä asettaa vx/vy:n arvot (summamuoto)
+        -get_vx, get_vy, get_vx_vy - nämä palauttaa vx/vy:n arvot (summamuoto)
+        -set_magnitude, set_angle, set_magnitude_angle - nämä asettaa vektorin pituuden ja/tai kulman (kulmamuoto)
+        -get_magnitude, get_angle, get_magnitude_angle - nämä palauttaa vektorin pituuden ja/tai kulman (kulmamuoto)
+        -get_all - palauttaa vektorin arvot sekä summa- että kulmamuodossa
+    
+    Tässä on ideana että kun kutsutaan get_(arvo) niin toimii täten:
+        -jos arvo on jo määritetty (esim. vx) niin palauttaa sen suoraan
+        -jos arvoa ei ole määritetty (on None) niin laskee sen ja tallettaa - näin useampi get-kutsu peräkkäin ei 
+         tee turhia uudelleenlaskentoja joka kerta
+    
+    Kun set-metodeita kutsutaan niin toimii täten:
+        -jos asetetaan vx ja/tai vy niin asetetaan magnitude ja angle Noneksi
+        -jos asetetaan magnitude ja/tai angle niin asetetaan vx ja vy Noneksi
+        Näistä sitten tietää että Noneksi asetettu arvo pitää laskea uusiksi sitten jos sitä joskus haetaan
+            
+    TODO: joko tee parannuksia (dot product, metodit helpommille arvojen yhteenlaskuille) tai siirry käyttämään
+          pygamen valmiita vektorijuttuja 
+    TODO: samalla logiikalla kulman muutos asteisiin
     """
     def __init__(self, vx=None, vy=None, magnitude=None, angle=None):
         self.vx = vx
@@ -18,7 +38,6 @@ class MoveVector:
             pass
         else:
             self.vx, self.vy, self.magnitude, self.angle = 0, 0, 0, 0
-            # raise ValueError("x and y OR magnitude and angle need to be set!")
 
     def _clear_magnitude_angle(self):
         self.magnitude = None
