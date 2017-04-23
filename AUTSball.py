@@ -22,7 +22,7 @@ class AUTSBallGame:
         self.clock = pygame.time.Clock()
 
         # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
-        self.loading_image = pygame.image.load('loading.png').convert_alpha()
+        self.loading_image = pygame.image.load('gfx/loading.png').convert_alpha()
         self.win.blit(self.loading_image, self.loading_image.get_rect())
         pygame.display.update()
 
@@ -165,7 +165,7 @@ class Level(pygame.sprite.Sprite):
     """ Level-classi. Käytännössä vain taustakuva, logiikka tapahtuu muualla. """
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, LevelGroup)
-        self.image = pygame.image.load('test_arena_2400x1200.png').convert_alpha()
+        self.image = pygame.image.load('gfx/test_arena_2400x1200.png').convert_alpha()
         self.size_x = self.image.get_width()
         self.size_y = self.image.get_height()
         self.rect = self.image.get_rect()
@@ -199,7 +199,7 @@ class EffectSprite(game_object.GameObject):
 class BallSprite(game_object.GameObject):
     """ Pallo. Osaa liittää itsensä pelaajaan ja poistaa liitoksen. """
     def __init__(self, level=None, parent=None):
-        game_object.GameObject.__init__(self, group=BallGroup, image_file='ball_50.png', level=level, parent=parent)
+        game_object.GameObject.__init__(self, group=BallGroup, image_file='gfx/ball_50.png', level=level, parent=parent)
         self.start_position = self.level.center_point
         self.x, self.y = self.start_position
         self.attached_player = None
@@ -270,7 +270,7 @@ class BallSprite(game_object.GameObject):
 class BulletSprite(game_object.GameObject):
     """ direction asteina, tulee PlayerSpriten headingista """
     def __init__(self, parent=None, level=None, x=0, y=0, direction=0, parent_speed=0, speed=5, type='basic'):
-        game_object.GameObject.__init__(self, group=BulletGroup, image_file='bullet_5.png', start_position=(x, y),
+        game_object.GameObject.__init__(self, group=BulletGroup, image_file='gfx/bullet_5.png', start_position=(x, y),
                                         level=level, parent=parent)
         self.rect.center = (x, y)
         self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
@@ -300,10 +300,10 @@ class BulletSprite(game_object.GameObject):
 class PlayerSprite(game_object.GameObject):
     def __init__(self, level=None, parent=None):
         # Lisätään PlayerGroup-ryhmään
-        game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent, image_file='ship1_20px.png')
+        game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent, image_file='gfx/ship1_20px.png')
 
         # Graffat
-        self.motor_flame_image = pygame.image.load('motor_flame_10.png').convert_alpha()
+        self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
         self.thrust_gfx = EffectSprite(attached_player=self, image=self.motor_flame_image,
                                        effect_type='motorflame', visible=0)
         self.rect.center = self.parent.screen_center_point
