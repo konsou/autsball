@@ -117,3 +117,24 @@ class MoveVector:
         if self.vx is None or self.vy is None:
             self._calculate_vx_vy()
         return self.vx, self.vy, self.magnitude, self.angle
+
+    def add_to_vx(self, value):
+        self.vx = self.get_vx() + value
+        self._clear_magnitude_angle()
+
+    def add_to_vy(self, value):
+        self.vy = self.get_vy() + value
+        self._clear_magnitude_angle()
+
+    def add_to_magnitude(self, value):
+        self.magnitude = self.get_magnitude() + value
+        self._clear_vx_vy()
+
+    def add_to_angle(self, value):
+        self.angle = self.get_angle() + value
+        self._clear_vx_vy()
+
+    def add_vector(self, vector):
+        """ Lisää tähän vektoriin toisen Vector-objektin """
+        self.add_to_vx(vector.get_vx())
+        self.add_to_vy(vector.get_vy())

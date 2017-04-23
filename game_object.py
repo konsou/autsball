@@ -81,7 +81,7 @@ class GameObject(pygame.sprite.Sprite):
         """
         # Gravityn vaikutus
         if self.gravity_affects:
-            self.move_vector.set_vy(self.move_vector.get_vy() + self.parent.gravity)
+            self.move_vector.add_to_vy(self.parent.gravity)
 
         # Max speed rajoittaa
         self.move_vector.set_magnitude(min(self.move_vector.get_magnitude(), self.max_speed))
@@ -125,7 +125,7 @@ class GameObject(pygame.sprite.Sprite):
         current_point = self.level.image.get_at((self.x, self.y))[:3]
 
         # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys ja vauhti menee nollaan
-        if current_point != black and current_point != green and current_point != red:
+        if current_point not in (black, red, green):
             if self.is_bullet:
                 # Tuhoaa seinää törmätessä jos on bullet
                 pygame.draw.circle(self.level.image, black, (self.x, self.y), self.size - 1)
@@ -154,7 +154,5 @@ class GameObject(pygame.sprite.Sprite):
         if len(collide_list) > 0:
             # TODO: laske massojen vaikutukset törmäyksessä
             # TODO: laske vektorit oikein objektien suhteellisten kulmien mukaan
-            self.move_vector.set_vx(self.move_vector.get_vx() + collide_list[0].move_vector.get_vx() * collide_list[0].explosion_force)
-            self.move_vector.set_vy(self.move_vector.get_vy() + collide_list[0].move_vector.get_vy() * collide_list[0].explosion_force)
-
+            self.move_vector.add_vector(collide_list[0].move_vector)
 
