@@ -138,3 +138,7 @@ class MoveVector:
         """ Lisää tähän vektoriin toisen Vector-objektin """
         self.add_to_vx(vector.get_vx())
         self.add_to_vy(vector.get_vy())
+
+    def get_dot_product(self, vector):
+        """ Laskee kahden vektorin pistetulon """
+        return (self.get_vx() * vector.get_vx()) + (self.get_vy() * vector.get_vy())

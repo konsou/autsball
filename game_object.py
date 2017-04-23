@@ -1,4 +1,4 @@
-import pygame, vector
+import pygame, vector, math
 
 red = (255, 0, 0)
 green = (0, 255, 0)
@@ -9,8 +9,6 @@ white = (255, 255, 255)
 
 class GameObject(pygame.sprite.Sprite):
     """ Classi joka perii pygamen Spriten ja lisää yleisiä peliobjektin käyttäytymiseen liittyviä juttuja """
-    # TODO: muuta nämä niin että vakioarvot ei tule tässä argumentteina vaan selkeämmin alempana asetetaan arvoihinsa
-    # ja sitten instansioinnissa voi tarvittaessa overrideta
     def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None):
         # Pygame-Spriten init
         pygame.sprite.Sprite.__init__(self, group)
@@ -109,10 +107,12 @@ class GameObject(pygame.sprite.Sprite):
         """ Pitää objektin pelialueen sisällä """
         x_before = self.x
         y_before = self.y
+
         self.x = max(0, self.x)
         self.x = min(self.level.size_x - 1, self.x)
         self.y = max(0, self.y)
         self.y = min(self.level.size_y - 1, self.y)
+
         # Jos koordinaatteja muutettiin (eli oli out of bounds) niin muutetaan liikemäärää
         if self.x != x_before:
             self.move_vector.set_vx(0)
@@ -137,7 +137,6 @@ class GameObject(pygame.sprite.Sprite):
                 self.x = self.x_previous
                 self.y = self.y_previous
 
-
         # Jos objekti on pallo niin katsotaan onko maalissa
         if self.is_ball:
             # Punainen maali - piste vihreälle
@@ -155,4 +154,9 @@ class GameObject(pygame.sprite.Sprite):
             # TODO: laske massojen vaikutukset törmäyksessä
             # TODO: laske vektorit oikein objektien suhteellisten kulmien mukaan
             self.move_vector.add_vector(collide_list[0].move_vector)
+            dotproduct = self.move_vector.get_dot_product(collide_list[0].move_vector)
+            print("Bullet collision")
+            print("Object 1 angle (rad/deg):", self.move_vector.get_angle(), math.degrees(self.move_vector.get_angle()))
+            print("Object 2 angle (rad/deg):", collide_list[0].move_vector.get_angle(), math.degrees(collide_list[0].move_vector.get_angle()))
+            print("Dot product:", dotproduct)
 
