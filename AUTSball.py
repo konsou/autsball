@@ -21,13 +21,6 @@ class AUTSBallGame:
         pygame.display.set_caption("AUTSball")
         self.clock = pygame.time.Clock()
 
-        # Sprite-ryhmät
-        self.PlayerGroup = pygame.sprite.Group()
-        self.LevelGroup = pygame.sprite.Group()
-        self.BulletGroup = pygame.sprite.Group()
-        self.BallGroup = pygame.sprite.Group()
-        self.EffectGroup = pygame.sprite.Group()
-        self.TextGroup = pygame.sprite.Group()
 
         # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
         self.loading_image = pygame.image.load('gfx/loading.png').convert_alpha()
@@ -36,7 +29,7 @@ class AUTSBallGame:
 
         # TODO: tähän assettien esilataus
         # Instansioidaan leveli, tämä lataa myös level-kuvan joka voi olla iiisooo
-        self.current_level = Level(group=self.LevelGroup)
+        self.current_level = Level()
         # Instansioidaan pelaaja ja pallo
         self.player = { 0: PlayerSprite(level=self.current_level, parent=self) }
         self.ball = BallSprite(level=self.current_level, parent=self)
@@ -82,11 +75,11 @@ class AUTSBallGame:
                                          self.screen_size_y)
 
             # Spritejen päivitykset tässä
-            self.BulletGroup.update(self.viewscreen_rect)
-            self.BallGroup.update(self.viewscreen_rect)
-            self.PlayerGroup.update()
-            self.EffectGroup.update()
-            self.TextGroup.update()
+            BulletGroup.update(self.viewscreen_rect)
+            BallGroup.update(self.viewscreen_rect)
+            PlayerGroup.update()
+            EffectGroup.update()
+            TextGroup.update()
 
             # Päivitetään graffat vaan joka toisessa framessa
             if self.frame_counter % 2 == 0:
@@ -107,11 +100,11 @@ class AUTSBallGame:
         self.win.blit(self.current_level.image, self.background_view_rect)
 
         # Bullettien, pelaajan, pallon piirrot
-        self.BulletGroup.draw(self.win)
-        self.BallGroup.draw(self.win)
-        self.PlayerGroup.draw(self.win)
-        self.EffectGroup.draw(self.win)
-        self.TextGroup.draw(self.win)
+        BulletGroup.draw(self.win)
+        BallGroup.draw(self.win)
+        PlayerGroup.draw(self.win)
+        EffectGroup.draw(self.win)
+        TextGroup.draw(self.win)
 
         # HUD
         # self.show_text((10, 10), "Speed: " + str(math.hypot(self.player[0].vx, self.player[0].vy)))
@@ -140,7 +133,7 @@ class AUTSBallGame:
         elif scoring_team == 'green':
             self.score_green += 1
             goal_text_color = green
-        DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=120, group=self.TextGroup,
+        DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=120,
                          color=goal_text_color, font_size=120, flashes=1)
 
     def get_ball_angle_in_radians(self, ball):
@@ -163,11 +156,19 @@ class AUTSBallGame:
         # Jostain syystä vaatii myös tämän, muuten jää infinite looppi taustalle vaikka pygame-ikkuna katoaakin
         sys.exit()
 
+# Sprite-ryhmät
+PlayerGroup = pygame.sprite.Group()
+LevelGroup = pygame.sprite.Group()
+BulletGroup = pygame.sprite.Group()
+BallGroup = pygame.sprite.Group()
+EffectGroup = pygame.sprite.Group()
+TextGroup = pygame.sprite.Group()
+
 
 class Level(pygame.sprite.Sprite):
     """ Level-classi. Käytännössä vain taustakuva, logiikka tapahtuu muualla. """
-    def __init__(self, group=None):
-        pygame.sprite.Sprite.__init__(self, group)
+    def __init__(self):
+        pygame.sprite.Sprite.__init__(self, LevelGroup)
         self.image = pygame.image.load('gfx/test_arena_2400x1200.png').convert_alpha()
         self.size_x = self.image.get_width()
         self.size_y = self.image.get_height()
@@ -178,7 +179,7 @@ class Level(pygame.sprite.Sprite):
 class EffectSprite(game_object.GameObject):
     """ Yleinen efektisprite, tällä hetkellä tosin vain moottorin liekit """
     def __init__(self, image=None, attached_player=None, effect_type=None, visible=1, parent=None):
-        game_object.GameObject.__init__(self, group=parent.EffectGroup, image=image)
+        game_object.GameObject.__init__(self, group=EffectGroup, image=image)
         self.attached_player = attached_player
         self.type = effect_type
         self.visible = visible
@@ -202,7 +203,7 @@ class EffectSprite(game_object.GameObject):
 class BallSprite(game_object.GameObject):
     """ Pallo. Osaa liittää itsensä pelaajaan ja poistaa liitoksen. """
     def __init__(self, level=None, parent=None):
-        game_object.GameObject.__init__(self, group=parent.BallGroup, image_file='gfx/ball_50.png', level=level, parent=parent)
+        game_object.GameObject.__init__(self, group=BallGroup, image_file='gfx/ball_50.png', level=level, parent=parent)
         self.start_position = self.level.center_point
         self.x, self.y = self.start_position
         self.attached_player = None
@@ -216,7 +217,7 @@ class BallSprite(game_object.GameObject):
         self.viewscreen_rect = viewscreen_rect
 
         # Jos törmää pelaajaan niin liitetään siihen
-        collide_list = pygame.sprite.spritecollide(self, self.parent.PlayerGroup, False)
+        collide_list = pygame.sprite.spritecollide(self, PlayerGroup, False)
         if len(collide_list) > 0:
             self.attach_to_player(collide_list[0])
 
@@ -231,7 +232,7 @@ class BallSprite(game_object.GameObject):
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
-        self.check_collision_with_bullets(self.parent.BulletGroup)
+        self.check_collision_with_bullets(BulletGroup)
 
     def reset(self):
         """ 
@@ -273,7 +274,7 @@ class BallSprite(game_object.GameObject):
 class BulletSprite(game_object.GameObject):
     """ direction asteina, tulee PlayerSpriten headingista """
     def __init__(self, parent=None, level=None, x=0, y=0, direction=0, parent_speed=0, speed=5, type='basic'):
-        game_object.GameObject.__init__(self, group=parent.BulletGroup, image_file='gfx/bullet_5.png', start_position=(x, y),
+        game_object.GameObject.__init__(self, group=BulletGroup, image_file='gfx/bullet_5.png', start_position=(x, y),
                                         level=level, parent=parent)
         self.rect.center = (x, y)
         self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
@@ -288,7 +289,7 @@ class BulletSprite(game_object.GameObject):
         self.check_out_of_bounds()
 
         # Tehdään nämä vain jos on olemassa
-        if self in self.parent.BulletGroup:
+        if self in BulletGroup:
             self.check_collision_with_wall_and_goal()
             self.update_rect()
 
@@ -303,7 +304,7 @@ class BulletSprite(game_object.GameObject):
 class PlayerSprite(game_object.GameObject):
     def __init__(self, level=None, parent=None):
         # Lisätään PlayerGroup-ryhmään
-        game_object.GameObject.__init__(self, group=parent.PlayerGroup, level=level, parent=parent, image_file='gfx/ship1_20px.png')
+        game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent, image_file='gfx/ship1_20px.png')
 
         # Graffat
         self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
@@ -343,7 +344,7 @@ class PlayerSprite(game_object.GameObject):
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
-        self.check_collision_with_bullets(self.parent.BulletGroup)
+        self.check_collision_with_bullets(BulletGroup)
 
         # Lasketaan cooldownia
         if self.cooldown_counter > 0:
@@ -404,9 +405,9 @@ class PlayerSprite(game_object.GameObject):
 class DisappearingText(pygame.sprite.Sprite):
     """ Näyttää ruudulla tekstin x framen ajan """
     # TODO: tausta läpinäkyväksi
-    def __init__(self, pos=(0,0), text="", frames_visible=60, group=None,
+    def __init__(self, pos=(0,0), text="", frames_visible=60,
                  color=white, bgcolor=black, font_size=24, flashes=0, flash_interval=10):
-        pygame.sprite.Sprite.__init__(self, group)
+        pygame.sprite.Sprite.__init__(self, TextGroup)
 
         self.frame_counter = 0
         self.frames_visible = frames_visible
