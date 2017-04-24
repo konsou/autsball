@@ -8,6 +8,7 @@ GREEN = (0, 255, 0)
 
 pygame.font.init()
 
+
 class Button(object):
     def __init__(self, rect=Rect(10, 10, 150, 50), text='Button', bgcolor=YELLOWISH, textcolor=BLACK, font_size=30):
         self._rect = rect
@@ -177,13 +178,18 @@ def debug_run():
     active_mode = 'menu'
     practice_game = None
 
+    # Music
+    pygame.mixer.init()
+    pygame.mixer.music.load( 'audio/title_music_by_pera.ogg')
+    pygame.mixer.music.play(-1)
+
     running = True
     while running:
 
         for event in pygame.event.get():
             if active_mode == 'menu':
                 if 'click' in practice_button.handleEvent(event):
-                    print('practice button clicked')
+                    #print('practice button clicked')
                     active_mode = 'practice'
                     window.fill(BLACK)
                     practice_game = AUTSball.AUTSBallGame()
