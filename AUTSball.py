@@ -16,7 +16,7 @@ class AUTSBallGame:
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
 
         # Pygamen inittejä
-        # pygame.mixer.pre_init(44100, -16, 2, 1024)
+        pygame.mixer.pre_init(22050, -16, 2, 2048)
         pygame.mixer.init()
         pygame.init()
         self.win = pygame.display.set_mode((self.screen_size_x, self.screen_size_y))
@@ -316,8 +316,10 @@ class PlayerSprite(game_object.GameObject):
         self.is_centered_on_screen = 1
 
         # Sound effex
-        self.motor_sound = pygame.mixer.Sound(file='sfx/shhhh_shorter.wav')
+        self.motor_sound = pygame.mixer.Sound(file='sfx/shhhh_v2.wav')
         self.motor_sound_playing = 0
+        self.bullet_sound = pygame.mixer.Sound(file='sfx/pop.wav')
+        self.ball_shoot_sound = pygame.mixer.Sound(file='sfx/pchou.wav')
 
         # Koordinaatit
         self.start_position = (800, 600)
@@ -397,6 +399,7 @@ class PlayerSprite(game_object.GameObject):
         # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
         if self.cooldown_counter == 0:
+            self.bullet_sound.play()
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
             BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
@@ -405,6 +408,7 @@ class PlayerSprite(game_object.GameObject):
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
+            self.ball_shoot_sound.play()
             ball_x = self.attached_ball.image.get_width() * math.sin(math.radians(self.heading)) * -1 + self.x
             ball_y = self.attached_ball.image.get_height() * math.cos(math.radians(self.heading)) * -1 + self.y
 
