@@ -168,8 +168,8 @@ class Level(pygame.sprite.Sprite):
     """ Level-classi. Käytännössä vain taustakuva, logiikka tapahtuu muualla. """
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, LevelGroup)
-        self.image = pygame.image.load('gfx/test_arena_2400x1200.png').convert_alpha()
-        # self.image = pygame.image.load('gfx/test_arena_vertical_challenge.png').convert_alpha()
+        # self.image = pygame.image.load('gfx/test_arena_2400x1200.png').convert_alpha()
+        self.image = pygame.image.load('gfx/test_arena_vertical_challenge.png').convert_alpha()
         self.size_x = self.image.get_width()
         self.size_y = self.image.get_height()
         self.rect = self.image.get_rect()
