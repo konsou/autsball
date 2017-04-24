@@ -16,6 +16,8 @@ class AUTSBallGame:
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
 
         # Pygamen inittejä
+        # pygame.mixer.pre_init(44100, -16, 2, 1024)
+        pygame.mixer.init()
         pygame.init()
         self.win = pygame.display.set_mode((self.screen_size_x, self.screen_size_y))
         pygame.display.set_caption("AUTSball")
@@ -313,6 +315,10 @@ class PlayerSprite(game_object.GameObject):
         self.rect.center = self.parent.screen_center_point
         self.is_centered_on_screen = 1
 
+        # Sound effex
+        self.motor_sound = pygame.mixer.Sound(file='sfx/shhhh_shorter.wav')
+        self.motor_sound_playing = 0
+
         # Koordinaatit
         self.start_position = (800, 600)
         self.x, self.y = self.start_position
@@ -363,10 +369,14 @@ class PlayerSprite(game_object.GameObject):
     def accelerate(self):
         self.thrust = self.max_thrust
         self.thrust_gfx.visible = 1
+        if not self.motor_sound_playing:
+            self.motor_sound.play(-1)
 
     def stop_acceleration(self):
         self.thrust = 0
         self.thrust_gfx.visible = 0
+        self.motor_sound.stop()
+        self.motor_sound_playing = 0
 
     def rotate_right(self):
         self.heading -= self.handling
