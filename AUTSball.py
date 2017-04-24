@@ -21,7 +21,6 @@ class AUTSBallGame:
         pygame.display.set_caption("AUTSball")
         self.clock = pygame.time.Clock()
 
-
         # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
         self.loading_image = pygame.image.load('gfx/loading.png').convert_alpha()
         self.win.blit(self.loading_image, self.loading_image.get_rect())
