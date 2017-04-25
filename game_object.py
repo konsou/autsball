@@ -33,6 +33,9 @@ class GameObject(pygame.sprite.Sprite):
         self.original_image = self.image
         self.size = (self.image.get_width() + self.image.get_height()) // 2
 
+        # SFX
+        self.wall_collide_sound = None
+
         # Start positio on levelin keskellä jos muuta ei ole määritetty
         if start_position is None:
             if level is not None:
@@ -131,12 +134,15 @@ class GameObject(pygame.sprite.Sprite):
                 pygame.draw.circle(self.level.image, black, (self.x, self.y), self.size - 1)
                 self.kill()
             else:
+                # Soitetaan seinääntörmäysääni jos on liikuttu ja semmoinen on olemassa
+                if self.wall_collide_sound and self.x != self.x_previous and self.y != self.y_previous:
+                    self.play_sound(self.wall_collide_sound)
+                    # pygame.mixer.find_channel(True).play(self.wall_collide_sound)
                 # Vauhti loppuu kuin seinään
                 self.move_vector.set_magnitude(0)
                 # Vähän estetään seinän sisään menemistä tällä
                 self.x = self.x_previous
                 self.y = self.y_previous
-
 
         # Jos objekti on pallo niin katsotaan onko maalissa
         if self.is_ball:
@@ -155,4 +161,13 @@ class GameObject(pygame.sprite.Sprite):
             # TODO: laske massojen vaikutukset törmäyksessä
             # TODO: laske vektorit oikein objektien suhteellisten kulmien mukaan
             self.move_vector.add_vector(collide_list[0].move_vector)
+
+    def play_sound(self, sound, duration=0):
+        # Soitetaan ääni vain jos se ei jo soi, pakotetaan sille kanava auki
+        # if sound.get_num_channels() == 0:
+        print("Playing sound", sound)
+        pygame.mixer.find_channel(True).play(sound, duration)
+        # else:
+        #     print("Not playing sound", sound)
+
 
