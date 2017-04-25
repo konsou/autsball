@@ -171,16 +171,28 @@ def debug_run():
     clock = pygame.time.Clock()
 
     window.fill((0, 0, 0))
-    practice_button = Button(Rect(50, 50, 250, 70), 'Practice flight')
-    multiplayer_button = Button(Rect(50, 125, 250, 70), 'Multiplayer')
-    quit_button = Button(Rect(50, 200, 250, 70), 'Quit')
+
+    static_visual_components_group = pygame.sprite.Group()
+
+    # Logo
+    logo_sprite = pygame.sprite.Sprite()
+    logo_sprite.image = pygame.image.load('gfx/AUTSBall_logo.png').convert_alpha()
+    logo_sprite.rect = logo_sprite.image.get_rect()
+    logo_sprite.rect.topleft = (50, 30)
+    static_visual_components_group.add(logo_sprite)
+    static_visual_components_group.draw(window)
+
+    # Buttons
+    practice_button = Button(Rect(50, 330, 250, 70), 'Practice flight')
+    multiplayer_button = Button(Rect(50, 405, 250, 70), 'Multiplayer')
+    quit_button = Button(Rect(50, 480, 250, 70), 'Quit')
 
     active_mode = 'menu'
     practice_game = None
 
     # Music
     pygame.mixer.init()
-    pygame.mixer.music.load( 'audio/title_music_by_pera.ogg')
+    pygame.mixer.music.load('audio/title_music_by_pera.ogg')
     pygame.mixer.music.play(-1)
 
     running = True
@@ -193,6 +205,7 @@ def debug_run():
                     active_mode = 'practice'
                     window.fill(BLACK)
                     practice_game = AUTSball.AUTSBallGame()
+                    pygame.mixer.music.stop()
                 if 'click' in multiplayer_button.handleEvent(event):
                     print('multiplayer button clicked')
                 if 'click' in quit_button.handleEvent(event):
@@ -203,6 +216,8 @@ def debug_run():
                         del practice_game
                         active_mode = 'menu'
                         window.fill(BLACK)
+                        static_visual_components_group.draw(window)
+                        pygame.mixer.music.play(-1)
             if event.type == pygame.QUIT:
                 running = False
 
