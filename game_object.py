@@ -48,7 +48,7 @@ class GameObject(pygame.sprite.Sprite):
         self.move_vector = vector.MoveVector()
 
         # Peliobjektin ominaisuuksia - oletusarvot
-        self.mass = 1
+        self.mass = 1.0
         self.max_speed = 30
         self.gravity_affects = 1
         self.is_ball = 0
@@ -159,10 +159,36 @@ class GameObject(pygame.sprite.Sprite):
         if len(collide_list) > 0:
             # TODO: laske massojen vaikutukset törmäyksessä
             # TODO: laske vektorit oikein objektien suhteellisten kulmien mukaan
-            self.move_vector.add_vector(collide_list[0].move_vector)
-            dotproduct = self.move_vector.get_dot_product(collide_list[0].move_vector)
-            print("Bullet collision")
-            print("Object 1 direction (rad/deg):", self.move_vector.get_direction(), math.degrees(self.move_vector.get_direction()))
-            print("Object 2 direction (rad/deg):", collide_list[0].move_vector.get_direction(), math.degrees(collide_list[0].move_vector.get_direction()))
-            print("Dot product:", dotproduct)
+            # self.move_vector.add_vector(collide_list[0].move_vector)
+            # dotproduct = self.move_vector.get_dot_product(collide_list[0].move_vector)
+            self.collide_circle(collide_list[0])
 
+    def collide_circle(self, other_sprite):
+        """ 
+        Törmäyttää kaksi ympyrän muotoista GameObjectia ja laskee niiden suunnat ja liikemäärät uusiksi.
+        Jopa ottaa massat huomioon! 
+        """
+        angle_to_other = get_angle_in_radians(other_sprite.rect.center, self.rect.center)
+        self.move_vector.set_direction(angle_to_other - math.pi)
+        other_sprite.move_vector.set_direction(angle_to_other)
+
+        speed1 = self.move_vector.get_speed()
+        speed2 = other_sprite.move_vector.get_speed()
+        mass1 = self.mass
+        mass2 = other_sprite.mass
+        speed1_new = (mass2 / mass1) * speed2
+        speed2_new = (mass1 / mass2) * speed1
+        self.move_vector.set_speed(speed1_new)
+        other_sprite.move_vector.set_speed(speed2_new)
+
+
+def get_angle_difference(angle1, angle2):
+    """ Palauttaa kahden kulman välisen eron radiaaneissa. Väli -PI...0...PI """
+    angle_difference = angle1 - angle2
+    if angle_difference > math.pi: angle_difference -= 2 * math.pi
+    return angle_difference
+
+def get_angle_in_radians(point1, point2):
+    x_difference = point1[0] - point2[0]
+    y_difference = point1[1] - point2[1]
+    return math.atan2(y_difference, x_difference)

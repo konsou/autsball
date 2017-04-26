@@ -1,6 +1,5 @@
 import math, pygame
 
-
 class MoveVector:
     """ 
     Classi johon voi tallettaa liikevektorin joko kulma- tai summamuodossa ja tekee konversiot automaattisesti.
@@ -12,6 +11,14 @@ class MoveVector:
         -set_speed, set_direction, set_speed_direction - nämä asettaa vektorin pituuden ja/tai kulman (kulmamuoto)
         -get_speed, get_direction, get_speed_direction - nämä palauttaa vektorin pituuden ja/tai kulman (kulmamuoto)
         -get_all - palauttaa vektorin arvot sekä summa- että kulmamuodossa
+        -add_to_vx(self, value): lisää vx:ään numeron
+        -add_to_vy(self, value): lisää vy:hyn numeron
+        -add_to_speed(self, value): lisää speediin numeron
+        -add_to_direction(self, value): lisää directioniin numeron
+        -add_vector(self, vector):  lisää tähän vektoriin toisen Vector-objektin
+        -get_dot_product(self, vector): laskee tämän ja toisen vektorin pistetulon
+        -normalize(self): Palauttaa vektorin, jolla on sama suunta mutta nopeus on 1 
+        -normalize_ip(self):  Muuttaa vektorin nopeudeksi 1 pitäen suunnan samana (in-place)
     
     Tässä on ideana että kun kutsutaan get_(arvo) niin toimii täten:
         -jos arvo on jo määritetty (esim. vx) niin palauttaa sen suoraan
@@ -23,8 +30,6 @@ class MoveVector:
         -jos asetetaan speed ja/tai direction niin asetetaan vx ja vy Noneksi
         Näistä sitten tietää että Noneksi asetettu arvo pitää laskea uusiksi sitten jos sitä joskus haetaan
             
-    TODO: joko tee parannuksia (dot product, metodit helpommille arvojen yhteenlaskuille) tai siirry käyttämään
-          pygamen valmiita vektorijuttuja 
     TODO: samalla logiikalla kulman muutos asteisiin
     """
     def __init__(self, vx=None, vy=None, speed=None, direction=None):
@@ -59,10 +64,14 @@ class MoveVector:
         self._clear_speed_direction()
 
     def set_vx(self, vx):
+        if self.vy is None:
+            self._calculate_vx_vy()
         self.vx = vx
         self._clear_speed_direction()
 
     def set_vy(self, vy):
+        if self.vx is None:
+            self._calculate_vx_vy()
         self.vy = vy
         self._clear_speed_direction()
 
@@ -72,10 +81,14 @@ class MoveVector:
         self._clear_vx_vy()
 
     def set_speed(self, speed):
+        if self.direction is None:
+            self._calculate_speed_direction()
         self.speed = speed
         self._clear_vx_vy()
 
     def set_direction(self, direction):
+        if self.speed is None:
+            self._calculate_speed_direction()
         self.direction = direction
         self._clear_vx_vy()
 
@@ -136,6 +149,7 @@ class MoveVector:
         """ Lisää tähän vektoriin toisen Vector-objektin """
         self.add_to_vx(vector.get_vx())
         self.add_to_vy(vector.get_vy())
+        self._clear_speed_direction()
 
     def get_dot_product(self, vector):
         """ Laskee kahden vektorin pistetulon """
@@ -148,3 +162,4 @@ class MoveVector:
     def normalize_ip(self):
         """ Muuttaa vektorin nopeudeksi 1 pitäen suunnan samana (in-place) """
         self.set_speed(1)
+        self._clear_vx_vy()
