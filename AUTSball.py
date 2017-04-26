@@ -167,10 +167,17 @@ TextGroup = pygame.sprite.Group()
 
 class Level(pygame.sprite.Sprite):
     """ Level-classi. Käytännössä vain taustakuva, logiikka tapahtuu muualla. """
-    def __init__(self):
+    def __init__(self, image_file=None, image=None):
         pygame.sprite.Sprite.__init__(self, LevelGroup)
-        # self.image = pygame.image.load('gfx/test_arena_2400x1200.png').convert_alpha()
-        self.image = pygame.image.load('gfx/test_arena_vertical_challenge.png').convert_alpha()
+
+        # Level-imagen lataus
+        if image is not None:
+            self.image = image
+        elif image_file is not None:
+            self.image = pygame.image.load(image_file).convert_alpha()
+        else:
+            self.image = pygame.image.load('gfx/test_arena_vertical_challenge.png').convert_alpha()
+
         self.size_x = self.image.get_width()
         self.size_y = self.image.get_height()
         self.rect = self.image.get_rect()
@@ -306,7 +313,7 @@ class BulletSprite(game_object.GameObject):
 class PlayerSprite(game_object.GameObject):
     def __init__(self, level=None, parent=None):
         # Lisätään PlayerGroup-ryhmään
-        game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent, image_file='gfx/ship1_20px.png')
+        game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent, image_file='gfx/ship1_red_20px.png')
 
         # Graffat
         self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
