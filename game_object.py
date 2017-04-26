@@ -44,7 +44,7 @@ class GameObject(pygame.sprite.Sprite):
         self.x, self.y = self.start_position
         self.x_previous, self.y_previous = self.start_position
 
-        # Liikkumisvektori - sisältää sekä vx/vy että magnitude/angle (radiaaneina)
+        # Liikkumisvektori - sisältää sekä vx/vy että speed/direction (radiaaneina)
         self.move_vector = vector.MoveVector()
 
         # Peliobjektin ominaisuuksia - oletusarvot
@@ -61,7 +61,7 @@ class GameObject(pygame.sprite.Sprite):
     def reset(self):
         """ Resetoi position ja asettaa nopeuden nollaan. Päivittää rectin. """
         self.x, self.y = self.start_position
-        self.move_vector.set_magnitude(0)
+        self.move_vector.set_speed(0)
         self.update_rect()
 
     def update_rect(self):
@@ -82,7 +82,7 @@ class GameObject(pygame.sprite.Sprite):
             self.move_vector.add_to_vy(self.parent.gravity)
 
         # Max speed rajoittaa
-        self.move_vector.set_magnitude(min(self.move_vector.get_magnitude(), self.max_speed))
+        self.move_vector.set_speed(min(self.move_vector.get_speed(), self.max_speed))
 
         # Muutetaan koordinaatteja liikemäärän mukaan
         self.x_previous = int(self.x)
@@ -104,7 +104,9 @@ class GameObject(pygame.sprite.Sprite):
         self.image = rot_image
 
     def check_out_of_bounds(self):
-        """ Pitää objektin pelialueen sisällä """
+        """ Pitää objektin pelialueen sisällä, palauttaa 1 jos on ulkopuolella """
+        return_value = 0
+
         x_before = self.x
         y_before = self.y
 
@@ -116,8 +118,12 @@ class GameObject(pygame.sprite.Sprite):
         # Jos koordinaatteja muutettiin (eli oli out of bounds) niin muutetaan liikemäärää
         if self.x != x_before:
             self.move_vector.set_vx(0)
+            return_value = 1
         elif self.y != y_before:
             self.move_vector.set_vy(0)
+            return_value = 1
+
+        return return_value
 
     def check_collision_with_wall_and_goal(self):
         """ Tarkastaa törkmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
@@ -132,7 +138,7 @@ class GameObject(pygame.sprite.Sprite):
                 self.kill()
             else:
                 # Vauhti loppuu kuin seinään
-                self.move_vector.set_magnitude(0)
+                self.move_vector.set_speed(0)
                 # Vähän estetään seinän sisään menemistä tällä
                 self.x = self.x_previous
                 self.y = self.y_previous
@@ -156,7 +162,7 @@ class GameObject(pygame.sprite.Sprite):
             self.move_vector.add_vector(collide_list[0].move_vector)
             dotproduct = self.move_vector.get_dot_product(collide_list[0].move_vector)
             print("Bullet collision")
-            print("Object 1 angle (rad/deg):", self.move_vector.get_angle(), math.degrees(self.move_vector.get_angle()))
-            print("Object 2 angle (rad/deg):", collide_list[0].move_vector.get_angle(), math.degrees(collide_list[0].move_vector.get_angle()))
+            print("Object 1 direction (rad/deg):", self.move_vector.get_direction(), math.degrees(self.move_vector.get_direction()))
+            print("Object 2 direction (rad/deg):", collide_list[0].move_vector.get_direction(), math.degrees(collide_list[0].move_vector.get_direction()))
             print("Dot product:", dotproduct)
 
