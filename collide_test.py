@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 import pygame, math, time, vector, game_object, random
 
 YELLOW = (255, 255, 0)
