@@ -207,7 +207,7 @@ class BallSprite(game_object.GameObject):
         self.start_position = self.level.center_point
         self.x, self.y = self.start_position
         self.attached_player = None
-        self.mass = 1
+        self.mass = 1.0
         self.max_speed = 10
         # Tämä tekee sen että tarkistetaan törmäys maaliin
         self.is_ball = 1
@@ -248,7 +248,7 @@ class BallSprite(game_object.GameObject):
         Tätä kutsuu PlayerSpriten shoot-metodi, joka hoitaa detachauksen ja antaa tarvittavat tiedot
         """
         # Jostain syystä vaatii direktion korjauksen tässä
-        self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
+        self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
         self.x = int(x)
         self.y = int(y)
         self.update_rect()
@@ -277,9 +277,10 @@ class BulletSprite(game_object.GameObject):
         game_object.GameObject.__init__(self, group=BulletGroup, image_file='gfx/bullet_5.png', start_position=(x, y),
                                         level=level, parent=parent)
         self.rect.center = (x, y)
-        self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
+        self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
         self.max_speed = 20
-        self.explosion_force = 1
+        # self.explosion_force = 1
+        self.mass = 0.1
 
         self.is_bullet = 1
 
@@ -329,7 +330,7 @@ class PlayerSprite(game_object.GameObject):
         self.handling = int(5) # kuinka monta astetta kääntyy per frame
         self.max_thrust = 0.35 # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
         self.max_speed = 10
-        self.mass = 1
+        self.mass = 1.0
         self.cooldown_basic_shot = 5 # framea
         self.cooldown_after_ball_shot = 60 # cooldown sen jälkeen kun pallo on ammuttu
         self.cooldown_counter = 0 # cooldown-counter1
@@ -390,7 +391,7 @@ class PlayerSprite(game_object.GameObject):
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
             BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
-                                  speed=10 + self.move_vector.get_magnitude())
+                         speed=10 + self.move_vector.get_speed())
             self.cooldown_counter = self.cooldown_basic_shot
 
         # Jos pallo on liitettynä niin ammutaan se
