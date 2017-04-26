@@ -193,7 +193,7 @@ def debug_run():
 
     # Music
     pygame.mixer.init()
-    pygame.mixer.music.load('audio/title_music_by_pera.ogg')
+    pygame.mixer.music.load('sfx/title_music_by_pera.ogg')
     pygame.mixer.music.play(-1)
 
     running = True
