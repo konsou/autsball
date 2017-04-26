@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 from math import acos
 from math import sqrt
 from math import pi
@@ -35,7 +36,7 @@ while running:
             running = False
 
     mouse_position = pygame.mouse.get_pos()
-    # angle = angle_between(center_point, mouse_position)
+    # direction = angle_between(center_point, mouse_position)
 
     x_difference = mouse_position[0] - center_point[0]
     y_difference = mouse_position[1] - center_point[1]
@@ -44,7 +45,7 @@ while running:
     halfway_point = (center_point[0] + x_difference // 2, center_point[1] + y_difference // 2)
 
     distance = math.hypot(x_difference, y_difference)
-    #angle = np.rad2deg(math.asin(y_difference / distance))
+    #direction = np.rad2deg(math.asin(y_difference / distance))
     # angle_radians = math.atan2(y_difference, x_difference)
     angle_radians = get_angle_in_radians(mouse_position, center_point)
     angle_degrees = np.rad2deg(angle_radians)

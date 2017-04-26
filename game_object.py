@@ -1,4 +1,5 @@
-import pygame, vector
+# -*- coding: utf8 -*-
+import pygame, vector, math
 
 red = (255, 0, 0)
 green = (0, 255, 0)
@@ -9,8 +10,6 @@ white = (255, 255, 255)
 
 class GameObject(pygame.sprite.Sprite):
     """ Classi joka perii pygamen Spriten ja lisää yleisiä peliobjektin käyttäytymiseen liittyviä juttuja """
-    # TODO: muuta nämä niin että vakioarvot ei tule tässä argumentteina vaan selkeämmin alempana asetetaan arvoihinsa
-    # ja sitten instansioinnissa voi tarvittaessa overrideta
     def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None):
         # Pygame-Spriten init
         pygame.sprite.Sprite.__init__(self, group)
@@ -46,11 +45,11 @@ class GameObject(pygame.sprite.Sprite):
         self.x, self.y = self.start_position
         self.x_previous, self.y_previous = self.start_position
 
-        # Liikkumisvektori - sisältää sekä vx/vy että magnitude/angle (radiaaneina)
+        # Liikkumisvektori - sisältää sekä vx/vy että speed/direction (radiaaneina)
         self.move_vector = vector.MoveVector()
 
         # Peliobjektin ominaisuuksia - oletusarvot
-        self.mass = 1
+        self.mass = 1.0
         self.max_speed = 30
         self.gravity_affects = 1
         self.is_ball = 0
@@ -63,7 +62,7 @@ class GameObject(pygame.sprite.Sprite):
     def reset(self):
         """ Resetoi position ja asettaa nopeuden nollaan. Päivittää rectin. """
         self.x, self.y = self.start_position
-        self.move_vector.set_magnitude(0)
+        self.move_vector.set_speed(0)
         self.update_rect()
 
     def update_rect(self):
@@ -84,7 +83,7 @@ class GameObject(pygame.sprite.Sprite):
             self.move_vector.add_to_vy(self.parent.gravity)
 
         # Max speed rajoittaa
-        self.move_vector.set_magnitude(min(self.move_vector.get_magnitude(), self.max_speed))
+        self.move_vector.set_speed(min(self.move_vector.get_speed(), self.max_speed))
 
         # Muutetaan koordinaatteja liikemäärän mukaan
         self.x_previous = int(self.x)
@@ -106,18 +105,26 @@ class GameObject(pygame.sprite.Sprite):
         self.image = rot_image
 
     def check_out_of_bounds(self):
-        """ Pitää objektin pelialueen sisällä """
+        """ Pitää objektin pelialueen sisällä, palauttaa 1 jos on ulkopuolella """
+        return_value = 0
+
         x_before = self.x
         y_before = self.y
+
         self.x = max(0, self.x)
         self.x = min(self.level.size_x - 1, self.x)
         self.y = max(0, self.y)
         self.y = min(self.level.size_y - 1, self.y)
+
         # Jos koordinaatteja muutettiin (eli oli out of bounds) niin muutetaan liikemäärää
         if self.x != x_before:
             self.move_vector.set_vx(0)
+            return_value = 1
         elif self.y != y_before:
             self.move_vector.set_vy(0)
+            return_value = 1
+
+        return return_value
 
     def check_collision_with_wall_and_goal(self):
         """ Tarkastaa törkmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
@@ -132,11 +139,10 @@ class GameObject(pygame.sprite.Sprite):
                 self.kill()
             else:
                 # Vauhti loppuu kuin seinään
-                self.move_vector.set_magnitude(0)
+                self.move_vector.set_speed(0)
                 # Vähän estetään seinän sisään menemistä tällä
                 self.x = self.x_previous
                 self.y = self.y_previous
-
 
         # Jos objekti on pallo niin katsotaan onko maalissa
         if self.is_ball:
@@ -154,5 +160,36 @@ class GameObject(pygame.sprite.Sprite):
         if len(collide_list) > 0:
             # TODO: laske massojen vaikutukset törmäyksessä
             # TODO: laske vektorit oikein objektien suhteellisten kulmien mukaan
-            self.move_vector.add_vector(collide_list[0].move_vector)
+            # self.move_vector.add_vector(collide_list[0].move_vector)
+            # dotproduct = self.move_vector.get_dot_product(collide_list[0].move_vector)
+            self.collide_circle(collide_list[0])
 
+    def collide_circle(self, other_sprite):
+        """ 
+        Törmäyttää kaksi ympyrän muotoista GameObjectia ja laskee niiden suunnat ja liikemäärät uusiksi.
+        Jopa ottaa massat huomioon! 
+        """
+        angle_to_other = get_angle_in_radians(other_sprite.rect.center, self.rect.center)
+        self.move_vector.set_direction(angle_to_other - math.pi)
+        other_sprite.move_vector.set_direction(angle_to_other)
+
+        speed1 = self.move_vector.get_speed()
+        speed2 = other_sprite.move_vector.get_speed()
+        mass1 = self.mass
+        mass2 = other_sprite.mass
+        speed1_new = (mass2 / mass1) * speed2
+        speed2_new = (mass1 / mass2) * speed1
+        self.move_vector.set_speed(speed1_new)
+        other_sprite.move_vector.set_speed(speed2_new)
+
+
+def get_angle_difference(angle1, angle2):
+    """ Palauttaa kahden kulman välisen eron radiaaneissa. Väli -PI...0...PI """
+    angle_difference = angle1 - angle2
+    if angle_difference > math.pi: angle_difference -= 2 * math.pi
+    return angle_difference
+
+def get_angle_in_radians(point1, point2):
+    x_difference = point1[0] - point2[0]
+    y_difference = point1[1] - point2[1]
+    return math.atan2(y_difference, x_difference)

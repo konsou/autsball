@@ -1,3 +1,4 @@
+# -*- coding: utf8 -*-
 import pygame, AUTSball
 from pygame.locals import *
 
