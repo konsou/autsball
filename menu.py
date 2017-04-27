@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-import pygame, AUTSball
+import pygame, AUTSball, menu_background_action
 from pygame.locals import *
 
 WHITE = (255, 255, 255)
@@ -179,7 +179,7 @@ def debug_run():
     logo_sprite = pygame.sprite.Sprite()
     logo_sprite.image = pygame.image.load('gfx/AUTSBall_logo.png').convert_alpha()
     logo_sprite.rect = logo_sprite.image.get_rect()
-    logo_sprite.rect.topleft = (50, 30)
+    logo_sprite.rect.center = (400, 110)
     static_visual_components_group.add(logo_sprite)
     static_visual_components_group.draw(window)
 
@@ -188,6 +188,10 @@ def debug_run():
     multiplayer_button = Button(Rect(50, 405, 250, 70), 'Multiplayer')
     quit_button = Button(Rect(50, 480, 250, 70), 'Quit')
 
+    practice_button.rect.center = (400, 250)
+    multiplayer_button.rect.center = (400, 330)
+    quit_button.rect.center = (400, 410)
+
     active_mode = 'menu'
     practice_game = None
 
@@ -195,6 +199,11 @@ def debug_run():
     pygame.mixer.init()
     pygame.mixer.music.load('audio/title_music_by_pera.ogg')
     pygame.mixer.music.play(-1)
+
+    # Background action
+    menu_background_action.BackgroundAction()
+    darken_surface = pygame.Surface((800, 600))
+    darken_surface.set_alpha(128)
 
     running = True
     while running:
@@ -223,6 +232,14 @@ def debug_run():
                 running = False
 
         if active_mode == 'menu':
+            window.fill(0)
+
+            menu_background_action.background_group.update()
+            menu_background_action.background_group.draw(window)
+
+            window.blit(darken_surface, (0, 0))
+
+            static_visual_components_group.draw(window)
             practice_button.draw(window)
             multiplayer_button.draw(window)
             quit_button.draw(window)

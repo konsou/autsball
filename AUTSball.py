@@ -225,9 +225,11 @@ class BallSprite(game_object.GameObject):
         self.viewscreen_rect = viewscreen_rect
 
         # Jos törmää pelaajaan niin liitetään siihen
-        collide_list = pygame.sprite.spritecollide(self, PlayerGroup, False)
-        if len(collide_list) > 0:
-            self.attach_to_player(collide_list[0])
+        # Vain jos ei jo ole liitettynä!
+        if self.attached_player is None:
+            collide_list = pygame.sprite.spritecollide(self, PlayerGroup, False)
+            if len(collide_list) > 0:
+                self.attach_to_player(collide_list[0])
 
         # Jos on liitetty pelaajaan niin koordinaatit ja rect on samat kuin pelaajalla
         if self.attached_player is not None:
@@ -274,6 +276,7 @@ class BallSprite(game_object.GameObject):
     def detach(self):
         """ Tämä metodi poistaa liitoksen pelaajaan. """
         # self.attached_player.weight -= self.weight
+        # print("Ball detach method called. Attached player:", self.attached_player)
         if self.attached_player is not None:
             self.attached_player.detach_ball()
             self.attached_player = None
@@ -313,7 +316,8 @@ class BulletSprite(game_object.GameObject):
 class PlayerSprite(game_object.GameObject):
     def __init__(self, level=None, parent=None):
         # Lisätään PlayerGroup-ryhmään
-        game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent, image_file='gfx/ship1_red_20px.png')
+        game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent,
+                                        image_file='gfx/ship1_red_20px.png')
 
         # Graffat
         self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
@@ -353,6 +357,7 @@ class PlayerSprite(game_object.GameObject):
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
+        self.check_collision_with_players(PlayerGroup)
         self.check_collision_with_bullets(BulletGroup)
 
         # Lasketaan cooldownia
@@ -365,9 +370,11 @@ class PlayerSprite(game_object.GameObject):
 
     def attach_ball(self, ball):
         self.attached_ball = ball
+        self.radius = ball.radius
 
     def detach_ball(self):
         self.attached_ball = None
+        self.radius = self.original_radius
 
     def accelerate(self):
         self.thrust = self.max_thrust
@@ -390,7 +397,7 @@ class PlayerSprite(game_object.GameObject):
             self.heading -= 360
         self.rot_self_image_keep_size(self.heading)
 
-    def shoot(self, bullet_list=None):
+    def shoot(self):
         # Ammutaan perusammus
         # Pelaajan nopeus vaikuttaa ammuksen vauhtiin
         # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
@@ -399,7 +406,7 @@ class PlayerSprite(game_object.GameObject):
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
             BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
-                         speed=10 + self.move_vector.get_speed())
+                         speed=15)
             self.cooldown_counter = self.cooldown_basic_shot
 
         # Jos pallo on liitettynä niin ammutaan se
