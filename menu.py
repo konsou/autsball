@@ -201,7 +201,8 @@ def debug_run():
     pygame.mixer.music.play(-1)
 
     # Background action
-    menu_background_action.BackgroundAction()
+    background_action = menu_background_action.BackgroundAction()
+    # Tämä tummentaa tausta-actionin
     darken_surface = pygame.Surface((800, 600))
     darken_surface.set_alpha(128)
 
@@ -214,6 +215,10 @@ def debug_run():
                     #print('practice button clicked')
                     active_mode = 'practice'
                     window.fill(BLACK)
+                    # Lopetetaan background action
+                    background_action.kill_me()
+                    del background_action
+
                     practice_game = AUTSball.AUTSBallGame()
                     pygame.mixer.music.stop()
                 if 'click' in multiplayer_button.handleEvent(event):
@@ -223,9 +228,11 @@ def debug_run():
             if active_mode == 'practice':
                 if event.type == KEYUP:
                     if event.key == K_ESCAPE:
+                        practice_game.empty_groups()
                         del practice_game
                         active_mode = 'menu'
                         window.fill(BLACK)
+                        background_action = menu_background_action.BackgroundAction()
                         static_visual_components_group.draw(window)
                         pygame.mixer.music.play(-1)
             if event.type == pygame.QUIT:
@@ -236,7 +243,6 @@ def debug_run():
 
             menu_background_action.background_group.update()
             menu_background_action.background_group.draw(window)
-
             window.blit(darken_surface, (0, 0))
 
             static_visual_components_group.draw(window)

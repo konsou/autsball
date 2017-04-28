@@ -144,6 +144,13 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.ship5 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 300))
         self.ship6 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 400))
         self.ball = DemoBall(level=self.level, parent=self)
+
+        coders = ['Konso', 'Muumi', 'Tursa']
+        random.shuffle(coders)
+        coders_string = ', '.join(coders)
+        credits_text = "Idea: Konso"+30*" "+"Code: "+coders_string+30*" "+"Music: Pera"+30*" "+"Your name can be here!"
+        AUTSball.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
+
         self.image = pygame.Surface((800, 600))
         self.rect = self.image.get_rect()
         self.viewscreen_rect = (0, 0, 800, 600)
@@ -152,6 +159,8 @@ class BackgroundAction(pygame.sprite.Sprite):
 
         self.score_green = 0
         self.score_red = 0
+
+
 
     def update(self):
         self.ball_pos = (self.ball.x, self.ball.y)
@@ -194,6 +203,16 @@ class BackgroundAction(pygame.sprite.Sprite):
             goal_text_color = AUTSball.green
         AUTSball.DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=60,
                                   color=goal_text_color, font_size=120, flashes=1)
+
+    def kill_me(self):
+        AUTSball.LevelGroup.empty()
+        AUTSball.BallGroup.empty()
+        AUTSball.PlayerGroup.empty()
+        AUTSball.BulletGroup.empty()
+        AUTSball.EffectGroup.empty()
+        AUTSball.TextGroup.empty()
+        background_group.empty()
+        self.kill()
 
 
 def debug_run():

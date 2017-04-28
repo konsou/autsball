@@ -91,6 +91,7 @@ class AUTSBallGame:
         if self.quit_game:
             self.exit()
 
+
     def update_graphics(self):
         """ Grafiikoiden päivitysmetodi """
 
@@ -149,6 +150,14 @@ class AUTSBallGame:
         font = pygame.font.Font(None, font_size)
         textimg = font.render(text, 1, color, bgcolor)
         self.win.blit(textimg, pos)
+
+    def empty_groups(self):
+        LevelGroup.empty()
+        BallGroup.empty()
+        PlayerGroup.empty()
+        BulletGroup.empty()
+        EffectGroup.empty()
+        TextGroup.empty()
 
     def exit(self):
         """ Tähän voi laittaa jotain mitä tulee ennen poistumista """
@@ -454,6 +463,59 @@ class DisappearingText(pygame.sprite.Sprite):
             self.visible = 1
             self.rect.center = self.original_position
 
+
+class ScrollingText(pygame.sprite.Sprite):
+    """ Scrollaa tekstiä ruudulla """
+    # TODO: tausta läpinäkyväksi
+    def __init__(self, y_pos=0, screen_size_x=800, text="", scroll_direction='left', scroll_speed=5,
+                 color=white, bgcolor=black, font_size=24, flashes=0, flash_interval=10):
+        pygame.sprite.Sprite.__init__(self, TextGroup)
+
+        self.frame_counter = 0
+
+        font = pygame.font.Font(None, font_size)
+        self.image = font.render(text, 1, color, bgcolor)
+        self.original_image = self.image
+        self.empty_image = pygame.Surface((0, 0))
+        self.rect = self.image.get_rect()
+        self.screen_size_x = screen_size_x
+
+        self.scroll_direction = scroll_direction
+
+        if scroll_direction == 'left':
+            self.rect.midleft = screen_size_x, y_pos
+            self.original_position = self.rect.midleft
+            self.scroll_speed = scroll_speed * -1
+        else:
+            self.rect.midright = 0, y_pos
+            self.original_position = self.rect.midright
+            self.scroll_speed = scroll_speed
+
+        self.flashes = flashes
+        self.flash_interval = flash_interval
+        self.visible = 1
+
+    def update(self):
+        self.rect.x += self.scroll_speed
+        if self.scroll_direction == 'left':
+            if self.rect.midright[0] < 0:
+                self.rect.midleft = self.original_position
+        else:
+            if self.rect.midleft[0] > self.screen_size_x:
+                self.rect.midright = self.original_position
+
+        if self.flashes:
+            self.frame_counter += 1
+            if self.frame_counter % self.flash_interval == 0:
+                self.toggle_image()
+
+    def toggle_image(self):
+        if self.visible:
+            self.visible = 0
+            self.image = self.empty_image
+        else:
+            self.visible = 1
+            self.image = self.original_image
 
 if __name__ == '__main__':
     game = AUTSBallGame()
