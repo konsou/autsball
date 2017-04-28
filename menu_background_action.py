@@ -201,7 +201,7 @@ class BackgroundAction(pygame.sprite.Sprite):
         elif scoring_team == 'green':
             self.score_green += 1
             goal_text_color = AUTSball.green
-        AUTSball.DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=60,
+        AUTSball.DisappearingText(pos=(400,525), text="GOAL!!!", frames_visible=60,
                                   color=goal_text_color, font_size=120, flashes=1)
 
     def kill_me(self):
