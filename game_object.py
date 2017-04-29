@@ -187,6 +187,10 @@ class GameObject(pygame.sprite.Sprite):
         """ Laskee etäisyyden neliön toiseen GameObjectiin. Näin vältetään neliöjuuren laskeminen joka on kallista. """
         return (self.x - other_object.x)**2 + (self.y - other_object.y)**2
 
+    def distance(self, other_object):
+        """ Laskee etäisyyden toiseen GameObjectiin. Käyttää neliöjuurta eli oletettavasti hitaampi kuin yllä. """
+        return math.hypot(self.x - other_object.x, self.y - other_object.y)
+
 
 def get_angle_difference(angle1, angle2):
     """ Palauttaa kahden kulman välisen eron radiaaneissa. Väli -PI...0...PI """

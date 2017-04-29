@@ -204,7 +204,7 @@ class EffectSprite(game_object.GameObject):
 class BallSprite(game_object.GameObject):
     """ Pallo. Osaa liittää itsensä pelaajaan ja poistaa liitoksen. """
     def __init__(self, level=None, parent=None):
-        game_object.GameObject.__init__(self, group=BallGroup, image_file='gfx/ball_50.png', level=level, parent=parent)
+        game_object.GameObject.__init__(self, group=BallGroup, image_file='gfx/ball_50_red.png', level=level, parent=parent)
         self.start_position = self.level.center_point
         self.x, self.y = self.start_position
 
@@ -233,32 +233,18 @@ class BallSprite(game_object.GameObject):
             distance_squared_to_player = self.distance_squared(self.attached_player)
             if distance_squared_to_player >= self.attached_player_max_distance_squared:
                 player_angle = game_object.get_angle_in_radians((self.attached_player.x, self.attached_player.y),
-                                                                (self.x, self.y))
-                # pull_vector_speed = distance_squared_to_player / 15000
-                pull_vector_normalized = vector.MoveVector(speed=1, direction=player_angle)
-                pull_vector_normalized_flipped = vector.MoveVector(speed=1, direction=player_angle + math.pi)
+                                                                 (self.x, self.y))
 
-                player_pull_vector_speed = self.move_vector.get_dot_product_normalized(pull_vector_normalized) \
-                                           * self.move_vector.get_speed()
-                ball_pull_vector_speed = self.attached_player.move_vector.get_dot_product_normalized(pull_vector_normalized_flipped) \
-                                         * self.attached_player.move_vector.get_speed()
+                pull_vector_speed = (distance_squared_to_player - self.attached_player_max_distance_squared) / 10000
 
-                player_pull_vector_speed -= (distance_squared_to_player - self.attached_player_max_distance_squared) * 0.001
-                ball_pull_vector_speed -= (distance_squared_to_player - self.attached_player_max_distance_squared) * 0.001
-
-                player_pull_vector = vector.MoveVector(speed=player_pull_vector_speed, direction=player_angle + math.pi)
-                ball_pull_vector = vector.MoveVector(speed=ball_pull_vector_speed, direction=player_angle)
-
-                # print("Pull vector speed:", pull_vector_speed)
-                # pull_vector = vector.MoveVector(direction=player_angle, speed=pull_vector_speed)
-                # pull_vector_flipped = vector.MoveVector(direction=player_angle + math.pi, speed=pull_vector_speed)
-                # orig_self_movevector = self.move_vector
+                player_pull_vector = vector.MoveVector(speed=pull_vector_speed, direction=player_angle)
+                ball_pull_vector = vector.MoveVector(speed=pull_vector_speed * -1, direction=player_angle)
                 self.move_vector.add_vector(player_pull_vector)
                 self.attached_player.move_vector.add_vector(ball_pull_vector)
+
             # self.x = self.attached_player.x
             # self.y = self.attached_player.y
             # self.rect.center = self.attached_player.rect.center
-        # Jos ei ole liitetty pelaajaan niin lasketaan liike
 
         self.update_movement()
 
