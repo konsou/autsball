@@ -229,20 +229,30 @@ class BallSprite(game_object.GameObject):
             self.attach_to_player(collide_list[0])
 
         # Jos on liitetty pelaajaan ja jos on liian kaukana niin vetävät toisiaan puoleensa
+        # TODO: liian bouncy!
         if self.attached_player is not None:
             distance_squared_to_player = self.distance_squared(self.attached_player)
             if distance_squared_to_player >= self.attached_player_max_distance_squared:
                 player_angle = game_object.get_angle_in_radians((self.attached_player.x, self.attached_player.y),
                                                                  (self.x, self.y))
 
-                pull_vector_speed = (distance_squared_to_player - self.attached_player_max_distance_squared) / 10000
+                pull_vector_speed = (distance_squared_to_player - self.attached_player_max_distance_squared) / 15000
+                # pull_vector_speed = 0.5
+                print("Pull vector speed:", pull_vector_speed)
 
                 player_pull_vector = vector.MoveVector(speed=pull_vector_speed, direction=player_angle)
                 ball_pull_vector = vector.MoveVector(speed=pull_vector_speed * -1, direction=player_angle)
+
+                player_pullvector_dotproduct = self.attached_player.move_vector.get_dot_product_normalized(ball_pull_vector)
+                ball_pullvector_dotproduct = self.move_vector.get_dot_product_normalized(player_pull_vector)
+
                 self.move_vector.add_vector(player_pull_vector)
                 self.attached_player.move_vector.add_vector(ball_pull_vector)
+                # self.move_vector.add_vector(vector.MoveVector(speed=pull_vector_speed * ball_pullvector_dotproduct, direction=player_angle + math.pi))
+                # self.attached_player.move_vector.add_vector(
+                #     vector.MoveVector(speed=pull_vector_speed * player_pullvector_dotproduct, direction=player_angle))
 
-            # self.x = self.attached_player.x
+                # self.x = self.attached_player.x
             # self.y = self.attached_player.y
             # self.rect.center = self.attached_player.rect.center
 

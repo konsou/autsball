@@ -22,20 +22,6 @@ class TestBall(AUTSball.BallSprite):
         self.attached_player_max_distance_squared = self.attached_player_max_distance**2  # distance-laskelmia varten
 
 
-    def update(self, viewscreen_rect):
-        AUTSball.BallSprite.update(self, viewscreen_rect)
-        distance_squared_to_player = self.distance_squared(self.attached_player)
-        if distance_squared_to_player > self.attached_player_max_distance_squared:
-            player_angle = game_object.get_angle_in_radians((self.attached_player.x, self.attached_player.y),
-                                                             (self.x, self.y))
-            pull_vector_speed = (distance_squared_to_player - self.attached_player_max_distance_squared) / 10000
-            pull_vector_normalized = vector.MoveVector(speed=1, direction=player_angle)
-            self.dotproduct = self.move_vector.get_dot_product_normalized(vector.MoveVector(speed=1, direction=player_angle + math.pi))
-            # print(self.dotproduct)
-            self.move_vector.add_vector(vector.MoveVector(speed=pull_vector_speed, direction=player_angle))
-            self.attached_player.move_vector.add_vector(vector.MoveVector(speed=pull_vector_speed * -1, direction=player_angle))
-            # self.move_vector.set_speed(self.move_vector.get_speed() * 0.95)
-
 
 class TestPlayer(AUTSball.PlayerSprite):
     def __init__(self, level):
