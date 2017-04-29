@@ -285,6 +285,11 @@ class BulletSprite(game_object.GameObject):
 
         self.is_bullet = 1
 
+        # SFX
+        self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump3.wav')
+        self.wall_collide_sound.set_volume(1.2)
+
+
     def update(self, viewscreen_rect):
         self.viewscreen_rect = viewscreen_rect
         self.update_movement()
@@ -320,8 +325,10 @@ class PlayerSprite(game_object.GameObject):
         self.motor_sound.set_volume(0.4)
         self.motor_sound_playing = 0
         self.bullet_sound = pygame.mixer.Sound(file='sfx/pop.wav')
+        self.bullet_sound.set_volume(0.7)
         self.ball_shoot_sound = pygame.mixer.Sound(file='sfx/pchou.wav')
         self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump4.wav')
+        self.wall_collide_sound.set_volume(1.2)
 
         # Koordinaatit
         self.start_position = (800, 600)
@@ -374,7 +381,7 @@ class PlayerSprite(game_object.GameObject):
         self.thrust = self.max_thrust
         self.thrust_gfx.visible = 1
         if not self.motor_sound_playing:
-            self.play_sound(self.motor_sound, -1)
+            self.force_play_sound(self.motor_sound, -1)
             self.motor_sound_playing = 1
         # print(self.motor_sound.get_num_channels())
         # print(pygame.mixer.get_busy())
@@ -406,7 +413,7 @@ class PlayerSprite(game_object.GameObject):
         # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
         if self.cooldown_counter == 0:
-            self.play_sound(self.bullet_sound)
+            self.force_play_sound(self.bullet_sound)
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
             BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
@@ -415,7 +422,7 @@ class PlayerSprite(game_object.GameObject):
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
-            self.play_sound(self.ball_shoot_sound)
+            self.force_play_sound(self.ball_shoot_sound)
             ball_x = self.attached_ball.image.get_width() * math.sin(math.radians(self.heading)) * -1 + self.x
             ball_y = self.attached_ball.image.get_height() * math.cos(math.radians(self.heading)) * -1 + self.y
 

@@ -129,15 +129,19 @@ class GameObject(pygame.sprite.Sprite):
 
         # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys ja vauhti menee nollaan
         if current_point not in (black, red, green):
+            # Soitetaan seinääntörmäysääni seuraavin ehdoin:
+            #  -nopeus yli 5 (ettei ihan pienistä tule jatkuvaa pärinää)
+            #  -jos on liikuttu
+            #  -ääni on olemassa
+            if self.move_vector.get_magnitude() > 5:
+                if self.wall_collide_sound and self.x != self.x_previous and self.y != self.y_previous:
+                    # print("Playing thump")
+                    self.force_play_sound(self.wall_collide_sound)
             if self.is_bullet:
-                # Tuhoaa seinää törmätessä jos on bullet
+                # Tuhoaa seinää törmätessä ja myös itsensä jos on bullet
                 pygame.draw.circle(self.level.image, black, (self.x, self.y), self.size - 1)
                 self.kill()
             else:
-                # Soitetaan seinääntörmäysääni jos on liikuttu ja semmoinen on olemassa
-                if self.wall_collide_sound and self.x != self.x_previous and self.y != self.y_previous:
-                    self.play_sound(self.wall_collide_sound)
-                    # pygame.mixer.find_channel(True).play(self.wall_collide_sound)
                 # Vauhti loppuu kuin seinään
                 self.move_vector.set_magnitude(0)
                 # Vähän estetään seinän sisään menemistä tällä
@@ -162,10 +166,10 @@ class GameObject(pygame.sprite.Sprite):
             # TODO: laske vektorit oikein objektien suhteellisten kulmien mukaan
             self.move_vector.add_vector(collide_list[0].move_vector)
 
-    def play_sound(self, sound, duration=0):
-        # Soitetaan ääni vain jos se ei jo soi, pakotetaan sille kanava auki
+    def force_play_sound(self, sound, duration=0):
+        # Soitetaan ääni, pakotetaan sille kanava auki
         # if sound.get_num_channels() == 0:
-        print("Playing sound", sound)
+        # print("Playing sound", sound)
         pygame.mixer.find_channel(True).play(sound, duration)
         # else:
         #     print("Not playing sound", sound)
