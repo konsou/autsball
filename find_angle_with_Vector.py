@@ -1,9 +1,7 @@
 # -*- coding: utf8 -*-
-from math import acos
-from math import sqrt
-from math import pi
 import pygame, math, time
 import numpy as np
+from vector import MoveVector
 
 """ TOIMII! """
 
@@ -78,9 +76,9 @@ while running:
     x_difference = mouse_position[0] - center_point[0]
     y_difference = mouse_position[1] - center_point[1]
 
-    mouse_vector = Vector(x=x_difference, y=y_difference)
-    angle_radians = mouse_vector.get_angle()
-    distance = mouse_vector.get_magnitude()
+    mouse_vector = MoveVector(vx=x_difference, vy=y_difference)
+    angle_radians = mouse_vector.get_direction()
+    distance = mouse_vector.get_speed()
 
     halfway_point = (center_point[0] + x_difference // 2, center_point[1] + y_difference // 2)
 

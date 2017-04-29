@@ -164,23 +164,28 @@ class GameObject(pygame.sprite.Sprite):
             # dotproduct = self.move_vector.get_dot_product(collide_list[0].move_vector)
             self.collide_circle(collide_list[0])
 
-    def collide_circle(self, other_sprite):
+    def collide_circle(self, other_object):
         """ 
         Törmäyttää kaksi ympyrän muotoista GameObjectia ja laskee niiden suunnat ja liikemäärät uusiksi.
-        Jopa ottaa massat huomioon! 
+        Jopa ottaa massat huomioon!
+        Vähän luulen että tässä on vielä viilaamisen varaa, ei tunnu aivan oikealta kaikissa tilanteissa...
         """
-        angle_to_other = get_angle_in_radians(other_sprite.rect.center, self.rect.center)
+        angle_to_other = get_angle_in_radians(other_object.rect.center, self.rect.center)
         self.move_vector.set_direction(angle_to_other - math.pi)
-        other_sprite.move_vector.set_direction(angle_to_other)
+        other_object.move_vector.set_direction(angle_to_other)
 
         speed1 = self.move_vector.get_speed()
-        speed2 = other_sprite.move_vector.get_speed()
+        speed2 = other_object.move_vector.get_speed()
         mass1 = self.mass
-        mass2 = other_sprite.mass
+        mass2 = other_object.mass
         speed1_new = (mass2 / mass1) * speed2
         speed2_new = (mass1 / mass2) * speed1
         self.move_vector.set_speed(speed1_new)
-        other_sprite.move_vector.set_speed(speed2_new)
+        other_object.move_vector.set_speed(speed2_new)
+
+    def distance_squared(self, other_object):
+        """ Laskee etäisyyden neliön toiseen GameObjectiin. Näin vältetään neliöjuuren laskeminen joka on kallista. """
+        return (self.x - other_object.x)**2 + (self.y - other_object.y)**2
 
 
 def get_angle_difference(angle1, angle2):

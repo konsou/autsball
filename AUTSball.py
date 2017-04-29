@@ -207,9 +207,15 @@ class BallSprite(game_object.GameObject):
         game_object.GameObject.__init__(self, group=BallGroup, image_file='gfx/ball_50.png', level=level, parent=parent)
         self.start_position = self.level.center_point
         self.x, self.y = self.start_position
+
+        # Player attachment
         self.attached_player = None
+        self.attached_player_max_distance = 50  # "tetherin" pituus
+        self.attached_player_max_distance_squared = self.attached_player_max_distance**2  # distance-laskelmia varten
+
         self.mass = 1.0
         self.max_speed = 10
+
         # Tämä tekee sen että tarkistetaan törmäys maaliin
         self.is_ball = 1
 
@@ -222,14 +228,18 @@ class BallSprite(game_object.GameObject):
         if len(collide_list) > 0:
             self.attach_to_player(collide_list[0])
 
-        # Jos on liitetty pelaajaan niin koordinaatit ja rect on samat kuin pelaajalla
+        # Jos on liitetty pelaajaan ja jos on liian kaukana niin vetävät toisiaan puoleensa
         if self.attached_player is not None:
-            self.x = self.attached_player.x
-            self.y = self.attached_player.y
-            self.rect.center = self.attached_player.rect.center
+            if self.distance_squared(self.attached_player) >= self.attached_player_max_distance_squared:
+                orig_self_movevector = self.move_vector
+                self.move_vector.add_vector(self.attached_player.move_vector)
+                self.attached_player.move_vector.add_vector(orig_self_movevector)
+            # self.x = self.attached_player.x
+            # self.y = self.attached_player.y
+            # self.rect.center = self.attached_player.rect.center
         # Jos ei ole liitetty pelaajaan niin lasketaan liike
-        else:
-            self.update_movement()
+
+        self.update_movement()
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
@@ -321,7 +331,7 @@ class PlayerSprite(game_object.GameObject):
         self.x_previous, self.y_previous = self.x, self.y
 
         # Heading ja thrust
-        self.heading = 0
+        self.heading = 0  # HUOM! Heading asteina koska Pygame käyttää niitä rotaatioissa
         self.thrust = 0
 
         # Pallo
