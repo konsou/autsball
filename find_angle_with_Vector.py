@@ -77,12 +77,13 @@ while running:
     y_difference = mouse_position[1] - center_point[1]
 
     mouse_vector = MoveVector(vx=x_difference, vy=y_difference)
+    compare_vector = MoveVector(speed=100, direction=math.pi / 8)
+
+    dot_produt = mouse_vector.get_dot_product_normalized(compare_vector)
     angle_radians = mouse_vector.get_direction()
     distance = mouse_vector.get_speed()
 
     halfway_point = (center_point[0] + x_difference // 2, center_point[1] + y_difference // 2)
-
-
 
     angle_degrees = np.rad2deg(angle_radians)
 
@@ -99,14 +100,16 @@ while running:
 
     show_text((10,10), str(center_point) + " - " + str(mouse_position))
     show_text((10,30), str(angle_degrees))
+    show_text((10,50), "Dot product: "+str(dot_produt))
     pygame.draw.circle(win, yellow, center_point, 5)
     pygame.draw.circle(win, yellow, mouse_position, 5)
     pygame.draw.line(win, yellow, center_point, mouse_position)
-    pygame.draw.line(win, red, center_point, (mouse_position[0], center_point[1]))
-    pygame.draw.line(win, red, mouse_position, (mouse_position[0], center_point[1]))
-    show_text(halfway_point, str(round(distance, 2)))
-    show_text((halfway_point[0], center_point[1]), str(round(x_difference, 2)))
-    show_text((mouse_position[0], halfway_point[1]), str(round(y_difference, 2)))
+    pygame.draw.line(win, red, center_point, (compare_vector.get_vx()+center_point[0], compare_vector.get_vy()+center_point[1]))
+    # pygame.draw.line(win, red, center_point, (mouse_position[0], center_point[1]))
+    # pygame.draw.line(win, red, mouse_position, (mouse_position[0], center_point[1]))
+    # show_text(halfway_point, str(round(distance, 2)))
+    # show_text((halfway_point[0], center_point[1]), str(round(x_difference, 2)))
+    # show_text((mouse_position[0], halfway_point[1]), str(round(y_difference, 2)))
     pygame.display.flip()
     time.sleep(0.01)
 

@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-import pygame, math, sys, game_object
+import pygame, math, sys, game_object, vector
 
 red = (255, 0, 0)
 green = (0, 255, 0)
@@ -230,10 +230,31 @@ class BallSprite(game_object.GameObject):
 
         # Jos on liitetty pelaajaan ja jos on liian kaukana niin vetävät toisiaan puoleensa
         if self.attached_player is not None:
-            if self.distance_squared(self.attached_player) >= self.attached_player_max_distance_squared:
-                orig_self_movevector = self.move_vector
-                self.move_vector.add_vector(self.attached_player.move_vector)
-                self.attached_player.move_vector.add_vector(orig_self_movevector)
+            distance_squared_to_player = self.distance_squared(self.attached_player)
+            if distance_squared_to_player >= self.attached_player_max_distance_squared:
+                player_angle = game_object.get_angle_in_radians((self.attached_player.x, self.attached_player.y),
+                                                                (self.x, self.y))
+                # pull_vector_speed = distance_squared_to_player / 15000
+                pull_vector_normalized = vector.MoveVector(speed=1, direction=player_angle)
+                pull_vector_normalized_flipped = vector.MoveVector(speed=1, direction=player_angle + math.pi)
+
+                player_pull_vector_speed = self.move_vector.get_dot_product_normalized(pull_vector_normalized) \
+                                           * self.move_vector.get_speed()
+                ball_pull_vector_speed = self.attached_player.move_vector.get_dot_product_normalized(pull_vector_normalized_flipped) \
+                                         * self.attached_player.move_vector.get_speed()
+
+                player_pull_vector_speed -= (distance_squared_to_player - self.attached_player_max_distance_squared) * 0.001
+                ball_pull_vector_speed -= (distance_squared_to_player - self.attached_player_max_distance_squared) * 0.001
+
+                player_pull_vector = vector.MoveVector(speed=player_pull_vector_speed, direction=player_angle + math.pi)
+                ball_pull_vector = vector.MoveVector(speed=ball_pull_vector_speed, direction=player_angle)
+
+                # print("Pull vector speed:", pull_vector_speed)
+                # pull_vector = vector.MoveVector(direction=player_angle, speed=pull_vector_speed)
+                # pull_vector_flipped = vector.MoveVector(direction=player_angle + math.pi, speed=pull_vector_speed)
+                # orig_self_movevector = self.move_vector
+                self.move_vector.add_vector(player_pull_vector)
+                self.attached_player.move_vector.add_vector(ball_pull_vector)
             # self.x = self.attached_player.x
             # self.y = self.attached_player.y
             # self.rect.center = self.attached_player.rect.center
