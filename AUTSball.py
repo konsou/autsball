@@ -26,7 +26,7 @@ class AUTSBallGame:
 
         # Taustamusiikki
         self.music_player = music.MusicPlayer(screen='game', window_size=(self.screen_size_x, self.screen_size_y),
-                                              pos='bottomleft')
+                                              pos='bottomleft', group=TextGroup, shuffle=0)
         self.music_player.play()
 
         # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
@@ -473,6 +473,7 @@ class DisappearingText(pygame.sprite.Sprite):
         else:
             self.visible = 1
             self.rect.center = self.original_position
+
 
 
 if __name__ == '__main__':

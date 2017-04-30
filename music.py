@@ -3,16 +3,46 @@ import pygame
 import AUTSball
 import random
 import time
-# TODO: song info ei näy pelissä!
-# TODO: eriytä kaikki biisit vs. soittolistat
+import tinytag
+
+
+"""
+Pitää sisällään seuraavaa:
+
+class MusicPlayer(pygame.sprite.Sprite): taustamusiikin soittajaclass, osaa näyttää infoblurbin biisistä
+class MusicFile(object): lukee tiedoston tagit ja tallettaa tiedon siitä, missä ruuduissa biisiä saa soittaa
+MUSIC_FINISHED -pygame-eventti. Tämä nousee kun biisi on soitettu loppuun. Silloin pitää kutsua MusicPlayer.next()
+
+Katso luokkien ja metodien docstringeistä lisää.
+"""
+
+# TODO: eriytä kaikki biisit ja biiseistä tehdyt soittolistat toisistaan
 
 # Kustomieventti kappaleiden soiton händläämiseen
 MUSIC_FINISHED = pygame.USEREVENT + 1
 
 
 class MusicPlayer(pygame.sprite.Sprite):
-    def __init__(self, pos='topleft', shuffle=1, screen='menu', window_size=(800, 600)):
-        pygame.sprite.Sprite.__init__(self, AUTSball.TextGroup)
+    """
+    class MusicPlayer(pygame.sprite.Sprite):
+    
+    Musiikin soittajaclassi. Osaa seuraavaa:
+     -shuffle/ei shufflea
+     -näyttää hienon infoblurbin kun biisi vaihtuu
+     -osaa soittaa vain niitä biisejä, jotka on määritelty valideiksi käytössä olevaan ruutuun (game/menu/etc.)
+     
+     __init__:issä ottaa vastaan seuraavia argumentteja:
+      -pos: 'topleft', 'topright', 'bottomleft' tai 'bottomright' - infoblurbin positio
+      -shuffle: 1/0
+      -screen: (string) - tämä määrittää missä ruudussa ollaan ja soittaa sen perusteella oikeaa musaa
+      -group: pygame.sprite.Group 
+      -window_size: ikkunan koko että osaa laskea infoblurbin position oikein
+      
+      HUOM HUOM! Toistaiseksi biisit pitää lisätä käsin __init__-osioon!
+      
+    """
+    def __init__(self, pos='topleft', shuffle=1, screen='menu', group=None, window_size=(800, 600)):
+        pygame.sprite.Sprite.__init__(self, group)
         self._shuffle = shuffle
         self._screen = screen
 
@@ -41,22 +71,27 @@ class MusicPlayer(pygame.sprite.Sprite):
         self.fadeout_decrement = 5
 
         self.playlist = []
-        self.playlist.append(MusicFile(filename='sfx/short_1.ogg', artist='PeraSpede',
-                                       songname='Short Music', allowed_screens=('menu', 'game')))
-        self.playlist.append(MusicFile(filename='sfx/short_2.ogg', artist='PeraSpede',
-                                       songname='Short Music 2', allowed_screens=('menu',)))
-        self.playlist.append(MusicFile(filename='sfx/short_3.ogg', artist='PeraSpede',
-                                       songname='Short Music 3', allowed_screens=('menu', 'game')))
-        # self.playlist.append(MusicFile(filename='sfx/autsball1.ogg', artist='PeraSpede',
-        #                                songname='Mouse meets Robot', allowed_screens=('menu', 'game')))
-        # self.playlist.append(MusicFile(filename='sfx/title_music_by_pera.ogg', artist='PeraSpede',
-        #                                songname='Cavern Rain', allowed_screens=('menu', 'game')))
+        ############################################################
+        # HUOM HUOM! Toistaiseksi biisit pitää lisätä käsin tähän! #
+        ############################################################
+        # self.playlist.append(MusicFile(filename='sfx/short_1.ogg', artist='PeraSpede',
+        #                                title='Short Music', allowed_screens=('menu', 'game')))
+        # self.playlist.append(MusicFile(filename='sfx/short_2.ogg', artist='PeraSpede',
+        #                                title='Short Music 2', allowed_screens=('menu',)))
+        # self.playlist.append(MusicFile(filename='sfx/short_3.ogg', artist='PeraSpede',
+        #                               title='Short Music 3', allowed_screens=('menu', 'game')))
+        self.playlist.append(MusicFile(filename='sfx/mouse_meets_robot.ogg', allowed_screens='game'))
+        self.playlist.append(MusicFile(filename='sfx/cavern_rain.ogg', allowed_screens='menu'))
         if shuffle:
             self.shuffle_playlist()
         self.playlist_pointer = 0
         pygame.mixer.music.set_endevent(MUSIC_FINISHED)
 
     def play(self):
+        """ 
+        Soittaa playlist[]:issä olevan playlist_pointer:in määrittämän tähän ruutuun validin biisin. 
+        Jos soittolista on käyty loppuun niin aloitetaan alusta (shufflettaen jos niin määritetty).
+        """
         try:
             current_song = self.playlist[self.playlist_pointer]
         except IndexError:
@@ -66,29 +101,37 @@ class MusicPlayer(pygame.sprite.Sprite):
             self.playlist_pointer = 0
             current_song = self.playlist[0]
 
+        # Tarkastetaan onko biisi validi tähän ruutuun
         if self._screen in current_song.allowed_screens:
             pygame.mixer.music.load(current_song.filename)
             pygame.mixer.music.play()
+            # Näytetään infoblurb
             self.now_playing(current_song)
-            # print("Now playing:", current_song.filename, current_song.songname, current_song.artist)
+            # print("Now playing:", current_song.filename, current_song.title, current_song.artist)
         else:
             # Song not allowed in this screen. Next!
             self.next()
 
     def update(self):
+        """ Tämä laskee infoblurbin fadeoutin """
         if self.fadeout_counter > 0:
             self.fadeout_counter -= self.fadeout_decrement
-            if self.fadeout_counter <= 255 and self.fadeout_counter >= 0:
+            # Jos fadeout_counter on välillä 0..255 niin asetetaan alpha siitä
+            if 255 >= self.fadeout_counter >= 0:
                 self.image.set_alpha(self.fadeout_counter)
+            # Kuva tyhjäksi kun ollaan päästy nollaan
             if self.fadeout_counter <= 0:
                 self.image = pygame.Surface((0, 0))
                 self.rect = self.image.get_rect()
 
+    def stop(self):
+        pygame.mixer.music.stop()
+
     def now_playing(self, current_song):
-        """ Näyttää soivan biisin tiedot ruudulla """
+        """ Näyttää soivan biisin tiedot ruudulla (infoblurb)"""
         # Tekstit
         line1 = "Now playing:"
-        line2 = current_song.songname
+        line2 = current_song.title
         line3 = "by " + current_song.artist
 
         # Teksteistä kuvat
@@ -112,6 +155,7 @@ class MusicPlayer(pygame.sprite.Sprite):
         self.image.blit(textimg2, (self.info_padding, self.info_padding + textimg1.get_height()))
         self.image.blit(textimg3, (self.info_padding, self.info_padding + textimg1.get_height() + textimg2.get_height()))
 
+        # Määritetään alpha ettei myöhemmin herjaa kun sitä muutetaan
         self.image.set_alpha(255)
 
         self.rect = self.image.get_rect()
@@ -129,9 +173,9 @@ class MusicPlayer(pygame.sprite.Sprite):
         else:
             self.rect.bottomright = (self._window_size[0] - self.screen_border_margin, self._window_size[1] - self.screen_border_margin)
 
-
     def set_screen(self, screen):
         self._screen = screen
+        self.next()
 
     def shuffle_playlist(self):
         random.shuffle(self.playlist)
@@ -142,12 +186,16 @@ class MusicPlayer(pygame.sprite.Sprite):
 
 
 class MusicFile(object):
-    """ Kertoo filen tiedot. Tehty näin kun oli ongelmia ID-tagien lukemisen kanssa. """
-    def __init__(self, filename=None, artist=None, songname=None, allowed_screens=('game',)):
+    """ Kertoo filen tiedot - filenamen, artistin, titlen ja sallitut ruudut """
+    def __init__(self, filename=None, allowed_screens=('game',)):
         self.filename = filename
-        self.artist = artist
-        self.songname = songname
-        # Kertoo missä ruuduissa tätä saa soittaa
+
+        # Luetaan tagit
+        tag = tinytag.TinyTag.get(filename)
+        self.artist = tag.artist
+        self.title = tag.title
+
+        # Kertoo missä ruuduissa tätä saa soittaa - tuple/lista
         self.allowed_screens = allowed_screens
 
 
@@ -161,7 +209,7 @@ def debug_run():
     # Music
     pygame.init()
     pygame.mixer.init()
-    music_player = MusicPlayer(screen='game', window_size=(800, 600), pos='bottomleft')
+    music_player = MusicPlayer(screen='game', window_size=(800, 600), pos='bottomleft', group=AUTSball.TextGroup)
     music_player.play()
 
     running = True

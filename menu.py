@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-import pygame, AUTSball
+import pygame, AUTSball, music
 from pygame.locals import *
 
 WHITE = (255, 255, 255)
@@ -174,6 +174,7 @@ def debug_run():
     window.fill((0, 0, 0))
 
     static_visual_components_group = pygame.sprite.Group()
+    music_player_group = pygame.sprite.Group()
 
     # Logo
     logo_sprite = pygame.sprite.Sprite()
@@ -193,8 +194,10 @@ def debug_run():
 
     # Music
     pygame.mixer.init()
-    pygame.mixer.music.load('sfx/title_music_by_pera.ogg')
-    pygame.mixer.music.play(-1)
+    music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
+    music_player.play()
+    # pygame.mixer.music.load('sfx/cavern_rain.ogg')
+    # pygame.mixer.music.play(-1)
 
     running = True
     while running:
@@ -206,7 +209,7 @@ def debug_run():
                     active_mode = 'practice'
                     window.fill(BLACK)
                     practice_game = AUTSball.AUTSBallGame()
-                    pygame.mixer.music.stop()
+                    music_player.stop()
                 if 'click' in multiplayer_button.handleEvent(event):
                     print('multiplayer button clicked')
                 if 'click' in quit_button.handleEvent(event):
@@ -217,15 +220,20 @@ def debug_run():
                         del practice_game
                         active_mode = 'menu'
                         window.fill(BLACK)
-                        static_visual_components_group.draw(window)
-                        pygame.mixer.music.play(-1)
+                        music_player.set_screen('menu')
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == music.MUSIC_FINISHED:
+                music_player.next()
 
         if active_mode == 'menu':
+            music_player_group.update()
+            window.fill(0)
+            static_visual_components_group.draw(window)
             practice_button.draw(window)
             multiplayer_button.draw(window)
             quit_button.draw(window)
+            music_player_group.draw(window)
 
             pygame.display.update()
             clock.tick(30)
