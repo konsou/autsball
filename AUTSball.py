@@ -1,4 +1,5 @@
-import pygame, math, sys, game_object
+# -*- coding: utf-8 -*-
+import pygame, math, sys, game_object, music
 
 red = (255, 0, 0)
 green = (0, 255, 0)
@@ -22,6 +23,11 @@ class AUTSBallGame:
         self.win = pygame.display.set_mode((self.screen_size_x, self.screen_size_y))
         pygame.display.set_caption("AUTSball")
         self.clock = pygame.time.Clock()
+
+        # Taustamusiikki
+        self.music_player = music.MusicPlayer(screen='game', window_size=(self.screen_size_x, self.screen_size_y),
+                                              pos='bottomleft')
+        self.music_player.play()
 
         # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
         self.loading_image = pygame.image.load('gfx/loading.png').convert_alpha()
@@ -50,6 +56,8 @@ class AUTSBallGame:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.quit_game = True
+                if event.type == music.MUSIC_FINISHED:
+                    self.music_player.next()
 
             pressed_keys = pygame.key.get_pressed()
             if pressed_keys[pygame.K_UP]:

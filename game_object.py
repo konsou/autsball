@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import pygame, vector
 
 red = (255, 0, 0)
