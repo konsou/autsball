@@ -127,10 +127,10 @@ class AUTSBallGame:
 
     def score(self, scoring_team):
         """ Tätä kutsutaan kun tulee maali """
-        if scoring_team == 'red':
+        if scoring_team == 'RED':
             self.score_red += 1
             goal_text_color = red
-        elif scoring_team == 'green':
+        elif scoring_team == 'GREEN':
             self.score_green += 1
             goal_text_color = green
         DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=120,
@@ -318,7 +318,6 @@ class BallSprite(game_object.GameObject):
             # self.tether = None
 
 
-
 class BulletSprite(game_object.GameObject):
     """ direction asteina, tulee PlayerSpriten headingista """
     def __init__(self, parent=None, level=None, x=0, y=0, direction=0, parent_speed=0, speed=5, type='basic'):
@@ -336,11 +335,15 @@ class BulletSprite(game_object.GameObject):
         self.viewscreen_rect = viewscreen_rect
         self.update_movement()
         self.check_out_of_bounds()
-
+        # print("Speed:", self.move_vector.get_speed())
         # Tehdään nämä vain jos on olemassa
         if self in BulletGroup:
             self.check_collision_with_wall_and_goal()
-            self.update_rect()
+            if self in BulletGroup:
+                if self.speculate_collision_with_wall() == 1:
+                    # print(self.move_vector.get_speed())
+                    self.move_vector.set_speed(min(self.move_vector.get_speed(), 3))
+                self.update_rect()
 
     def check_out_of_bounds(self):
         """ Overrideaa GameObjectin metodin koska pitää tuhota bulletti jos on out of bounds """

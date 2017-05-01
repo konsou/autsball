@@ -1,11 +1,11 @@
 # -*- coding: utf8 -*-
-import pygame, vector, math
+import pygame, vector, math, copy
 
-red = (255, 0, 0)
-green = (0, 255, 0)
-blue = (0, 0, 255)
-black = (0, 0, 0)
-white = (255, 255, 255)
+RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 
 
 class GameObject(pygame.sprite.Sprite):
@@ -136,10 +136,10 @@ class GameObject(pygame.sprite.Sprite):
         current_point = self.level.image.get_at((self.x, self.y))[:3]
 
         # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys ja vauhti menee nollaan
-        if current_point not in (black, red, green):
+        if current_point not in (BLACK, RED, GREEN):
             if self.is_bullet:
                 # Tuhoaa seinää törmätessä jos on bullet
-                pygame.draw.circle(self.level.image, black, (self.x, self.y), self.size - 1)
+                pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
                 self.kill()
             else:
                 # Vauhti loppuu kuin seinään
@@ -151,13 +151,44 @@ class GameObject(pygame.sprite.Sprite):
         # Jos objekti on pallo niin katsotaan onko maalissa
         if self.is_ball:
             # Punainen maali - piste vihreälle
-            if current_point == red:
-                self.parent.score('green')
+            if current_point == RED:
+                self.parent.score('GREEN')
                 self.reset()
             # Vihreä maali - piste punaiselle
-            elif current_point == green:
-                self.parent.score('red')
+            elif current_point == GREEN:
+                self.parent.score('RED')
                 self.reset()
+
+    def speculate_collision_with_wall(self):
+        """ Spekuloi mahdollista törmäystä walliin - onpahan taas huonosti toteutettu mutta toimii """
+        move_vector_copy = copy.copy(self.move_vector)
+
+        # Gravityn vaikutus
+        if self.gravity_affects:
+            move_vector_copy.add_to_vy(self.parent.gravity)
+
+        # Max speed rajoittaa
+        move_vector_copy.set_speed(min(move_vector_copy.get_speed(), self.max_speed))
+
+        # Muutetaan koordinaatteja liikemäärän mukaan
+        x = int(move_vector_copy.get_vx() + self.x)
+        y = int(move_vector_copy.get_vy() + self.y)
+
+        # Out of bounds-check
+        x = max(0, x)
+        x = min(self.level.size_x - 1, x)
+        y = max(0, y)
+        y = min(self.level.size_y - 1, y)
+
+        # Katotaan mikä väri on levelissä tässä pisteessä - skipataan alfa
+        current_point = self.level.image.get_at((x, y))[:3]
+        # print("Current point (copy):", current_point)
+        if current_point not in (BLACK, RED, GREEN):
+            #print("Speculative collision detected")
+            return 1
+        else:
+            return 0
+
 
     def check_collision_with_bullets(self, BulletGroup):
         collide_list = pygame.sprite.spritecollide(self, BulletGroup, dokill=True, collided=pygame.sprite.collide_circle)
@@ -191,6 +222,20 @@ class GameObject(pygame.sprite.Sprite):
         """ Laskee etäisyyden toiseen GameObjectiin. Käyttää neliöjuurta eli oletettavasti hitaampi kuin yllä. """
         return math.hypot(self.x - other_object.x, self.y - other_object.y)
 
+
+class DummyObject(GameObject):
+    """ Luo kopion alkuperäisestä GameObjectista soveltuvin osin seinän collision detektiota varten """
+    def __init__(self, original):
+        self.x = original.x
+        self.y = original.y
+        self.move_vector = original.move_vector
+        self.gravity_affects = original.gravity_affects
+        self.parent = original.parent
+        self.level = original.level
+        self.max_speed = original.max_speed
+        self.is_centered_on_screen = original.is_centered_on_screen
+        self.viewscreen_rect = original.viewscreen_rect
+        self.rect = original.rect
 
 def get_angle_difference(angle1, angle2):
     """ Palauttaa kahden kulman välisen eron radiaaneissa. Väli -PI...0...PI """
