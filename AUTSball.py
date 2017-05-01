@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
-import pygame, math, sys, game_object, music
-
-red = (255, 0, 0)
-green = (0, 255, 0)
-blue = (0, 0, 255)
-black = (0, 0, 0)
-white = (255, 255, 255)
+# -*- coding: utf8 -*-
+import pygame, math, sys, game_object, vector
+from colors import *
 
 
 class AUTSBallGame:
@@ -74,6 +69,8 @@ class AUTSBallGame:
                 self.player[0].rotate_left()
             if pressed_keys[pygame.K_LSHIFT] or pressed_keys[pygame.K_RSHIFT]:
                 self.player[0].shoot()
+            if pressed_keys[pygame.K_BACKSPACE]:
+                self.player[0].recover()
 
             # Viewscreen rect: viewscreen absoluuttisissa koordinaateissa
             self.viewscreen_rect = (self.player[0].x - self.screen_size_x // 2,
@@ -123,8 +120,8 @@ class AUTSBallGame:
         # HUD
         # self.show_text((10, 10), "Speed: " + str(math.hypot(self.player[0].vx, self.player[0].vy)))
         self.show_text((10, 50), "FPS: " + str(self.clock.get_fps()))
-        self.show_text((10, 10), str(self.score_green), color=green, font_size=40)
-        self.show_text((750, 10), str(self.score_red), color=red, font_size=40)
+        self.show_text((10, 10), str(self.score_green), color=GREEN, font_size=40)
+        self.show_text((750, 10), str(self.score_red), color=RED, font_size=40)
 
         # Näytetään pallonsuuntamarkkeri
         # TODO: muuta pallon sijaan nuoli joka osoittaa oikeaan suuntaan
@@ -141,13 +138,13 @@ class AUTSBallGame:
 
     def score(self, scoring_team):
         """ Tätä kutsutaan kun tulee maali """
-        if scoring_team == 'red':
+        if scoring_team == 'RED':
             self.score_red += 1
-            goal_text_color = red
+            goal_text_color = RED
             self.goal_red_sound.play()
-        elif scoring_team == 'green':
+        elif scoring_team == 'GREEN':
             self.score_green += 1
-            goal_text_color = green
+            goal_text_color = GREEN
             self.goal_green_sound.play()
         DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=120,
                          color=goal_text_color, font_size=120, flashes=1)
@@ -210,10 +207,11 @@ class Level(pygame.sprite.Sprite):
 
 class EffectSprite(game_object.GameObject):
     """ Yleinen efektisprite, tällä hetkellä tosin vain moottorin liekit """
-    def __init__(self, image=None, attached_player=None, effect_type=None, visible=1, parent=None):
+    def __init__(self, image=None, attached_player=None, attached_ball=None, effect_type=None, visible=1, parent=None):
         game_object.GameObject.__init__(self, group=EffectGroup, image=image)
         self.attached_player = attached_player
-        self.type = effect_type
+        self.attached_ball = attached_ball
+        self.effect_type = effect_type
         self.visible = visible
 
     def update(self):
@@ -223,6 +221,7 @@ class EffectSprite(game_object.GameObject):
             dy = int(12 * math.cos(player_dir_radians))
             self.rect.center = self.attached_player.rect.center[0] + dx, self.attached_player.rect.center[1] + dy
             self.rot_self_image_keep_size(self.attached_player.heading)
+
         else:
             # jos ei visible niin heitetään vaan jonnekin kuuseen
             self.rect.center = -100, -100
@@ -235,12 +234,18 @@ class EffectSprite(game_object.GameObject):
 class BallSprite(game_object.GameObject):
     """ Pallo. Osaa liittää itsensä pelaajaan ja poistaa liitoksen. """
     def __init__(self, level=None, parent=None):
-        game_object.GameObject.__init__(self, group=BallGroup, image_file='gfx/ball_50.png', level=level, parent=parent)
+        game_object.GameObject.__init__(self, group=BallGroup, image_file='gfx/ball_50_red.png', level=level, parent=parent)
         self.start_position = self.level.center_point
         self.x, self.y = self.start_position
+
+        # Player attachment
         self.attached_player = None
-        self.mass = 1
+        self.attached_player_max_distance = 50  # "tetherin" pituus
+        self.attached_player_max_distance_squared = self.attached_player_max_distance**2  # distance-laskelmia varten
+
+        self.mass = 1.0
         self.max_speed = 10
+
         # Tämä tekee sen että tarkistetaan törmäys maaliin
         self.is_ball = 1
 
@@ -255,22 +260,56 @@ class BallSprite(game_object.GameObject):
         # Jos törmää pelaajaan niin liitetään siihen
         # Vain jos ei jo ole liitettynä!
         if self.attached_player is None:
-            collide_list = pygame.sprite.spritecollide(self, PlayerGroup, False)
+            collide_list = pygame.sprite.spritecollide(self, PlayerGroup, dokill=False, collided=pygame.sprite.collide_circle)
             if len(collide_list) > 0:
                 self.attach_to_player(collide_list[0])
 
-        # Jos on liitetty pelaajaan niin koordinaatit ja rect on samat kuin pelaajalla
+        # Jos on liitetty pelaajaan ja jos on liian kaukana niin vetävät toisiaan puoleensa
+        # Suht hyvä, voi viilata jos saa vielä paremmaksi
+        # TODO: weightit ei tunnu vaikuttavan?
+        # TODO: graffat tetherille
         if self.attached_player is not None:
-            self.x = self.attached_player.x
-            self.y = self.attached_player.y
-            self.rect.center = self.attached_player.rect.center
-        # Jos ei ole liitetty pelaajaan niin lasketaan liike
-        else:
-            self.update_movement()
+            distance_to_player = self.distance(self.attached_player)
+            if distance_to_player >= self.attached_player_max_distance:
+                player_angle = game_object.get_angle_in_radians((self.attached_player.x, self.attached_player.y),
+                                                                 (self.x, self.y))
+
+                pull_vector_speed = (distance_to_player - self.attached_player_max_distance) * 0.02
+
+                ball_pull_vector = vector.MoveVector(speed=pull_vector_speed, direction=player_angle)
+                # Tässä rikotaan voiman ja vastavoiman lakia mutta who cares! (Newton pyörii haudassaan)
+                player_pull_vector = vector.MoveVector(speed=pull_vector_speed * -1 * 0.4, direction=player_angle)
+
+                self.move_vector.add_vector(ball_pull_vector)
+                self.attached_player.move_vector.add_vector(player_pull_vector)
+
+        self.update_movement()
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
         self.check_collision_with_bullets(BulletGroup)
+
+    def collide_tether(self, other_object):
+        """ 
+        Eksperimentaalinen tetherin törmäysmetodi. Ei toimi niin kuin haluaisin.
+        Ideana tässä että tether-collide on oletettavasti ekvivalentti normaalille törmäykselle niin että
+        objektien paikat vaihdetaan
+        Ei tällä hetkellä käytössä
+        """
+        new_self = other_object
+        new_other = self
+        angle_to_other = game_object.get_angle_in_radians(new_other.rect.center, new_self.rect.center)
+        new_self.move_vector.set_direction(angle_to_other - math.pi)
+        new_other.move_vector.set_direction(angle_to_other)
+
+        speed1 = new_self.move_vector.get_speed()
+        speed2 = new_other.move_vector.get_speed()
+        mass1 = new_self.mass
+        mass2 = new_other.mass
+        speed1_new = (mass2 / mass1) * speed2
+        speed2_new = (mass1 / mass2) * speed1
+        self.move_vector.set_speed(speed2_new * -1)
+        other_object.move_vector.set_speed(speed1_new * -1)
 
     def reset(self):
         """ 
@@ -280,16 +319,24 @@ class BallSprite(game_object.GameObject):
         game_object.GameObject.reset(self)
         self.detach()
 
-    def shoot(self, direction=0, speed=0, x=0, y=0):
+    def shoot(self, direction=0, speed=0, x=None, y=None):
         """ 
         Ampuu itsensä määritettyyn suuntaan, määritetyllä nopeudella, alkaen määritetyistä koordinaateista.
         Tätä kutsuu PlayerSpriten shoot-metodi, joka hoitaa detachauksen ja antaa tarvittavat tiedot
         """
-        # Jostain syystä vaatii direktion korjauksen tässä
-        self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
-        self.x = int(x)
-        self.y = int(y)
-        self.update_rect()
+
+        if x is not None and y is not None:
+            # Tämä tehdään jos annettu uudet koordinaatit
+            # Jostain syystä vaatii direktion korjauksen tässä
+            self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
+            self.x = int(x)
+            self.y = int(y)
+            self.update_rect()
+        else:
+            # Jos ei ole annettu uusia koordinaatteja niin lisätään vain liikevektoriin määritetyt
+            # direction ja speed
+            self.move_vector.add_vector(vector.MoveVector(speed=speed, direction=math.radians(270 - direction)))
+
 
     def attach_to_player(self, player):
         """ 
@@ -298,6 +345,8 @@ class BallSprite(game_object.GameObject):
         """
         self.attached_player = player
         player.attach_ball(self)
+        # self.tether = EffectSprite(image=pygame.Surface((0,0)), effect_type='tether',
+        #                            attached_ball=self, attached_player=player, parent=self.parent)
         # TODO: korjaa weight että tämä voidaan enabloida
         # self.attached_player.weight += self.weight
 
@@ -306,8 +355,10 @@ class BallSprite(game_object.GameObject):
         # self.attached_player.weight -= self.weight
         # print("Ball detach method called. Attached player:", self.attached_player)
         if self.attached_player is not None:
-            self.attached_player.detach_ball()
+            self.attached_player.detach()
             self.attached_player = None
+            # self.tether.kill()
+            # self.tether = None
 
 
 class BulletSprite(game_object.GameObject):
@@ -331,11 +382,16 @@ class BulletSprite(game_object.GameObject):
         self.viewscreen_rect = viewscreen_rect
         self.update_movement()
         self.check_out_of_bounds()
-
+        # print("Speed:", self.move_vector.get_speed())
         # Tehdään nämä vain jos on olemassa
         if self in BulletGroup:
             self.check_collision_with_wall_and_goal()
-            self.update_rect()
+            if self in BulletGroup:
+                if self.speculate_collision_with_wall() == 1:
+                    # print(self.move_vector.get_speed())
+                    # Vähennetään nopeutta jos spekulointi havaitsee törmäyksen
+                    self.move_vector.set_speed(min(self.move_vector.get_speed(), 3))
+                self.update_rect()
 
     def check_out_of_bounds(self):
         """ Overrideaa GameObjectin metodin koska pitää tuhota bulletti jos on out of bounds """
@@ -369,12 +425,12 @@ class PlayerSprite(game_object.GameObject):
         self.bullet_collide_sound = pygame.mixer.Sound(file='sfx/metal_thud_2.wav')
 
         # Koordinaatit
-        self.start_position = (800, 600)
+        self.start_position = (700, 1200)
         self.x, self.y = self.start_position
         self.x_previous, self.y_previous = self.x, self.y
 
         # Heading ja thrust
-        self.heading = 0
+        self.heading = 0  # HUOM! Heading asteina koska Pygame käyttää niitä rotaatioissa
         self.thrust = 0
 
         # Pallo
@@ -384,10 +440,12 @@ class PlayerSprite(game_object.GameObject):
         self.handling = int(5)  # kuinka monta astetta kääntyy per frame
         self.max_thrust = 0.35  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
         self.max_speed = 10
-        self.mass = 1
-        self.cooldown_basic_shot = 5  # framea
-        self.cooldown_after_ball_shot = 60  # cooldown sen jälkeen kun pallo on ammuttu
-        self.cooldown_counter = 0  # cooldown-counter1
+        self.mass = 1.0
+        self.cooldown_basic_shot = 5 # framea
+        self.cooldown_after_ball_shot = 60 # cooldown sen jälkeen kun pallo on ammuttu
+        self.cooldown_counter = 0 # cooldown-counter1
+        self.recovery_time = 3  # sekunteja jopa!
+        self.recovery_started_at = 0
 
     def update(self):
         # Lisätään liikemäärään thrust-vektori
@@ -410,12 +468,17 @@ class PlayerSprite(game_object.GameObject):
         if self.attached_ball is not None:
             self.cooldown_counter = self.cooldown_after_ball_shot
 
+        if self.recovery_started_at != 0:
+            if (pygame.time.get_ticks() - self.recovery_started_at) // 1000 > self.recovery_time - 1:
+                self.reset()
+                self.recovery_started_at = 0
+
     def attach_ball(self, ball):
         if self.attached_ball is None:
             self.attached_ball = ball
             self.force_play_sound(self.ball_capture_sound)
 
-    def detach_ball(self):
+    def detach(self):
         self.attached_ball = None
         self.radius = self.original_radius
 
@@ -465,19 +528,24 @@ class PlayerSprite(game_object.GameObject):
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
-            self.force_play_sound(self.ball_shoot_sound)
-            ball_x = self.attached_ball.image.get_width() * math.sin(math.radians(self.heading)) * -1 + self.x
-            ball_y = self.attached_ball.image.get_height() * math.cos(math.radians(self.heading)) * -1 + self.y
+            # ball_x = self.attached_ball.image.get_width() * math.sin(math.radians(self.heading)) * -1 + self.x
+            # ball_y = self.attached_ball.image.get_height() * math.cos(math.radians(self.heading)) * -1 + self.y
 
-            self.attached_ball.shoot(x=ball_x, y=ball_y, direction=self.heading, speed=10)
+            # self.attached_ball.shoot(x=ball_x, y=ball_y, direction=self.heading, speed=10)
+            self.attached_ball.shoot(direction=self.heading, speed=10)
             self.attached_ball.detach()
+            self.force_play_sound(self.ball_shoot_sound)
 
+    def recover(self):
+        """ Aloittaa recovery-laskennan """
+        self.recovery_started_at = pygame.time.get_ticks()
+        DisappearingText(pos=self.parent.screen_center_point, text="RECOVERING...", frames_visible=240, flashes=1,
+                         font_size=80, color=RED)
 
 class DisappearingText(pygame.sprite.Sprite):
     """ Näyttää ruudulla tekstin x framen ajan """
-    # TODO: tausta läpinäkyväksi
     def __init__(self, pos=(0,0), text="", frames_visible=60,
-                 color=white, bgcolor=black, font_size=24, flashes=0, flash_interval=10):
+                 color=WHITE, bgcolor=None, font_size=24, flashes=0, flash_interval=10):
         pygame.sprite.Sprite.__init__(self, TextGroup)
 
         self.frame_counter = 0

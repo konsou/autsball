@@ -139,3 +139,41 @@ class MoveVector:
         """ Lisää tähän vektoriin toisen Vector-objektin """
         self.add_to_vx(vector.get_vx())
         self.add_to_vy(vector.get_vy())
+        self._clear_speed_direction()
+
+    def get_dot_product(self, vector):
+        """ Laskee kahden vektorin pistetulon """
+        return (self.get_vx() * vector.get_vx()) + (self.get_vy() * vector.get_vy())
+
+    def get_dot_product_normalized(self, vector):
+        """ Laskee kahden vektorin pistetulon normalisoiduilla (speed=1) vektoreilla"""
+        if self.speed != 1:
+            self_normalized = self.normalize()
+        else:
+            self_normalized = self
+
+        if vector.speed != 1:
+            vector_normalized = vector.normalize()
+        else:
+            vector_normalized = vector
+
+        return (self_normalized.get_vx() * vector_normalized.get_vx()) + (self_normalized.get_vy() * vector_normalized.get_vy())
+
+    def normalize(self):
+        """ Palauttaa vektorin, jolla on sama suunta mutta nopeus on 1 """
+        return MoveVector(speed=1, direction=self.get_direction())
+
+    def normalize_ip(self):
+        """ Muuttaa vektorin nopeudeksi 1 pitäen suunnan samana (in-place) """
+        self.set_speed(1)
+        self._clear_vx_vy()
+
+    def flip(self):
+        """ Palauttaa vektorin, jonka suunta on vastakkainen kuin nyt """
+        return MoveVector(speed=self.get_speed(), direction=self.get_direction() + math.pi)
+
+    def flip_ip(self):
+        """ Muuttaa vektorin suunnan vastakkaiseksi (in-place) """
+        self.set_direction(self.get_direction() + math.pi)
+        self._clear_vx_vy()
+
