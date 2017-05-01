@@ -104,6 +104,7 @@ class AUTSBallGame:
         if self.quit_game:
             self.exit()
 
+
     def update_graphics(self):
         """ Grafiikoiden päivitysmetodi """
 
@@ -165,6 +166,14 @@ class AUTSBallGame:
         textimg = font.render(text, 1, color, bgcolor)
         self.win.blit(textimg, pos)
 
+    def empty_groups(self):
+        LevelGroup.empty()
+        BallGroup.empty()
+        PlayerGroup.empty()
+        BulletGroup.empty()
+        EffectGroup.empty()
+        TextGroup.empty()
+
     def exit(self):
         """ Tähän voi laittaa jotain mitä tulee ennen poistumista """
         pygame.quit()
@@ -182,10 +191,17 @@ TextGroup = pygame.sprite.Group()
 
 class Level(pygame.sprite.Sprite):
     """ Level-classi. Käytännössä vain taustakuva, logiikka tapahtuu muualla. """
-    def __init__(self):
+    def __init__(self, image_file=None, image=None):
         pygame.sprite.Sprite.__init__(self, LevelGroup)
-        # self.image = pygame.image.load('gfx/test_arena_2400x1200.png').convert_alpha()
-        self.image = pygame.image.load('gfx/test_arena_vertical_challenge.png').convert_alpha()
+
+        # Level-imagen lataus
+        if image is not None:
+            self.image = image
+        elif image_file is not None:
+            self.image = pygame.image.load(image_file).convert_alpha()
+        else:
+            self.image = pygame.image.load('gfx/test_arena_vertical_challenge.png').convert_alpha()
+
         self.size_x = self.image.get_width()
         self.size_y = self.image.get_height()
         self.rect = self.image.get_rect()
@@ -237,9 +253,11 @@ class BallSprite(game_object.GameObject):
         self.viewscreen_rect = viewscreen_rect
 
         # Jos törmää pelaajaan niin liitetään siihen
-        collide_list = pygame.sprite.spritecollide(self, PlayerGroup, False)
-        if len(collide_list) > 0:
-            self.attach_to_player(collide_list[0])
+        # Vain jos ei jo ole liitettynä!
+        if self.attached_player is None:
+            collide_list = pygame.sprite.spritecollide(self, PlayerGroup, False)
+            if len(collide_list) > 0:
+                self.attach_to_player(collide_list[0])
 
         # Jos on liitetty pelaajaan niin koordinaatit ja rect on samat kuin pelaajalla
         if self.attached_player is not None:
@@ -286,6 +304,7 @@ class BallSprite(game_object.GameObject):
     def detach(self):
         """ Tämä metodi poistaa liitoksen pelaajaan. """
         # self.attached_player.weight -= self.weight
+        # print("Ball detach method called. Attached player:", self.attached_player)
         if self.attached_player is not None:
             self.attached_player.detach_ball()
             self.attached_player = None
@@ -329,7 +348,8 @@ class BulletSprite(game_object.GameObject):
 class PlayerSprite(game_object.GameObject):
     def __init__(self, level=None, parent=None):
         # Lisätään PlayerGroup-ryhmään
-        game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent, image_file='gfx/ship1_20px.png')
+        game_object.GameObject.__init__(self, group=PlayerGroup, level=level, parent=parent,
+                                        image_file='gfx/ship1_red_20px.png')
 
         # Graffat
         self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
@@ -379,6 +399,7 @@ class PlayerSprite(game_object.GameObject):
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
+        self.check_collision_with_players(PlayerGroup)
         self.check_collision_with_bullets(BulletGroup)
 
         # Lasketaan cooldownia
@@ -396,6 +417,7 @@ class PlayerSprite(game_object.GameObject):
 
     def detach_ball(self):
         self.attached_ball = None
+        self.radius = self.original_radius
 
     def accelerate(self):
         self.thrust = self.max_thrust
@@ -427,7 +449,7 @@ class PlayerSprite(game_object.GameObject):
             self.heading -= 360
         self.rot_self_image_keep_size(self.heading)
 
-    def shoot(self, bullet_list=None):
+    def shoot(self):
         # Ammutaan perusammus
         # Pelaajan nopeus vaikuttaa ammuksen vauhtiin
         # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
@@ -486,6 +508,59 @@ class DisappearingText(pygame.sprite.Sprite):
             self.visible = 1
             self.rect.center = self.original_position
 
+
+class ScrollingText(pygame.sprite.Sprite):
+    """ Scrollaa tekstiä ruudulla """
+    # TODO: tausta läpinäkyväksi
+    def __init__(self, y_pos=0, screen_size_x=800, text="", scroll_direction='left', scroll_speed=5,
+                 color=white, bgcolor=black, font_size=24, flashes=0, flash_interval=10):
+        pygame.sprite.Sprite.__init__(self, TextGroup)
+
+        self.frame_counter = 0
+
+        font = pygame.font.Font(None, font_size)
+        self.image = font.render(text, 1, color, bgcolor)
+        self.original_image = self.image
+        self.empty_image = pygame.Surface((0, 0))
+        self.rect = self.image.get_rect()
+        self.screen_size_x = screen_size_x
+
+        self.scroll_direction = scroll_direction
+
+        if scroll_direction == 'left':
+            self.rect.midleft = screen_size_x, y_pos
+            self.original_position = self.rect.midleft
+            self.scroll_speed = scroll_speed * -1
+        else:
+            self.rect.midright = 0, y_pos
+            self.original_position = self.rect.midright
+            self.scroll_speed = scroll_speed
+
+        self.flashes = flashes
+        self.flash_interval = flash_interval
+        self.visible = 1
+
+    def update(self):
+        self.rect.x += self.scroll_speed
+        if self.scroll_direction == 'left':
+            if self.rect.midright[0] < 0:
+                self.rect.midleft = self.original_position
+        else:
+            if self.rect.midleft[0] > self.screen_size_x:
+                self.rect.midright = self.original_position
+
+        if self.flashes:
+            self.frame_counter += 1
+            if self.frame_counter % self.flash_interval == 0:
+                self.toggle_image()
+
+    def toggle_image(self):
+        if self.visible:
+            self.visible = 0
+            self.image = self.empty_image
+        else:
+            self.visible = 1
+            self.image = self.original_image
 
 
 if __name__ == '__main__':

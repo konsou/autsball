@@ -16,23 +16,13 @@ class GameObject(pygame.sprite.Sprite):
         # Pygame-Spriten init
         pygame.sprite.Sprite.__init__(self, group)
 
+        self.load_image(image=image, image_file=image_file)
+
         # parent on itse peliobjekti
         self.parent = parent
 
         # level-objekti
         self.level = level
-
-        # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
-        if image is not None:
-            self.image = image
-            self.rect = self.image.get_rect()
-        # Jos on annettu kuvatiedosto niin luetaan se
-        elif image_file is not None:
-            self.image = pygame.image.load(image_file).convert_alpha()
-            self.rect = self.image.get_rect()
-        # Tämä tarvitaan rotaatioita varten
-        self.original_image = self.image
-        self.size = (self.image.get_width() + self.image.get_height()) // 2
 
         # SFX
         self.wall_collide_sound = None
@@ -64,6 +54,21 @@ class GameObject(pygame.sprite.Sprite):
 
         # Tämä päivitetään myöhemmin, initoidaan kuitenkin ettei PyCharm herjaa
         self.viewscreen_rect = None
+
+    def load_image(self, image=None, image_file=None):
+        """ Lataa kuvan spritelle. Asettaa rect, radius, size."""
+        # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
+        if image is not None:
+            self.image = image
+        # Jos on annettu kuvatiedosto niin luetaan se
+        elif image_file is not None:
+            self.image = pygame.image.load(image_file).convert_alpha()
+        # Tämä tarvitaan rotaatioita varten
+        self.original_image = self.image
+        self.size = (self.image.get_width() + self.image.get_height()) // 2
+        self.rect = self.image.get_rect()
+        self.radius = (self.size + 1) // 2
+        self.original_radius = self.radius
 
     def reset(self):
         """ Resetoi position ja asettaa nopeuden nollaan. Päivittää rectin. """
@@ -161,15 +166,38 @@ class GameObject(pygame.sprite.Sprite):
                 self.parent.score('red')
                 self.reset()
 
+    def check_collision_with_players(self, playergroup):
+        collide_list = pygame.sprite.spritecollide(self, playergroup, dokill=False,
+                                                   collided=pygame.sprite.collide_circle)
+        for colliding_player in collide_list:
+            if colliding_player != self:
+                self.collide_circle(collide_list[0])
+
     def check_collision_with_bullets(self, BulletGroup):
-        collide_list = pygame.sprite.spritecollide(self, BulletGroup, True)
+        collide_list = pygame.sprite.spritecollide(self, BulletGroup, dokill=True,
+                                                   collided=pygame.sprite.collide_circle)
         if len(collide_list) > 0:
-            # TODO: laske massojen vaikutukset törmäyksessä
-            # TODO: laske vektorit oikein objektien suhteellisten kulmien mukaan
-            self.move_vector.add_vector(collide_list[0].move_vector)
+            self.collide_circle(collide_list[0])
             if self.bullet_collide_sound is not None:
                 self.force_play_sound(self.bullet_collide_sound)
+        
+    def collide_circle(self, other_sprite):
+        """ 
+        Törmäyttää kaksi ympyrän muotoista GameObjectia ja laskee niiden suunnat ja liikemäärät uusiksi.
+        Jopa ottaa massat huomioon! 
+        """
+        angle_to_other = get_angle_in_radians(other_sprite.rect.center, self.rect.center)
+        self.move_vector.set_direction(angle_to_other - math.pi)
+        other_sprite.move_vector.set_direction(angle_to_other)
 
+        speed1 = self.move_vector.get_speed()
+        speed2 = other_sprite.move_vector.get_speed()
+        mass1 = self.mass
+        mass2 = other_sprite.mass
+        speed1_new = (mass2 / mass1) * speed2
+        speed2_new = (mass1 / mass2) * speed1
+        self.move_vector.set_speed(speed1_new)
+        other_sprite.move_vector.set_speed(speed2_new)
 
     def force_play_sound(self, sound, duration=0):
         # Soitetaan ääni, pakotetaan sille kanava auki
@@ -178,5 +206,21 @@ class GameObject(pygame.sprite.Sprite):
         pygame.mixer.find_channel(True).play(sound, duration)
         # else:
         #     print("Not playing sound", sound)
+
+def get_angle_difference(angle1, angle2, degrees=0):
+    """ Palauttaa kahden kulman välisen eron radiaaneissa. Väli -PI...0...PI """
+    angle_difference = angle1 - angle2
+    if degrees:
+        if angle_difference > 180: angle_difference -= 360
+    else:
+        if angle_difference > math.pi: angle_difference -= 2 * math.pi
+    return angle_difference
+
+
+def get_angle_in_radians(point1, point2):
+    """ Palauttaa kahden pisteen välisen kulman radiaaneina """
+    x_difference = point1[0] - point2[0]
+    y_difference = point1[1] - point2[1]
+    return math.atan2(y_difference, x_difference)
 
 
