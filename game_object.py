@@ -135,7 +135,7 @@ class GameObject(pygame.sprite.Sprite):
             #  -nopeus yli 5 (ettei ihan pienistä tule jatkuvaa pärinää)
             #  -jos on liikuttu
             #  -ääni on olemassa
-            if self.move_vector.get_magnitude() > 5:
+            if self.move_vector.get_magnitude() > 3:
                 if self.wall_collide_sound and self.x != self.x_previous and self.y != self.y_previous:
                     # print("Playing thump")
                     self.force_play_sound(self.wall_collide_sound)

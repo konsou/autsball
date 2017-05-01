@@ -29,6 +29,10 @@ class AUTSBallGame:
                                               pos='bottomleft', group=TextGroup, shuffle=0)
         self.music_player.play()
 
+        # SFX
+        self.goal_green_sound = pygame.mixer.Sound(file='sfx/goal_green.wav')
+        self.goal_red_sound = pygame.mixer.Sound(file='sfx/goal_red.wav')
+
         # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
         self.loading_image = pygame.image.load('gfx/loading.png').convert_alpha()
         self.win.blit(self.loading_image, self.loading_image.get_rect())
@@ -139,9 +143,11 @@ class AUTSBallGame:
         if scoring_team == 'red':
             self.score_red += 1
             goal_text_color = red
+            self.goal_red_sound.play()
         elif scoring_team == 'green':
             self.score_green += 1
             goal_text_color = green
+            self.goal_green_sound.play()
         DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=120,
                          color=goal_text_color, font_size=120, flashes=1)
 
@@ -223,6 +229,7 @@ class BallSprite(game_object.GameObject):
         self.is_ball = 1
 
         # SFX
+        self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump4.wav')
         self.bullet_collide_sound = pygame.mixer.Sound(file='sfx/metal_thud_3.wav')
 
     def update(self, viewscreen_rect):
@@ -333,15 +340,13 @@ class PlayerSprite(game_object.GameObject):
 
         # Sound effex
         self.motor_sound = pygame.mixer.Sound(file='sfx/shhhh_v2.wav')
-        self.motor_sound.set_volume(0.4)
+        # self.motor_sound.set_volume(0.4)
         self.motor_sound_playing = 0
         self.bullet_sound = pygame.mixer.Sound(file='sfx/pop.wav')
-        self.bullet_sound.set_volume(0.6)
         self.ball_shoot_sound = pygame.mixer.Sound(file='sfx/pchou.wav')
+        self.ball_capture_sound = pygame.mixer.Sound(file='sfx/ball_capture.wav')
         self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump4.wav')
-        self.wall_collide_sound.set_volume(1.0)
         self.bullet_collide_sound = pygame.mixer.Sound(file='sfx/metal_thud_2.wav')
-        #self.bullet_collide_sound.set_volume(1)
 
         # Koordinaatit
         self.start_position = (800, 600)
@@ -385,7 +390,9 @@ class PlayerSprite(game_object.GameObject):
             self.cooldown_counter = self.cooldown_after_ball_shot
 
     def attach_ball(self, ball):
-        self.attached_ball = ball
+        if self.attached_ball is None:
+            self.attached_ball = ball
+            self.force_play_sound(self.ball_capture_sound)
 
     def detach_ball(self):
         self.attached_ball = None
