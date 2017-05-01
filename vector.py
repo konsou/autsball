@@ -1,11 +1,12 @@
 # -*- coding: utf8 -*-
 import math, pygame
 
+
 class MoveVector:
     """ 
     Classi johon voi tallettaa liikevektorin joko kulma- tai summamuodossa ja tekee konversiot automaattisesti.
     HUOM! Angle radiaaneina!
-    
+
     Sisältää seuraavat metodit:
         -set_vx, set_vy, set_vx_vy - nämä asettaa vx/vy:n arvot (summamuoto)
         -get_vx, get_vy, get_vx_vy - nämä palauttaa vx/vy:n arvot (summamuoto)
@@ -20,19 +21,20 @@ class MoveVector:
         -get_dot_product(self, vector): laskee tämän ja toisen vektorin pistetulon
         -normalize(self): Palauttaa vektorin, jolla on sama suunta mutta nopeus on 1 
         -normalize_ip(self):  Muuttaa vektorin nopeudeksi 1 pitäen suunnan samana (in-place)
-    
+
     Tässä on ideana että kun kutsutaan get_(arvo) niin toimii täten:
         -jos arvo on jo määritetty (esim. vx) niin palauttaa sen suoraan
         -jos arvoa ei ole määritetty (on None) niin laskee sen ja tallettaa - näin useampi get-kutsu peräkkäin ei 
          tee turhia uudelleenlaskentoja joka kerta
-    
+
     Kun set-metodeita kutsutaan niin toimii täten:
         -jos asetetaan vx ja/tai vy niin asetetaan speed ja direction Noneksi
         -jos asetetaan speed ja/tai direction niin asetetaan vx ja vy Noneksi
         Näistä sitten tietää että Noneksi asetettu arvo pitää laskea uusiksi sitten jos sitä joskus haetaan
-            
+
     TODO: samalla logiikalla kulman muutos asteisiin
     """
+
     def __init__(self, vx=None, vy=None, speed=None, direction=None):
         # print("Creating vector with init values: vx, vy, speed, direction")
         # print(vx, vy, speed, direction)
@@ -156,6 +158,21 @@ class MoveVector:
         """ Laskee kahden vektorin pistetulon """
         return (self.get_vx() * vector.get_vx()) + (self.get_vy() * vector.get_vy())
 
+    def get_dot_product_normalized(self, vector):
+        """ Laskee kahden vektorin pistetulon normalisoiduilla (speed=1) vektoreilla"""
+        if self.speed != 1:
+            self_normalized = self.normalize()
+        else:
+            self_normalized = self
+
+        if vector.speed != 1:
+            vector_normalized = vector.normalize()
+        else:
+            vector_normalized = vector
+
+        return (self_normalized.get_vx() * vector_normalized.get_vx()) + (
+        self_normalized.get_vy() * vector_normalized.get_vy())
+
     def normalize(self):
         """ Palauttaa vektorin, jolla on sama suunta mutta nopeus on 1 """
         return MoveVector(speed=1, direction=self.get_direction())
@@ -163,4 +180,13 @@ class MoveVector:
     def normalize_ip(self):
         """ Muuttaa vektorin nopeudeksi 1 pitäen suunnan samana (in-place) """
         self.set_speed(1)
+        self._clear_vx_vy()
+
+    def flip(self):
+        """ Palauttaa vektorin, jonka suunta on vastakkainen kuin nyt """
+        return MoveVector(speed=self.get_speed(), direction=self.get_direction() + math.pi)
+
+    def flip_ip(self):
+        """ Muuttaa vektorin suunnan vastakkaiseksi (in-place) """
+        self.set_direction(self.get_direction() + math.pi)
         self._clear_vx_vy()

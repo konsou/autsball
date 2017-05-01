@@ -1,11 +1,10 @@
 # -*- coding: utf8 -*-
-import pygame, AUTSball
+import pygame
+import AUTSball
+import menu_background_action
+import music
+from colors import *
 from pygame.locals import *
-
-WHITE = (255, 255, 255)
-YELLOWISH = (212, 208, 100)
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
 
 pygame.font.init()
 
@@ -174,12 +173,13 @@ def debug_run():
     window.fill((0, 0, 0))
 
     static_visual_components_group = pygame.sprite.Group()
+    music_player_group = pygame.sprite.Group()
 
     # Logo
     logo_sprite = pygame.sprite.Sprite()
     logo_sprite.image = pygame.image.load('gfx/AUTSBall_logo.png').convert_alpha()
     logo_sprite.rect = logo_sprite.image.get_rect()
-    logo_sprite.rect.topleft = (50, 30)
+    logo_sprite.rect.center = (400, 110)
     static_visual_components_group.add(logo_sprite)
     static_visual_components_group.draw(window)
 
@@ -188,13 +188,25 @@ def debug_run():
     multiplayer_button = Button(Rect(50, 405, 250, 70), 'Multiplayer')
     quit_button = Button(Rect(50, 480, 250, 70), 'Quit')
 
+    practice_button.rect.center = (400, 250)
+    multiplayer_button.rect.center = (400, 330)
+    quit_button.rect.center = (400, 410)
+
     active_mode = 'menu'
     practice_game = None
 
     # Music
     pygame.mixer.init()
-    pygame.mixer.music.load('sfx/title_music_by_pera.ogg')
-    pygame.mixer.music.play(-1)
+    music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
+    music_player.play()
+    # pygame.mixer.music.load('sfx/cavern_rain.ogg')
+    # pygame.mixer.music.play(-1)
+
+    # Background action
+    background_action = menu_background_action.BackgroundAction()
+    # Tämä tummentaa tausta-actionin
+    darken_surface = pygame.Surface((800, 600))
+    darken_surface.set_alpha(128)
 
     running = True
     while running:
@@ -205,8 +217,14 @@ def debug_run():
                     #print('practice button clicked')
                     active_mode = 'practice'
                     window.fill(BLACK)
+                    # Lopetetaan background action
+                    background_action.kill_me()
+                    del background_action
+                    music_player.stop()
+                    del music_player
+
                     practice_game = AUTSball.AUTSBallGame()
-                    pygame.mixer.music.stop()
+                    # music_player.stop()
                 if 'click' in multiplayer_button.handleEvent(event):
                     print('multiplayer button clicked')
                 if 'click' in quit_button.handleEvent(event):
@@ -214,18 +232,32 @@ def debug_run():
             if active_mode == 'practice':
                 if event.type == KEYUP:
                     if event.key == K_ESCAPE:
+                        practice_game.empty_groups()
                         del practice_game
                         active_mode = 'menu'
                         window.fill(BLACK)
+                        background_action = menu_background_action.BackgroundAction()
                         static_visual_components_group.draw(window)
-                        pygame.mixer.music.play(-1)
+                        music_player.set_screen('menu')
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == music.MUSIC_FINISHED:
+                music_player.next()
 
         if active_mode == 'menu':
+            window.fill(0)
+
+            menu_background_action.background_group.update()
+            music_player_group.update()
+
+            menu_background_action.background_group.draw(window)
+            window.blit(darken_surface, (0, 0))
+
+            static_visual_components_group.draw(window)
             practice_button.draw(window)
             multiplayer_button.draw(window)
             quit_button.draw(window)
+            music_player_group.draw(window)
 
             pygame.display.update()
             clock.tick(30)
