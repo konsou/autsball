@@ -36,6 +36,7 @@ class GameObject(pygame.sprite.Sprite):
 
         # SFX
         self.wall_collide_sound = None
+        self.bullet_collide_sound = None
 
         # Start positio on levelin keskellä jos muuta ei ole määritetty
         if start_position is None:
@@ -166,6 +167,9 @@ class GameObject(pygame.sprite.Sprite):
             # TODO: laske massojen vaikutukset törmäyksessä
             # TODO: laske vektorit oikein objektien suhteellisten kulmien mukaan
             self.move_vector.add_vector(collide_list[0].move_vector)
+            if self.bullet_collide_sound is not None:
+                self.force_play_sound(self.bullet_collide_sound)
+
 
     def force_play_sound(self, sound, duration=0):
         # Soitetaan ääni, pakotetaan sille kanava auki

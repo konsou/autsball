@@ -336,7 +336,9 @@ class PlayerSprite(game_object.GameObject):
         self.bullet_sound.set_volume(0.7)
         self.ball_shoot_sound = pygame.mixer.Sound(file='sfx/pchou.wav')
         self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump4.wav')
-        self.wall_collide_sound.set_volume(1.2)
+        self.wall_collide_sound.set_volume(1.0)
+        self.bullet_collide_sound = pygame.mixer.Sound(file='sfx/metal_thud_2.wav')
+        #self.bullet_collide_sound.set_volume(1)
 
         # Koordinaatit
         self.start_position = (800, 600)
