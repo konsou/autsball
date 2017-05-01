@@ -1,5 +1,9 @@
 # -*- coding: utf8 -*-
-import pygame, AUTSball, menu_background_action
+import pygame
+import AUTSball
+import menu_background_action
+import music
+
 
 from pygame.locals import *
 

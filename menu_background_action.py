@@ -70,6 +70,9 @@ class DemoPlayer(AUTSball.PlayerSprite):
         self.goal_red_pos = 750, 300
         self.goal = 0,0
 
+        self.motor_sound_playing = 0
+        self.motor_sound = None
+
     def update(self):
         if self.attached_ball is None:
             self.goal = self.parent.ball_pos

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
-import pygame, vector
+import pygame
+import vector
+import math
 
 red = (255, 0, 0)
 green = (0, 255, 0)

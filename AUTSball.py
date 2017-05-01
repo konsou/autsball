@@ -423,8 +423,9 @@ class PlayerSprite(game_object.GameObject):
         self.thrust = self.max_thrust
         self.thrust_gfx.visible = 1
         if not self.motor_sound_playing:
-            self.force_play_sound(self.motor_sound, -1)
-            self.motor_sound_playing = 1
+            if self.motor_sound is not None:
+                self.force_play_sound(self.motor_sound, -1)
+                self.motor_sound_playing = 1
         # print(self.motor_sound.get_num_channels())
         # print(pygame.mixer.get_busy())
         # if self.motor_sound.get_num_channels() == 0:
