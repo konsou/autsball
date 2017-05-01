@@ -1,4 +1,3 @@
-# -*- coding: utf8 -*-
 import pygame, math, time
 import numpy as np
 

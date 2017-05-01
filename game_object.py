@@ -1,12 +1,20 @@
-# -*- coding: utf8 -*-
-import pygame, vector, math, copy
+# -*- coding: utf-8 -*-
+import pygame
+import vector
+import math
+import copy
 from colors import *
 
 class GameObject(pygame.sprite.Sprite):
     """ Classi joka perii pygamen Spriten ja lisää yleisiä peliobjektin käyttäytymiseen liittyviä juttuja """
+    # TODO: muuta nämä niin että vakioarvot ei tule tässä argumentteina vaan selkeämmin alempana asetetaan arvoihinsa
+    # ja sitten instansioinnissa voi tarvittaessa overrideta
     def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None):
         # Pygame-Spriten init
         pygame.sprite.Sprite.__init__(self, group)
+        
+        # Tämä laskee myös rectin, sizen ja radiuksen
+        self.load_image(image=image, image_file=image_file)
 
         # parent on itse peliobjekti
         self.parent = parent
@@ -14,21 +22,9 @@ class GameObject(pygame.sprite.Sprite):
         # level-objekti
         self.level = level
 
-        # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
-        if image is not None:
-            self.image = image
-            self.rect = self.image.get_rect()
-        # Jos on annettu kuvatiedosto niin luetaan se
-        elif image_file is not None:
-            self.image = pygame.image.load(image_file).convert_alpha()
-            self.rect = self.image.get_rect()
-        # Tämä tarvitaan rotaatioita varten
-        self.original_image = self.image
-        # Size on tämmöinen yhden luvun approksimaatio objektin koosta - neliöllä sivun pituus, ympyrällä halkaisija
-        # Suorakulmiolla sivujen pituuksien keskiarvo
-        self.size = (self.image.get_width() + self.image.get_height()) // 2
-        # Radiusta tarvii collision detectionissa
-        self.radius = (self.size + 1) // 2
+        # SFX
+        self.wall_collide_sound = None
+        self.bullet_collide_sound = None
 
         # Start positio on levelin keskellä jos muuta ei ole määritetty
         if start_position is None:
@@ -43,11 +39,11 @@ class GameObject(pygame.sprite.Sprite):
         self.x, self.y = self.start_position
         self.x_previous, self.y_previous = self.start_position
 
-        # Liikkumisvektori - sisältää sekä vx/vy että speed/direction (radiaaneina)
+        # Liikkumisvektori - sisältää sekä vx/vy että magnitude/angle (radiaaneina)
         self.move_vector = vector.MoveVector()
 
         # Peliobjektin ominaisuuksia - oletusarvot
-        self.mass = 1.0
+        self.mass = 1
         self.max_speed = 30
         self.gravity_affects = 1
         self.is_ball = 0
@@ -61,10 +57,28 @@ class GameObject(pygame.sprite.Sprite):
         # Tämä päivitetään myöhemmin, initoidaan kuitenkin ettei PyCharm herjaa
         self.viewscreen_rect = None
 
+    def load_image(self, image=None, image_file=None):
+        """ Lataa kuvan spritelle. Asettaa rect, radius, size."""
+        # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
+        if image is not None:
+            self.image = image
+        # Jos on annettu kuvatiedosto niin luetaan se
+        elif image_file is not None:
+            self.image = pygame.image.load(image_file).convert_alpha()
+        # Tämä tarvitaan rotaatioita varten
+        self.original_image = self.image
+        # Size on tämmöinen yhden luvun approksimaatio objektin koosta - neliöllä sivun pituus, ympyrällä halkaisija
+        # Suorakulmiolla sivujen pituuksien keskiarvo
+        self.size = (self.image.get_width() + self.image.get_height()) // 2
+        # Radiusta tarvii collision detectionissa
+        self.rect = self.image.get_rect()
+        self.radius = (self.size + 1) // 2
+        self.original_radius = self.radius
+
     def reset(self):
         """ Resetoi position ja asettaa nopeuden nollaan. Päivittää rectin. """
         self.x, self.y = self.start_position
-        self.move_vector.set_speed(0)
+        self.move_vector.set_magnitude(0)
         self.update_rect()
         if self.attached_player is not None:
             self.attached_player.detach()
@@ -93,7 +107,7 @@ class GameObject(pygame.sprite.Sprite):
             self.move_vector.add_to_vy(self.parent.gravity)
 
         # Max speed rajoittaa
-        self.move_vector.set_speed(min(self.move_vector.get_speed(), self.max_speed))
+        self.move_vector.set_magnitude(min(self.move_vector.get_magnitude(), self.max_speed))
 
         # Muutetaan koordinaatteja liikemäärän mukaan
         self.x_previous = int(self.x)
@@ -115,26 +129,18 @@ class GameObject(pygame.sprite.Sprite):
         self.image = rot_image
 
     def check_out_of_bounds(self):
-        """ Pitää objektin pelialueen sisällä, palauttaa 1 jos on ulkopuolella """
-        return_value = 0
-
+        """ Pitää objektin pelialueen sisällä """
         x_before = self.x
         y_before = self.y
-
         self.x = max(0, self.x)
         self.x = min(self.level.size_x - 1, self.x)
         self.y = max(0, self.y)
         self.y = min(self.level.size_y - 1, self.y)
-
         # Jos koordinaatteja muutettiin (eli oli out of bounds) niin muutetaan liikemäärää
         if self.x != x_before:
             self.move_vector.set_vx(0)
-            return_value = 1
         elif self.y != y_before:
             self.move_vector.set_vy(0)
-            return_value = 1
-
-        return return_value
 
     def check_collision_with_wall_and_goal(self):
         """ Tarkastaa törkmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
@@ -143,13 +149,21 @@ class GameObject(pygame.sprite.Sprite):
 
         # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys ja vauhti menee nollaan
         if current_point not in (BLACK, RED, GREEN):
+            # Soitetaan seinääntörmäysääni seuraavin ehdoin:
+            #  -nopeus yli 3 (ettei ihan pienistä tule jatkuvaa pärinää)
+            #  -jos on liikuttu
+            #  -ääni on olemassa
+            if self.move_vector.get_magnitude() > 3:
+                if self.wall_collide_sound and self.x != self.x_previous and self.y != self.y_previous:
+                    # print("Playing thump")
+                    self.force_play_sound(self.wall_collide_sound)
             if self.is_bullet:
-                # Tuhoaa seinää törmätessä jos on bullet
+                # Tuhoaa seinää törmätessä ja myös itsensä jos on bullet
                 pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
                 self.kill()
             else:
                 # Vauhti loppuu kuin seinään
-                self.move_vector.set_speed(0)
+                self.move_vector.set_magnitude(0)
                 # Vähän estetään seinän sisään menemistä tällä
                 self.x = self.x_previous
                 self.y = self.y_previous
@@ -166,7 +180,7 @@ class GameObject(pygame.sprite.Sprite):
                 self.reset()
 
     def speculate_collision_with_wall(self):
-        """ Spekuloi mahdollista törmäystä walliin - onpahan taas huonosti toteutettu mutta toimii """
+        """ Spekuloi mahdollista törmäystä walliin - onpahan taas huonosti toteutettu (duplikoi koodia) mutta toimii """
         move_vector_copy = copy.copy(self.move_vector)
 
         # Gravityn vaikutus
@@ -200,7 +214,16 @@ class GameObject(pygame.sprite.Sprite):
         collide_list = pygame.sprite.spritecollide(self, BulletGroup, dokill=True, collided=pygame.sprite.collide_circle)
         if len(collide_list) > 0:
             self.collide_circle(collide_list[0])
+            if self.bullet_collide_sound is not None:
+                self.force_play_sound(self.bullet_collide_sound)
 
+    def check_collision_with_players(self, playergroup):
+        collide_list = pygame.sprite.spritecollide(self, playergroup, dokill=False,
+                                                   collided=pygame.sprite.collide_circle)
+        for colliding_player in collide_list:
+            if colliding_player != self:
+                self.collide_circle(collide_list[0])
+        
     def collide_circle(self, other_object):
         """ 
         Törmäyttää kaksi ympyrän muotoista GameObjectia ja laskee niiden suunnat ja liikemäärät uusiksi.
@@ -230,7 +253,10 @@ class GameObject(pygame.sprite.Sprite):
 
 
 class DummyObject(GameObject):
-    """ Luo kopion alkuperäisestä GameObjectista soveltuvin osin seinän collision detektiota varten """
+    """ 
+    Luo kopion alkuperäisestä GameObjectista soveltuvin osin seinän collision detektiota varten 
+    Ei taida olla enää käytössä
+    """
     def __init__(self, original):
         self.x = original.x
         self.y = original.y
@@ -243,13 +269,28 @@ class DummyObject(GameObject):
         self.viewscreen_rect = original.viewscreen_rect
         self.rect = original.rect
 
-def get_angle_difference(angle1, angle2):
+    def force_play_sound(self, sound, duration=0):
+        # Soitetaan ääni, pakotetaan sille kanava auki
+        # if sound.get_num_channels() == 0:
+        # print("Playing sound", sound)
+        pygame.mixer.find_channel(True).play(sound, duration)
+        # else:
+        #     print("Not playing sound", sound)
+
+def get_angle_difference(angle1, angle2, degrees=0):
     """ Palauttaa kahden kulman välisen eron radiaaneissa. Väli -PI...0...PI """
     angle_difference = angle1 - angle2
-    if angle_difference > math.pi: angle_difference -= 2 * math.pi
+    if degrees:
+        if angle_difference > 180: angle_difference -= 360
+    else:
+        if angle_difference > math.pi: angle_difference -= 2 * math.pi
     return angle_difference
 
+
 def get_angle_in_radians(point1, point2):
+    """ Palauttaa kahden pisteen välisen kulman radiaaneina """
     x_difference = point1[0] - point2[0]
     y_difference = point1[1] - point2[1]
     return math.atan2(y_difference, x_difference)
+
+

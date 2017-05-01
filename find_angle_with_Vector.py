@@ -16,17 +16,17 @@ class Vector:
         elif magnitude is not None and angle is not None:
             self.set_magnitude_angle(magnitude, angle)
         else:
-            raise ValueError("x and y OR speed and direction need to be set!")
+            raise ValueError("x and y OR magnitude and angle need to be set!")
 
     def set_xy(self, x, y):
-        """ Sets x and y directly, calculates speed and direction """
+        """ Sets x and y directly, calculates magnitude and angle """
         self.x = x
         self.y = y
         self.magnitude = math.hypot(x, y)
         self.angle = math.atan2(y, x)
 
     def set_magnitude_angle(self, magnitude, angle):
-        """ Sets speed and direction directly, calculates x and y """
+        """ Sets magnitude and angle directly, calculates x and y """
         self.magnitude = magnitude
         self.angle = angle
         self.x = math.cos(angle * magnitude)
@@ -71,7 +71,7 @@ while running:
             running = False
 
     mouse_position = pygame.mouse.get_pos()
-    # direction = angle_between(center_point, mouse_position)
+    # angle = angle_between(center_point, mouse_position)
 
     x_difference = mouse_position[0] - center_point[0]
     y_difference = mouse_position[1] - center_point[1]
