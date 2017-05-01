@@ -22,7 +22,6 @@ class TestBall(AUTSball.BallSprite):
         self.attached_player_max_distance_squared = self.attached_player_max_distance**2  # distance-laskelmia varten
 
 
-
 class TestPlayer(AUTSball.PlayerSprite):
     def __init__(self, level):
         AUTSball.PlayerSprite.__init__(self, level=level, parent=DummyParent())

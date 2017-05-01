@@ -30,7 +30,11 @@ class GameObject(pygame.sprite.Sprite):
             self.rect = self.image.get_rect()
         # Tämä tarvitaan rotaatioita varten
         self.original_image = self.image
+        # Size on tämmöinen yhden luvun approksimaatio objektin koosta - neliöllä sivun pituus, ympyrällä halkaisija
+        # Suorakulmiolla sivujen pituuksien keskiarvo
         self.size = (self.image.get_width() + self.image.get_height()) // 2
+        # Radiusta tarvii collision detectionissa
+        self.radius = (self.size + 1) // 2
 
         # Start positio on levelin keskellä jos muuta ei ole määritetty
         if start_position is None:
@@ -156,12 +160,8 @@ class GameObject(pygame.sprite.Sprite):
                 self.reset()
 
     def check_collision_with_bullets(self, BulletGroup):
-        collide_list = pygame.sprite.spritecollide(self, BulletGroup, True)
+        collide_list = pygame.sprite.spritecollide(self, BulletGroup, dokill=True, collided=pygame.sprite.collide_circle)
         if len(collide_list) > 0:
-            # TODO: laske massojen vaikutukset törmäyksessä
-            # TODO: laske vektorit oikein objektien suhteellisten kulmien mukaan
-            # self.move_vector.add_vector(collide_list[0].move_vector)
-            # dotproduct = self.move_vector.get_dot_product(collide_list[0].move_vector)
             self.collide_circle(collide_list[0])
 
     def collide_circle(self, other_object):

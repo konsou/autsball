@@ -179,10 +179,11 @@ class Level(pygame.sprite.Sprite):
 
 class EffectSprite(game_object.GameObject):
     """ Yleinen efektisprite, tällä hetkellä tosin vain moottorin liekit """
-    def __init__(self, image=None, attached_player=None, effect_type=None, visible=1, parent=None):
+    def __init__(self, image=None, attached_player=None, attached_ball=None, effect_type=None, visible=1, parent=None):
         game_object.GameObject.__init__(self, group=EffectGroup, image=image)
         self.attached_player = attached_player
-        self.type = effect_type
+        self.attached_ball = attached_ball
+        self.effect_type = effect_type
         self.visible = visible
 
     def update(self):
@@ -192,6 +193,7 @@ class EffectSprite(game_object.GameObject):
             dy = int(12 * math.cos(player_dir_radians))
             self.rect.center = self.attached_player.rect.center[0] + dx, self.attached_player.rect.center[1] + dy
             self.rot_self_image_keep_size(self.attached_player.heading)
+
         else:
             # jos ei visible niin heitetään vaan jonnekin kuuseen
             self.rect.center = -100, -100
@@ -224,43 +226,56 @@ class BallSprite(game_object.GameObject):
         self.viewscreen_rect = viewscreen_rect
 
         # Jos törmää pelaajaan niin liitetään siihen
-        collide_list = pygame.sprite.spritecollide(self, PlayerGroup, False)
+        collide_list = pygame.sprite.spritecollide(self, PlayerGroup, dokill=False, collided=pygame.sprite.collide_circle)
         if len(collide_list) > 0:
             self.attach_to_player(collide_list[0])
 
         # Jos on liitetty pelaajaan ja jos on liian kaukana niin vetävät toisiaan puoleensa
-        # TODO: liian bouncy!
+        # Suht hyvä, voi viilata jos saa vielä paremmaksi
+        # TODO: weightit ei tunnu vaikuttavan?
+        # TODO: graffat tetherille
         if self.attached_player is not None:
-            distance_squared_to_player = self.distance_squared(self.attached_player)
-            if distance_squared_to_player >= self.attached_player_max_distance_squared:
+            distance_to_player = self.distance(self.attached_player)
+            if distance_to_player >= self.attached_player_max_distance:
                 player_angle = game_object.get_angle_in_radians((self.attached_player.x, self.attached_player.y),
                                                                  (self.x, self.y))
 
-                pull_vector_speed = (distance_squared_to_player - self.attached_player_max_distance_squared) / 15000
-                # pull_vector_speed = 0.5
-                print("Pull vector speed:", pull_vector_speed)
+                pull_vector_speed = (distance_to_player - self.attached_player_max_distance) * 0.02
 
-                player_pull_vector = vector.MoveVector(speed=pull_vector_speed, direction=player_angle)
-                ball_pull_vector = vector.MoveVector(speed=pull_vector_speed * -1, direction=player_angle)
+                ball_pull_vector = vector.MoveVector(speed=pull_vector_speed, direction=player_angle)
+                # Tässä rikotaan voiman ja vastavoiman lakia mutta who cares! (Newton pyörii haudassaan)
+                player_pull_vector = vector.MoveVector(speed=pull_vector_speed * -1 * 0.4, direction=player_angle)
 
-                player_pullvector_dotproduct = self.attached_player.move_vector.get_dot_product_normalized(ball_pull_vector)
-                ball_pullvector_dotproduct = self.move_vector.get_dot_product_normalized(player_pull_vector)
-
-                self.move_vector.add_vector(player_pull_vector)
-                self.attached_player.move_vector.add_vector(ball_pull_vector)
-                # self.move_vector.add_vector(vector.MoveVector(speed=pull_vector_speed * ball_pullvector_dotproduct, direction=player_angle + math.pi))
-                # self.attached_player.move_vector.add_vector(
-                #     vector.MoveVector(speed=pull_vector_speed * player_pullvector_dotproduct, direction=player_angle))
-
-                # self.x = self.attached_player.x
-            # self.y = self.attached_player.y
-            # self.rect.center = self.attached_player.rect.center
+                self.move_vector.add_vector(ball_pull_vector)
+                self.attached_player.move_vector.add_vector(player_pull_vector)
 
         self.update_movement()
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
         self.check_collision_with_bullets(BulletGroup)
+
+    def collide_tether(self, other_object):
+        """ 
+        Eksperimentaalinen tetherin törmäysmetodi. Ei toimi niin kuin haluaisin.
+        Ideana tässä että tether-collide on oletettavasti ekvivalentti normaalille törmäykselle niin että
+        objektien paikat vaihdetaan
+        Ei tällä hetkellä käytössä
+        """
+        new_self = other_object
+        new_other = self
+        angle_to_other = game_object.get_angle_in_radians(new_other.rect.center, new_self.rect.center)
+        new_self.move_vector.set_direction(angle_to_other - math.pi)
+        new_other.move_vector.set_direction(angle_to_other)
+
+        speed1 = new_self.move_vector.get_speed()
+        speed2 = new_other.move_vector.get_speed()
+        mass1 = new_self.mass
+        mass2 = new_other.mass
+        speed1_new = (mass2 / mass1) * speed2
+        speed2_new = (mass1 / mass2) * speed1
+        self.move_vector.set_speed(speed2_new * -1)
+        other_object.move_vector.set_speed(speed1_new * -1)
 
     def reset(self):
         """ 
@@ -288,6 +303,8 @@ class BallSprite(game_object.GameObject):
         """
         self.attached_player = player
         player.attach_ball(self)
+        # self.tether = EffectSprite(image=pygame.Surface((0,0)), effect_type='tether',
+        #                            attached_ball=self, attached_player=player, parent=self.parent)
         # TODO: korjaa weight että tämä voidaan enabloida
         # self.attached_player.weight += self.weight
 
@@ -297,6 +314,9 @@ class BallSprite(game_object.GameObject):
         if self.attached_player is not None:
             self.attached_player.detach_ball()
             self.attached_player = None
+            # self.tether.kill()
+            # self.tether = None
+
 
 
 class BulletSprite(game_object.GameObject):
@@ -343,7 +363,7 @@ class PlayerSprite(game_object.GameObject):
         self.is_centered_on_screen = 1
 
         # Koordinaatit
-        self.start_position = (800, 600)
+        self.start_position = (700, 1200)
         self.x, self.y = self.start_position
         self.x_previous, self.y_previous = self.x, self.y
 
