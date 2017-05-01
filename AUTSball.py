@@ -222,6 +222,9 @@ class BallSprite(game_object.GameObject):
         # Tämä tekee sen että tarkistetaan törmäys maaliin
         self.is_ball = 1
 
+        # SFX
+        self.bullet_collide_sound = pygame.mixer.Sound(file='sfx/metal_thud_3.wav')
+
     def update(self, viewscreen_rect):
         """ Päivittää palloa. Vaatii viewscreen_rect:in että osaa laskea näyttämisen oikein. """
         self.viewscreen_rect = viewscreen_rect
@@ -295,7 +298,7 @@ class BulletSprite(game_object.GameObject):
 
         # SFX
         self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump3.wav')
-        self.wall_collide_sound.set_volume(1.2)
+        self.wall_collide_sound.set_volume(1)
 
 
     def update(self, viewscreen_rect):
@@ -333,7 +336,7 @@ class PlayerSprite(game_object.GameObject):
         self.motor_sound.set_volume(0.4)
         self.motor_sound_playing = 0
         self.bullet_sound = pygame.mixer.Sound(file='sfx/pop.wav')
-        self.bullet_sound.set_volume(0.7)
+        self.bullet_sound.set_volume(0.6)
         self.ball_shoot_sound = pygame.mixer.Sound(file='sfx/pchou.wav')
         self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump4.wav')
         self.wall_collide_sound.set_volume(1.0)
