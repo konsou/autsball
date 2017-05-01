@@ -1,12 +1,6 @@
 # -*- coding: utf8 -*-
 import pygame, vector, math, copy
-
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-
+from colors import *
 
 class GameObject(pygame.sprite.Sprite):
     """ Classi joka perii pygamen Spriten ja lisää yleisiä peliobjektin käyttäytymiseen liittyviä juttuja """
@@ -60,6 +54,10 @@ class GameObject(pygame.sprite.Sprite):
         self.is_bullet = 0
         self.is_centered_on_screen = 0
 
+        # Attachit
+        self.attached_player = None
+        self.attached_ball = None
+
         # Tämä päivitetään myöhemmin, initoidaan kuitenkin ettei PyCharm herjaa
         self.viewscreen_rect = None
 
@@ -68,6 +66,14 @@ class GameObject(pygame.sprite.Sprite):
         self.x, self.y = self.start_position
         self.move_vector.set_speed(0)
         self.update_rect()
+        if self.attached_player is not None:
+            self.attached_player.detach()
+            self.detach()
+        if self.attached_ball is not None:
+            self.attached_ball.detach()
+            self.detach()
+
+
 
     def update_rect(self):
         """ 

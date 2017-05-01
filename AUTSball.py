@@ -1,11 +1,6 @@
 # -*- coding: utf8 -*-
 import pygame, math, sys, game_object, vector
-
-red = (255, 0, 0)
-green = (0, 255, 0)
-blue = (0, 0, 255)
-black = (0, 0, 0)
-white = (255, 255, 255)
+from colors import *
 
 
 class AUTSBallGame:
@@ -61,6 +56,8 @@ class AUTSBallGame:
                 self.player[0].rotate_left()
             if pressed_keys[pygame.K_LSHIFT] or pressed_keys[pygame.K_RSHIFT]:
                 self.player[0].shoot()
+            if pressed_keys[pygame.K_BACKSPACE]:
+                self.player[0].recover()
 
             # Viewscreen rect: viewscreen absoluuttisissa koordinaateissa
             self.viewscreen_rect = (self.player[0].x - self.screen_size_x // 2,
@@ -109,8 +106,8 @@ class AUTSBallGame:
         # HUD
         # self.show_text((10, 10), "Speed: " + str(math.hypot(self.player[0].vx, self.player[0].vy)))
         self.show_text((10, 50), "FPS: " + str(self.clock.get_fps()))
-        self.show_text((10, 10), str(self.score_green), color=green, font_size=40)
-        self.show_text((750, 10), str(self.score_red), color=red, font_size=40)
+        self.show_text((10, 10), str(self.score_green), color=GREEN, font_size=40)
+        self.show_text((750, 10), str(self.score_red), color=RED, font_size=40)
 
         # Näytetään pallonsuuntamarkkeri
         # TODO: muuta pallon sijaan nuoli joka osoittaa oikeaan suuntaan
@@ -129,10 +126,10 @@ class AUTSBallGame:
         """ Tätä kutsutaan kun tulee maali """
         if scoring_team == 'RED':
             self.score_red += 1
-            goal_text_color = red
+            goal_text_color = RED
         elif scoring_team == 'GREEN':
             self.score_green += 1
-            goal_text_color = green
+            goal_text_color = GREEN
         DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=120,
                          color=goal_text_color, font_size=120, flashes=1)
 
@@ -312,7 +309,7 @@ class BallSprite(game_object.GameObject):
         """ Tämä metodi poistaa liitoksen pelaajaan. """
         # self.attached_player.weight -= self.weight
         if self.attached_player is not None:
-            self.attached_player.detach_ball()
+            self.attached_player.detach()
             self.attached_player = None
             # self.tether.kill()
             # self.tether = None
@@ -342,6 +339,7 @@ class BulletSprite(game_object.GameObject):
             if self in BulletGroup:
                 if self.speculate_collision_with_wall() == 1:
                     # print(self.move_vector.get_speed())
+                    # Vähennetään nopeutta jos spekulointi havaitsee törmäyksen
                     self.move_vector.set_speed(min(self.move_vector.get_speed(), 3))
                 self.update_rect()
 
@@ -385,6 +383,8 @@ class PlayerSprite(game_object.GameObject):
         self.cooldown_basic_shot = 5 # framea
         self.cooldown_after_ball_shot = 60 # cooldown sen jälkeen kun pallo on ammuttu
         self.cooldown_counter = 0 # cooldown-counter1
+        self.recovery_time = 3  # sekunteja jopa!
+        self.recovery_started_at = 0
 
     def update(self):
         # Lisätään liikemäärään thrust-vektori
@@ -406,10 +406,15 @@ class PlayerSprite(game_object.GameObject):
         if self.attached_ball is not None:
             self.cooldown_counter = self.cooldown_after_ball_shot
 
+        if self.recovery_started_at != 0:
+            if (pygame.time.get_ticks() - self.recovery_started_at) // 1000 > self.recovery_time:
+                self.reset()
+                self.recovery_started_at = 0
+
     def attach_ball(self, ball):
         self.attached_ball = ball
 
-    def detach_ball(self):
+    def detach(self):
         self.attached_ball = None
 
     def accelerate(self):
@@ -453,12 +458,17 @@ class PlayerSprite(game_object.GameObject):
             self.attached_ball.shoot(x=ball_x, y=ball_y, direction=self.heading, speed=10)
             self.attached_ball.detach()
 
+    def recover(self):
+        """ Aloittaa recovery-laskennan """
+        self.recovery_started_at = pygame.time.get_ticks()
+        DisappearingText(pos=self.parent.screen_center_point, text="RECOVERING...", frames_visible=240, flashes=1,
+                         font_size=80, color=RED)
 
 class DisappearingText(pygame.sprite.Sprite):
     """ Näyttää ruudulla tekstin x framen ajan """
     # TODO: tausta läpinäkyväksi
     def __init__(self, pos=(0,0), text="", frames_visible=60,
-                 color=white, bgcolor=black, font_size=24, flashes=0, flash_interval=10):
+                 color=WHITE, bgcolor=None, font_size=24, flashes=0, flash_interval=10):
         pygame.sprite.Sprite.__init__(self, TextGroup)
 
         self.frame_counter = 0
