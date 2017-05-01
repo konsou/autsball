@@ -1,5 +1,5 @@
-# -*- coding: utf8 -*-
-import pygame, math, sys, game_object
+# -*- coding: utf-8 -*-
+import pygame, math, sys, game_object, music
 
 red = (255, 0, 0)
 green = (0, 255, 0)
@@ -17,10 +17,21 @@ class AUTSBallGame:
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
 
         # Pygamen inittejä
+        pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
         pygame.init()
+        pygame.mixer.init()
         self.win = pygame.display.set_mode((self.screen_size_x, self.screen_size_y))
         pygame.display.set_caption("AUTSball")
         self.clock = pygame.time.Clock()
+
+        # Taustamusiikki
+        self.music_player = music.MusicPlayer(screen='game', window_size=(self.screen_size_x, self.screen_size_y),
+                                              pos='bottomleft', group=TextGroup, shuffle=0)
+        self.music_player.play()
+
+        # SFX
+        self.goal_green_sound = pygame.mixer.Sound(file='sfx/goal_green.wav')
+        self.goal_red_sound = pygame.mixer.Sound(file='sfx/goal_red.wav')
 
         # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
         self.loading_image = pygame.image.load('gfx/loading.png').convert_alpha()
@@ -49,6 +60,8 @@ class AUTSBallGame:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.quit_game = True
+                if event.type == music.MUSIC_FINISHED:
+                    self.music_player.next()
 
             pressed_keys = pygame.key.get_pressed()
             if pressed_keys[pygame.K_UP]:
@@ -130,9 +143,11 @@ class AUTSBallGame:
         if scoring_team == 'red':
             self.score_red += 1
             goal_text_color = red
+            self.goal_red_sound.play()
         elif scoring_team == 'green':
             self.score_green += 1
             goal_text_color = green
+            self.goal_green_sound.play()
         DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=120,
                          color=goal_text_color, font_size=120, flashes=1)
 
@@ -208,10 +223,14 @@ class BallSprite(game_object.GameObject):
         self.start_position = self.level.center_point
         self.x, self.y = self.start_position
         self.attached_player = None
-        self.mass = 1.0
+        self.mass = 1
         self.max_speed = 10
         # Tämä tekee sen että tarkistetaan törmäys maaliin
         self.is_ball = 1
+
+        # SFX
+        self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump4.wav')
+        self.bullet_collide_sound = pygame.mixer.Sound(file='sfx/metal_thud_3.wav')
 
     def update(self, viewscreen_rect):
         """ Päivittää palloa. Vaatii viewscreen_rect:in että osaa laskea näyttämisen oikein. """
@@ -249,7 +268,7 @@ class BallSprite(game_object.GameObject):
         Tätä kutsuu PlayerSpriten shoot-metodi, joka hoitaa detachauksen ja antaa tarvittavat tiedot
         """
         # Jostain syystä vaatii direktion korjauksen tässä
-        self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
+        self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
         self.x = int(x)
         self.y = int(y)
         self.update_rect()
@@ -278,12 +297,16 @@ class BulletSprite(game_object.GameObject):
         game_object.GameObject.__init__(self, group=BulletGroup, image_file='gfx/bullet_5.png', start_position=(x, y),
                                         level=level, parent=parent)
         self.rect.center = (x, y)
-        self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
+        self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
         self.max_speed = 20
-        # self.explosion_force = 1
-        self.mass = 0.1
+        self.explosion_force = 1
 
         self.is_bullet = 1
+
+        # SFX
+        self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump3.wav')
+        self.wall_collide_sound.set_volume(1)
+
 
     def update(self, viewscreen_rect):
         self.viewscreen_rect = viewscreen_rect
@@ -315,6 +338,16 @@ class PlayerSprite(game_object.GameObject):
         self.rect.center = self.parent.screen_center_point
         self.is_centered_on_screen = 1
 
+        # Sound effex
+        self.motor_sound = pygame.mixer.Sound(file='sfx/shhhh_v2.wav')
+        # self.motor_sound.set_volume(0.4)
+        self.motor_sound_playing = 0
+        self.bullet_sound = pygame.mixer.Sound(file='sfx/pop.wav')
+        self.ball_shoot_sound = pygame.mixer.Sound(file='sfx/pchou.wav')
+        self.ball_capture_sound = pygame.mixer.Sound(file='sfx/ball_capture.wav')
+        self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump4.wav')
+        self.bullet_collide_sound = pygame.mixer.Sound(file='sfx/metal_thud_2.wav')
+
         # Koordinaatit
         self.start_position = (800, 600)
         self.x, self.y = self.start_position
@@ -328,13 +361,13 @@ class PlayerSprite(game_object.GameObject):
         self.attached_ball = None
 
         # Shipin ominaisuudet
-        self.handling = int(5) # kuinka monta astetta kääntyy per frame
-        self.max_thrust = 0.35 # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
+        self.handling = int(5)  # kuinka monta astetta kääntyy per frame
+        self.max_thrust = 0.35  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
         self.max_speed = 10
-        self.mass = 1.0
-        self.cooldown_basic_shot = 5 # framea
-        self.cooldown_after_ball_shot = 60 # cooldown sen jälkeen kun pallo on ammuttu
-        self.cooldown_counter = 0 # cooldown-counter1
+        self.mass = 1
+        self.cooldown_basic_shot = 5  # framea
+        self.cooldown_after_ball_shot = 60  # cooldown sen jälkeen kun pallo on ammuttu
+        self.cooldown_counter = 0  # cooldown-counter1
 
     def update(self):
         # Lisätään liikemäärään thrust-vektori
@@ -357,7 +390,9 @@ class PlayerSprite(game_object.GameObject):
             self.cooldown_counter = self.cooldown_after_ball_shot
 
     def attach_ball(self, ball):
-        self.attached_ball = ball
+        if self.attached_ball is None:
+            self.attached_ball = ball
+            self.force_play_sound(self.ball_capture_sound)
 
     def detach_ball(self):
         self.attached_ball = None
@@ -365,10 +400,19 @@ class PlayerSprite(game_object.GameObject):
     def accelerate(self):
         self.thrust = self.max_thrust
         self.thrust_gfx.visible = 1
+        if not self.motor_sound_playing:
+            self.force_play_sound(self.motor_sound, -1)
+            self.motor_sound_playing = 1
+        # print(self.motor_sound.get_num_channels())
+        # print(pygame.mixer.get_busy())
+        # if self.motor_sound.get_num_channels() == 0:
+        #     pygame.mixer.find_channel(True).play(self.motor_sound, -1)
 
     def stop_acceleration(self):
         self.thrust = 0
         self.thrust_gfx.visible = 0
+        self.motor_sound.stop()
+        self.motor_sound_playing = 0
 
     def rotate_right(self):
         self.heading -= self.handling
@@ -389,14 +433,16 @@ class PlayerSprite(game_object.GameObject):
         # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
         if self.cooldown_counter == 0:
+            self.force_play_sound(self.bullet_sound)
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
             BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
-                         speed=10 + self.move_vector.get_speed())
+                         speed=10 + self.move_vector.get_magnitude())
             self.cooldown_counter = self.cooldown_basic_shot
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
+            self.force_play_sound(self.ball_shoot_sound)
             ball_x = self.attached_ball.image.get_width() * math.sin(math.radians(self.heading)) * -1 + self.x
             ball_y = self.attached_ball.image.get_height() * math.cos(math.radians(self.heading)) * -1 + self.y
 
@@ -439,6 +485,7 @@ class DisappearingText(pygame.sprite.Sprite):
         else:
             self.visible = 1
             self.rect.center = self.original_position
+
 
 
 if __name__ == '__main__':
