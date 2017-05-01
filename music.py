@@ -2,7 +2,6 @@
 import pygame
 import AUTSball
 import random
-import time
 import tinytag
 
 

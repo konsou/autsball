@@ -1,5 +1,10 @@
 # -*- coding: utf8 -*-
-import pygame, math, sys, game_object, vector
+import pygame
+import math
+import sys
+import game_object
+import vector
+import music
 from colors import *
 
 
@@ -367,7 +372,7 @@ class BulletSprite(game_object.GameObject):
         game_object.GameObject.__init__(self, group=BulletGroup, image_file='gfx/bullet_5.png', start_position=(x, y),
                                         level=level, parent=parent)
         self.rect.center = (x, y)
-        self.move_vector.set_magnitude_angle(speed, math.radians(270 - direction))
+        self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
         self.max_speed = 20
         self.explosion_force = 1
 
@@ -376,7 +381,6 @@ class BulletSprite(game_object.GameObject):
         # SFX
         self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump3.wav')
         self.wall_collide_sound.set_volume(1)
-
 
     def update(self, viewscreen_rect):
         self.viewscreen_rect = viewscreen_rect
@@ -523,7 +527,7 @@ class PlayerSprite(game_object.GameObject):
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
             BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
-                         speed=10 + self.move_vector.get_magnitude())
+                         speed=10 + self.move_vector.get_speed())
             self.cooldown_counter = self.cooldown_basic_shot
 
         # Jos pallo on liitettynä niin ammutaan se
@@ -580,9 +584,8 @@ class DisappearingText(pygame.sprite.Sprite):
 
 class ScrollingText(pygame.sprite.Sprite):
     """ Scrollaa tekstiä ruudulla """
-    # TODO: tausta läpinäkyväksi
     def __init__(self, y_pos=0, screen_size_x=800, text="", scroll_direction='left', scroll_speed=5,
-                 color=white, bgcolor=black, font_size=24, flashes=0, flash_interval=10):
+                 color=WHITE, bgcolor=None, font_size=24, flashes=0, flash_interval=10):
         pygame.sprite.Sprite.__init__(self, TextGroup)
 
         self.frame_counter = 0

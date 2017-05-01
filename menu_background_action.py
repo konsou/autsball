@@ -4,15 +4,12 @@ import AUTSball
 import pygame
 import math
 import random
+from colors import *
 
 """ IHAN HIRVEÄ SOTKU MUTTA TOIMII PÄÄOSIN """
 # TODO: MAJOR CLEANUP
-
-red = (255, 0, 0)
-green = (0, 255, 0)
-blue = (0, 0, 255)
-black = (0, 0, 0)
-white = (255, 255, 255)
+# TODO: bulletit collideaa shippien kanssa kun ne ampuu niitä
+# TODO: äänet pois
 
 background_group = pygame.sprite.GroupSingle()
 
@@ -51,6 +48,9 @@ class DemoPlayer(AUTSball.PlayerSprite):
         self.cooldown_basic_shot = 5  # framea
         self.cooldown_after_ball_shot = 60  # cooldown sen jälkeen kun pallo on ammuttu
         self.cooldown_counter = 0  # cooldown-counter1
+        self.recovery_time = 3  # sekunteja jopa!
+        self.recovery_started_at = 0
+
 
         self.gravity_affects = 1
         self.team = team
@@ -72,6 +72,7 @@ class DemoPlayer(AUTSball.PlayerSprite):
 
         self.motor_sound_playing = 0
         self.motor_sound = None
+        self.ball_capture_sound = None
 
     def update(self):
         if self.attached_ball is None:
@@ -181,8 +182,8 @@ class BackgroundAction(pygame.sprite.Sprite):
         AUTSball.EffectGroup.draw(self.image)
         AUTSball.TextGroup.draw(self.image)
 
-        self.show_text((10, 10), str(self.score_green), color=green, font_size=40)
-        self.show_text((750, 10), str(self.score_red), color=red, font_size=40)
+        self.show_text((10, 10), str(self.score_green), color=GREEN, font_size=40)
+        self.show_text((750, 10), str(self.score_red), color=RED, font_size=40)
 
     def show_text(self, pos, text, color=(255, 255, 255), bgcolor=(0, 0, 0), font_size=24):
         """ Utility-metodi tekstin näyttämiseen ruudulla """
@@ -191,19 +192,19 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.image.blit(textimg, pos)
 
     def score(self, scoring_team=None):
-        self.ship1.detach_ball()
-        self.ship2.detach_ball()
-        self.ship3.detach_ball()
-        self.ship4.detach_ball()
-        self.ship5.detach_ball()
-        self.ship6.detach_ball()
+        self.ship1.detach()
+        self.ship2.detach()
+        self.ship3.detach()
+        self.ship4.detach()
+        self.ship5.detach()
+        self.ship6.detach()
         """ Tätä kutsutaan kun tulee maali """
-        if scoring_team == 'red':
+        if scoring_team == 'RED':
             self.score_red += 1
-            goal_text_color = AUTSball.red
-        elif scoring_team == 'green':
+            goal_text_color = RED
+        elif scoring_team == 'GREEN':
             self.score_green += 1
-            goal_text_color = AUTSball.green
+            goal_text_color = GREEN
         AUTSball.DisappearingText(pos=(400,525), text="GOAL!!!", frames_visible=60,
                                   color=goal_text_color, font_size=120, flashes=1)
 

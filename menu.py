@@ -3,14 +3,8 @@ import pygame
 import AUTSball
 import menu_background_action
 import music
-
-
+from colors import *
 from pygame.locals import *
-
-WHITE = (255, 255, 255)
-YELLOWISH = (212, 208, 100)
-BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
 
 pygame.font.init()
 
@@ -226,9 +220,11 @@ def debug_run():
                     # Lopetetaan background action
                     background_action.kill_me()
                     del background_action
+                    music_player.stop()
+                    del music_player
 
                     practice_game = AUTSball.AUTSBallGame()
-                    music_player.stop()
+                    # music_player.stop()
                 if 'click' in multiplayer_button.handleEvent(event):
                     print('multiplayer button clicked')
                 if 'click' in quit_button.handleEvent(event):

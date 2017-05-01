@@ -39,7 +39,7 @@ class GameObject(pygame.sprite.Sprite):
         self.x, self.y = self.start_position
         self.x_previous, self.y_previous = self.start_position
 
-        # Liikkumisvektori - sisältää sekä vx/vy että magnitude/angle (radiaaneina)
+        # Liikkumisvektori - sisältää sekä vx/vy että speed/direction (radiaaneina)
         self.move_vector = vector.MoveVector()
 
         # Peliobjektin ominaisuuksia - oletusarvot
@@ -78,7 +78,7 @@ class GameObject(pygame.sprite.Sprite):
     def reset(self):
         """ Resetoi position ja asettaa nopeuden nollaan. Päivittää rectin. """
         self.x, self.y = self.start_position
-        self.move_vector.set_magnitude(0)
+        self.move_vector.set_speed(0)
         self.update_rect()
         if self.attached_player is not None:
             self.attached_player.detach()
@@ -107,7 +107,7 @@ class GameObject(pygame.sprite.Sprite):
             self.move_vector.add_to_vy(self.parent.gravity)
 
         # Max speed rajoittaa
-        self.move_vector.set_magnitude(min(self.move_vector.get_magnitude(), self.max_speed))
+        self.move_vector.set_speed(min(self.move_vector.get_speed(), self.max_speed))
 
         # Muutetaan koordinaatteja liikemäärän mukaan
         self.x_previous = int(self.x)
@@ -153,7 +153,7 @@ class GameObject(pygame.sprite.Sprite):
             #  -nopeus yli 3 (ettei ihan pienistä tule jatkuvaa pärinää)
             #  -jos on liikuttu
             #  -ääni on olemassa
-            if self.move_vector.get_magnitude() > 3:
+            if self.move_vector.get_speed() > 3:
                 if self.wall_collide_sound and self.x != self.x_previous and self.y != self.y_previous:
                     # print("Playing thump")
                     self.force_play_sound(self.wall_collide_sound)
@@ -163,7 +163,7 @@ class GameObject(pygame.sprite.Sprite):
                 self.kill()
             else:
                 # Vauhti loppuu kuin seinään
-                self.move_vector.set_magnitude(0)
+                self.move_vector.set_speed(0)
                 # Vähän estetään seinän sisään menemistä tällä
                 self.x = self.x_previous
                 self.y = self.y_previous
@@ -251,6 +251,15 @@ class GameObject(pygame.sprite.Sprite):
         """ Laskee etäisyyden toiseen GameObjectiin. Käyttää neliöjuurta eli oletettavasti hitaampi kuin yllä. """
         return math.hypot(self.x - other_object.x, self.y - other_object.y)
 
+    def force_play_sound(self, sound, duration=0):
+        # Soitetaan ääni, pakotetaan sille kanava auki
+        # if sound.get_num_channels() == 0:
+        # print("Playing sound", sound)
+        if sound is not None:
+            pygame.mixer.find_channel(True).play(sound, duration)
+        # else:
+        #     print("Not playing sound", sound)
+
 
 class DummyObject(GameObject):
     """ 
@@ -269,13 +278,6 @@ class DummyObject(GameObject):
         self.viewscreen_rect = original.viewscreen_rect
         self.rect = original.rect
 
-    def force_play_sound(self, sound, duration=0):
-        # Soitetaan ääni, pakotetaan sille kanava auki
-        # if sound.get_num_channels() == 0:
-        # print("Playing sound", sound)
-        pygame.mixer.find_channel(True).play(sound, duration)
-        # else:
-        #     print("Not playing sound", sound)
 
 def get_angle_difference(angle1, angle2, degrees=0):
     """ Palauttaa kahden kulman välisen eron radiaaneissa. Väli -PI...0...PI """
