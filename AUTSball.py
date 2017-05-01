@@ -282,16 +282,22 @@ class BallSprite(game_object.GameObject):
         game_object.GameObject.reset(self)
         self.detach()
 
-    def shoot(self, direction=0, speed=0, x=0, y=0):
+    def shoot(self, direction=0, speed=0, x=None, y=None):
         """ 
         Ampuu itsensä määritettyyn suuntaan, määritetyllä nopeudella, alkaen määritetyistä koordinaateista.
         Tätä kutsuu PlayerSpriten shoot-metodi, joka hoitaa detachauksen ja antaa tarvittavat tiedot
         """
-        # Jostain syystä vaatii direktion korjauksen tässä
-        self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
-        self.x = int(x)
-        self.y = int(y)
-        self.update_rect()
+        if x is not None and y is not None:
+            # Tämä tehdään jos annettu uudet koordinaatit
+            # Jostain syystä vaatii direktion korjauksen tässä
+            self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
+            self.x = int(x)
+            self.y = int(y)
+            self.update_rect()
+        else:
+            # Jos ei ole annettu uusia koordinaatteja niin lisätään vain liikevektoriin määritetyt
+            # direction ja speed
+            self.move_vector.add_vector(vector.MoveVector(speed=speed, direction=math.radians(270 - direction)))
 
     def attach_to_player(self, player):
         """ 
@@ -407,7 +413,7 @@ class PlayerSprite(game_object.GameObject):
             self.cooldown_counter = self.cooldown_after_ball_shot
 
         if self.recovery_started_at != 0:
-            if (pygame.time.get_ticks() - self.recovery_started_at) // 1000 > self.recovery_time:
+            if (pygame.time.get_ticks() - self.recovery_started_at) // 1000 > self.recovery_time - 1:
                 self.reset()
                 self.recovery_started_at = 0
 
@@ -452,10 +458,11 @@ class PlayerSprite(game_object.GameObject):
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
-            ball_x = self.attached_ball.image.get_width() * math.sin(math.radians(self.heading)) * -1 + self.x
-            ball_y = self.attached_ball.image.get_height() * math.cos(math.radians(self.heading)) * -1 + self.y
+            # ball_x = self.attached_ball.image.get_width() * math.sin(math.radians(self.heading)) * -1 + self.x
+            # ball_y = self.attached_ball.image.get_height() * math.cos(math.radians(self.heading)) * -1 + self.y
 
-            self.attached_ball.shoot(x=ball_x, y=ball_y, direction=self.heading, speed=10)
+            # self.attached_ball.shoot(x=ball_x, y=ball_y, direction=self.heading, speed=10)
+            self.attached_ball.shoot(direction=self.heading, speed=10)
             self.attached_ball.detach()
 
     def recover(self):
@@ -466,7 +473,6 @@ class PlayerSprite(game_object.GameObject):
 
 class DisappearingText(pygame.sprite.Sprite):
     """ Näyttää ruudulla tekstin x framen ajan """
-    # TODO: tausta läpinäkyväksi
     def __init__(self, pos=(0,0), text="", frames_visible=60,
                  color=WHITE, bgcolor=None, font_size=24, flashes=0, flash_interval=10):
         pygame.sprite.Sprite.__init__(self, TextGroup)
