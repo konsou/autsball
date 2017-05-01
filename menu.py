@@ -1,5 +1,6 @@
 # -*- coding: utf8 -*-
 import pygame, AUTSball, menu_background_action
+
 from pygame.locals import *
 
 WHITE = (255, 255, 255)
@@ -174,6 +175,7 @@ def debug_run():
     window.fill((0, 0, 0))
 
     static_visual_components_group = pygame.sprite.Group()
+    music_player_group = pygame.sprite.Group()
 
     # Logo
     logo_sprite = pygame.sprite.Sprite()
@@ -197,8 +199,10 @@ def debug_run():
 
     # Music
     pygame.mixer.init()
-    pygame.mixer.music.load('audio/title_music_by_pera.ogg')
-    pygame.mixer.music.play(-1)
+    music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
+    music_player.play()
+    # pygame.mixer.music.load('sfx/cavern_rain.ogg')
+    # pygame.mixer.music.play(-1)
 
     # Background action
     background_action = menu_background_action.BackgroundAction()
@@ -220,7 +224,7 @@ def debug_run():
                     del background_action
 
                     practice_game = AUTSball.AUTSBallGame()
-                    pygame.mixer.music.stop()
+                    music_player.stop()
                 if 'click' in multiplayer_button.handleEvent(event):
                     print('multiplayer button clicked')
                 if 'click' in quit_button.handleEvent(event):
@@ -234,14 +238,18 @@ def debug_run():
                         window.fill(BLACK)
                         background_action = menu_background_action.BackgroundAction()
                         static_visual_components_group.draw(window)
-                        pygame.mixer.music.play(-1)
+                        music_player.set_screen('menu')
             if event.type == pygame.QUIT:
                 running = False
+            if event.type == music.MUSIC_FINISHED:
+                music_player.next()
 
         if active_mode == 'menu':
             window.fill(0)
 
             menu_background_action.background_group.update()
+            music_player_group.update()
+
             menu_background_action.background_group.draw(window)
             window.blit(darken_surface, (0, 0))
 
@@ -249,6 +257,7 @@ def debug_run():
             practice_button.draw(window)
             multiplayer_button.draw(window)
             quit_button.draw(window)
+            music_player_group.draw(window)
 
             pygame.display.update()
             clock.tick(30)
