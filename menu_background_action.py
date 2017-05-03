@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 import game_object
-import AUTSball
+import game
 import pygame
 import math
 import random

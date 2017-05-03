@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 import pygame
-import AUTSball
+import game
 import menu_background_action
 import music
 import groups
@@ -224,7 +224,7 @@ def debug_run():
                     music_player.stop()
                     del music_player
 
-                    practice_game = AUTSball.AUTSBallGame()
+                    practice_game = game.AUTSBallGame()
                     # music_player.stop()
                 if 'click' in multiplayer_button.handleEvent(event):
                     print('multiplayer button clicked')

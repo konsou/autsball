@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import pygame
-import AUTSball
+import game
 import random
 import tinytag
 import groups
