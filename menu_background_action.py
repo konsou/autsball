@@ -4,6 +4,13 @@ import AUTSball
 import pygame
 import math
 import random
+import player
+import ball
+import level
+import groups
+import effect
+import bullet
+import text
 from colors import *
 
 """ IHAN HIRVEÄ SOTKU MUTTA TOIMII PÄÄOSIN """
@@ -14,7 +21,7 @@ from colors import *
 background_group = pygame.sprite.GroupSingle()
 
 
-class DemoPlayer(AUTSball.PlayerSprite):
+class DemoPlayer(player.PlayerSprite):
     def __init__(self, team=None, level=None, parent=None, pos=None):
         if team == 'red':
             image = pygame.image.load('gfx/ship1_red_20px.png').convert_alpha()
@@ -22,12 +29,12 @@ class DemoPlayer(AUTSball.PlayerSprite):
             image = pygame.image.load('gfx/ship1_green_20px.png').convert_alpha()
 
         # Lisätään PlayerGroup-ryhmään
-        game_object.GameObject.__init__(self, group=AUTSball.PlayerGroup, level=level, parent=parent,
+        game_object.GameObject.__init__(self, group=groups.PlayerGroup, level=level, parent=parent,
                                         image=image)
 
         # Graffat
         self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
-        self.thrust_gfx = AUTSball.EffectSprite(attached_player=self, image=self.motor_flame_image,
+        self.thrust_gfx = effect.EffectSprite(attached_player=self, image=self.motor_flame_image,
                                                 effect_type='motorflame', visible=0)
         self.viewscreen_rect = (0, 0, 800, 600)
 
@@ -106,21 +113,21 @@ class DemoPlayer(AUTSball.PlayerSprite):
             if random.randint(1, 20) == 1:
                 self.shoot()
 
-        AUTSball.PlayerSprite.update(self)
+        player.PlayerSprite.update(self)
 
     def shoot(self):
         """ Pitää overrideta kun randomisyystä vakioarvot ei toimi """
         if self.cooldown_counter == 0:
             bullet_x = int(20 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(20 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            AUTSball.BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
+            bullet.BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
                          speed=20)
             self.cooldown_counter = self.cooldown_basic_shot
 
 
-class DemoBall(AUTSball.BallSprite):
+class DemoBall(ball.BallSprite):
     def __init__(self, level, parent):
-        AUTSball.BallSprite.__init__(self, level=level, parent=parent)
+        ball.BallSprite.__init__(self, level=level, parent=parent)
         self.gravity_affects = 1
         self.image = pygame.image.load('gfx/ball_50_red.png').convert_alpha()
         self.rect = self.image.get_rect()
@@ -140,7 +147,7 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.screen_size_y = 600
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
 
-        self.level = AUTSball.Level(image_file='gfx/menu_background_level.png')
+        self.level = level.Level(image_file='gfx/menu_background_level.png')
         self.ship1 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 200))
         self.ship2 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 300))
         self.ship3 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 400))
@@ -153,7 +160,7 @@ class BackgroundAction(pygame.sprite.Sprite):
         random.shuffle(coders)
         coders_string = ', '.join(coders)
         credits_text = "Idea: Konso"+30*" "+"Code: "+coders_string+30*" "+"Music: Pera"+30*" "+"Your name can be here!"
-        AUTSball.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
+        text.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
 
         self.image = pygame.Surface((800, 600))
         self.rect = self.image.get_rect()
@@ -169,27 +176,21 @@ class BackgroundAction(pygame.sprite.Sprite):
     def update(self):
         self.ball_pos = (self.ball.x, self.ball.y)
 
-        AUTSball.BulletGroup.update(self.viewscreen_rect)
-        AUTSball.BallGroup.update(self.viewscreen_rect)
-        AUTSball.PlayerGroup.update()
-        AUTSball.EffectGroup.update()
-        AUTSball.TextGroup.update()
+        groups.BulletGroup.update(self.viewscreen_rect)
+        groups.BallGroup.update(self.viewscreen_rect)
+        groups.PlayerGroup.update()
+        groups.EffectGroup.update()
+        groups.TextGroup.update()
 
-        AUTSball.LevelGroup.draw(self.image)
-        AUTSball.BallGroup.draw(self.image)
-        AUTSball.PlayerGroup.draw(self.image)
-        AUTSball.BulletGroup.draw(self.image)
-        AUTSball.EffectGroup.draw(self.image)
-        AUTSball.TextGroup.draw(self.image)
+        groups.LevelGroup.draw(self.image)
+        groups.BallGroup.draw(self.image)
+        groups.PlayerGroup.draw(self.image)
+        groups.BulletGroup.draw(self.image)
+        groups.EffectGroup.draw(self.image)
+        groups.TextGroup.draw(self.image)
 
-        self.show_text((10, 10), str(self.score_green), color=GREEN, font_size=40)
-        self.show_text((750, 10), str(self.score_red), color=RED, font_size=40)
-
-    def show_text(self, pos, text, color=(255, 255, 255), bgcolor=(0, 0, 0), font_size=24):
-        """ Utility-metodi tekstin näyttämiseen ruudulla """
-        font = pygame.font.Font(None, font_size)
-        textimg = font.render(text, 1, color, bgcolor)
-        self.image.blit(textimg, pos)
+        text.show_text(self.image, (10, 10), str(self.score_green), color=GREEN, font_size=40)
+        text.show_text(self.image, (750, 10), str(self.score_red), color=RED, font_size=40)
 
     def score(self, scoring_team=None):
         self.ship1.detach()
@@ -205,16 +206,11 @@ class BackgroundAction(pygame.sprite.Sprite):
         elif scoring_team == 'GREEN':
             self.score_green += 1
             goal_text_color = GREEN
-        AUTSball.DisappearingText(pos=(400,525), text="GOAL!!!", frames_visible=60,
+        text.DisappearingText(pos=(400,525), text="GOAL!!!", frames_visible=60,
                                   color=goal_text_color, font_size=120, flashes=1)
 
     def kill_me(self):
-        AUTSball.LevelGroup.empty()
-        AUTSball.BallGroup.empty()
-        AUTSball.PlayerGroup.empty()
-        AUTSball.BulletGroup.empty()
-        AUTSball.EffectGroup.empty()
-        AUTSball.TextGroup.empty()
+        groups.empty_groups()
         background_group.empty()
         self.kill()
 

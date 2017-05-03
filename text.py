@@ -1,0 +1,100 @@
+# -*- coding: utf8 -*-
+import pygame
+import groups
+from colors import *
+
+
+def show_text(win, pos, text, color=(255, 255, 255), bgcolor=(0, 0, 0), font_size=24):
+    """ Utilityfunktio tekstin näyttämiseen ruudulla """
+    font = pygame.font.Font(None, font_size)
+    textimg = font.render(text, 1, color, bgcolor)
+    win.blit(textimg, pos)
+
+
+class DisappearingText(pygame.sprite.Sprite):
+    """ Näyttää ruudulla tekstin x framen ajan """
+    def __init__(self, group=groups.TextGroup, pos=(0,0), text="", frames_visible=60,
+                 color=WHITE, bgcolor=None, font_size=24, flashes=0, flash_interval=10):
+        pygame.sprite.Sprite.__init__(self, group)
+
+        self.frame_counter = 0
+        self.frames_visible = frames_visible
+
+        font = pygame.font.Font(None, font_size)
+        self.image = font.render(text, 1, color, bgcolor)
+        self.original_position = pos
+        self.rect = self.image.get_rect()
+        self.rect.center = pos
+
+        self.flashes = flashes
+        self.flash_interval = flash_interval
+        self.visible = 1
+
+    def update(self):
+        self.frame_counter += 1
+        if self.frame_counter > self.frames_visible:
+            self.kill()
+
+        if self.flashes and self.frame_counter % self.flash_interval == 0:
+            self.toggle_image()
+
+    def toggle_image(self):
+        if self.visible:
+            self.visible = 0
+            self.rect.center = -100, -100
+        else:
+            self.visible = 1
+            self.rect.center = self.original_position
+
+
+class ScrollingText(pygame.sprite.Sprite):
+    """ Scrollaa tekstiä ruudulla """
+    def __init__(self, group=groups.TextGroup, y_pos=0, screen_size_x=800, text="", scroll_direction='left', scroll_speed=5,
+                 color=WHITE, bgcolor=None, font_size=24, flashes=0, flash_interval=10):
+        pygame.sprite.Sprite.__init__(self, group)
+
+        self.frame_counter = 0
+
+        font = pygame.font.Font(None, font_size)
+        self.image = font.render(text, 1, color, bgcolor)
+        self.original_image = self.image
+        self.empty_image = pygame.Surface((0, 0))
+        self.rect = self.image.get_rect()
+        self.screen_size_x = screen_size_x
+
+        self.scroll_direction = scroll_direction
+
+        if scroll_direction == 'left':
+            self.rect.midleft = screen_size_x, y_pos
+            self.original_position = self.rect.midleft
+            self.scroll_speed = scroll_speed * -1
+        else:
+            self.rect.midright = 0, y_pos
+            self.original_position = self.rect.midright
+            self.scroll_speed = scroll_speed
+
+        self.flashes = flashes
+        self.flash_interval = flash_interval
+        self.visible = 1
+
+    def update(self):
+        self.rect.x += self.scroll_speed
+        if self.scroll_direction == 'left':
+            if self.rect.midright[0] < 0:
+                self.rect.midleft = self.original_position
+        else:
+            if self.rect.midleft[0] > self.screen_size_x:
+                self.rect.midright = self.original_position
+
+        if self.flashes:
+            self.frame_counter += 1
+            if self.frame_counter % self.flash_interval == 0:
+                self.toggle_image()
+
+    def toggle_image(self):
+        if self.visible:
+            self.visible = 0
+            self.image = self.empty_image
+        else:
+            self.visible = 1
+            self.image = self.original_image

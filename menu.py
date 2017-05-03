@@ -3,6 +3,7 @@ import pygame
 import AUTSball
 import menu_background_action
 import music
+import groups
 from colors import *
 from pygame.locals import *
 
@@ -232,13 +233,14 @@ def debug_run():
             if active_mode == 'practice':
                 if event.type == KEYUP:
                     if event.key == K_ESCAPE:
-                        practice_game.empty_groups()
+                        groups.empty_groups()
                         del practice_game
                         active_mode = 'menu'
                         window.fill(BLACK)
                         background_action = menu_background_action.BackgroundAction()
                         static_visual_components_group.draw(window)
-                        music_player.set_screen('menu')
+                        music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
+                        music_player.play()
             if event.type == pygame.QUIT:
                 running = False
             if event.type == music.MUSIC_FINISHED:
