@@ -156,10 +156,6 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.ship6 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 400))
         self.ball = DemoBall(level=self.level, parent=self)
 
-        # coders = ['Konso', 'Muumi', 'Tursa']
-        # random.shuffle(coders)
-        # coders_string = ', '.join(coders)
-        # credits_text = "Idea: Konso"+30*" "+"Code: "+coders_string+30*" "+"Music: Pera"+30*" "+"Your name can be here!"
         credits_text = text.make_credits_string()
         text.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
 

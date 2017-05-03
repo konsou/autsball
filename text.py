@@ -105,11 +105,12 @@ class ScrollingText(pygame.sprite.Sprite):
 def credits_reader(creditsfile='CREDITS'):
     """ 
     Lukee CREDITS-tiedostosta creditsit dictiin ja palauttaa sen, ignoroi kommenttirivit ja tyhjät rivit
-    
+    Lisää keyn alkuun osion järjestysnumeron. Jos numero on alle 10, sen alkuun lisätään nolla.
+     
     Dictin formaatti:
     {'(järjestysnumero)Osion otsikko': ['lista', 'osiossa', 'olevista', 'nimistä']}
     Esim:
-    {'0Idea': ['Konso'], '1Code': ['Konso', 'Tursa', 'Muumi']}
+    {'00Idea': ['Konso'], '01Code': ['Konso', 'Tursa', 'Muumi']}
     """
     return_dict = {}
     current_section = ''
@@ -121,7 +122,11 @@ def credits_reader(creditsfile='CREDITS'):
         current_line = string.rstrip(current_line)
         if len(current_line) > 0 and current_line[0] != '#':
             if current_line[-1:] == ':':
-                current_section = str(current_section_number)+current_line[:-1]
+                if current_section_number < 10:
+                    section_number_string = '0' + str(current_section_number)
+                else:
+                    section_number_string = str(current_section_number)
+                current_section = section_number_string + current_line[:-1]
                 current_section_number += 1
             else:
                 if len(current_line) > 0:
@@ -138,22 +143,16 @@ def make_credits_string(creditsfile='CREDITS', numspaces=30):
     Osiot tulee siinä järjestyksessä kuin CREDITS-tiedostossa
     Randomoi nimien järjestyksen osioiden sisällä
     Lisää osioiden väliin numspaces verran välilyöntejä
+    Saattaa hieman bugata jos osioita yli 100
     """
     return_string = ''
     credits_dict = credits_reader(creditsfile)
     keys = credits_dict.keys()
     keys.sort()
-    # random.shuffle(keys)
     for current_key in keys:
-        return_string += current_key[1:] + ":  "
+        return_string += current_key[2:] + ":  "
         random.shuffle(credits_dict[current_key])
-        is_first = 1
-        for current_name in credits_dict[current_key]:
-            if is_first:
-                is_first = 0
-            else:
-                return_string += ",  "
-            return_string += current_name
+        return_string += ',  '.join(credits_dict[current_key])
         return_string += ' ' * numspaces
     return return_string
 
