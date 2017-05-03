@@ -118,8 +118,8 @@ class DemoPlayer(player.PlayerSprite):
     def shoot(self):
         """ Pitää overrideta kun randomisyystä vakioarvot ei toimi """
         if self.cooldown_counter == 0:
-            bullet_x = int(20 * math.sin(math.radians(self.heading)) * -1 + self.x)
-            bullet_y = int(20 * math.cos(math.radians(self.heading)) * -1 + self.y)
+            bullet_x = int(28 * math.sin(math.radians(self.heading)) * -1 + self.x)
+            bullet_y = int(28 * math.cos(math.radians(self.heading)) * -1 + self.y)
             bullet.BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
                          speed=20)
             self.cooldown_counter = self.cooldown_basic_shot
@@ -156,10 +156,11 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.ship6 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 400))
         self.ball = DemoBall(level=self.level, parent=self)
 
-        coders = ['Konso', 'Muumi', 'Tursa']
-        random.shuffle(coders)
-        coders_string = ', '.join(coders)
-        credits_text = "Idea: Konso"+30*" "+"Code: "+coders_string+30*" "+"Music: Pera"+30*" "+"Your name can be here!"
+        # coders = ['Konso', 'Muumi', 'Tursa']
+        # random.shuffle(coders)
+        # coders_string = ', '.join(coders)
+        # credits_text = "Idea: Konso"+30*" "+"Code: "+coders_string+30*" "+"Music: Pera"+30*" "+"Your name can be here!"
+        credits_text = text.make_credits_string()
         text.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
 
         self.image = pygame.Surface((800, 600))
@@ -170,8 +171,6 @@ class BackgroundAction(pygame.sprite.Sprite):
 
         self.score_green = 0
         self.score_red = 0
-
-
 
     def update(self):
         self.ball_pos = (self.ball.x, self.ball.y)

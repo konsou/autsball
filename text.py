@@ -1,6 +1,8 @@
 # -*- coding: utf8 -*-
 import pygame
 import groups
+import string
+import random
 from colors import *
 
 
@@ -98,3 +100,60 @@ class ScrollingText(pygame.sprite.Sprite):
         else:
             self.visible = 1
             self.image = self.original_image
+
+
+def credits_reader(creditsfile='CREDITS'):
+    """ 
+    Lukee CREDITS-tiedostosta creditsit dictiin ja palauttaa sen, ignoroi kommenttirivit ja tyhjät rivit
+    
+    Dictin formaatti:
+    {'(järjestysnumero)Osion otsikko': ['lista', 'osiossa', 'olevista', 'nimistä']}
+    Esim:
+    {'0Idea': ['Konso'], '1Code': ['Konso', 'Tursa', 'Muumi']}
+    """
+    return_dict = {}
+    current_section = ''
+    current_section_number = 0
+    fileobject = open(creditsfile)
+    contents = fileobject.readlines()
+    fileobject.close()
+    for current_line in contents:
+        current_line = string.rstrip(current_line)
+        if len(current_line) > 0 and current_line[0] != '#':
+            if current_line[-1:] == ':':
+                current_section = str(current_section_number)+current_line[:-1]
+                current_section_number += 1
+            else:
+                if len(current_line) > 0:
+                    try:
+                        return_dict[current_section].append(current_line)
+                    except KeyError:
+                        return_dict[current_section] = [current_line]
+    return return_dict
+
+
+def make_credits_string(creditsfile='CREDITS', numspaces=30):
+    """ 
+    Lukee CREDITS-tiedostosta creditsit ja tekee niistä yhden stringin
+    Osiot tulee siinä järjestyksessä kuin CREDITS-tiedostossa
+    Randomoi nimien järjestyksen osioiden sisällä
+    Lisää osioiden väliin numspaces verran välilyöntejä
+    """
+    return_string = ''
+    credits_dict = credits_reader(creditsfile)
+    keys = credits_dict.keys()
+    keys.sort()
+    # random.shuffle(keys)
+    for current_key in keys:
+        return_string += current_key[1:] + ":  "
+        random.shuffle(credits_dict[current_key])
+        is_first = 1
+        for current_name in credits_dict[current_key]:
+            if is_first:
+                is_first = 0
+            else:
+                return_string += ",  "
+            return_string += current_name
+        return_string += ' ' * numspaces
+    return return_string
+
