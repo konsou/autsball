@@ -4,6 +4,7 @@ import math
 import game_object
 import vector
 import groups
+import effect
 from colors import *
 
 
@@ -18,6 +19,7 @@ class BallSprite(game_object.GameObject):
         self.attached_player = None
         self.attached_player_max_distance = 50  # "tetherin" pituus
         self.attached_player_max_distance_squared = self.attached_player_max_distance**2  # distance-laskelmia varten
+        self.tether = None
 
         self.mass = 1.0
         self.max_speed = 10
@@ -39,6 +41,7 @@ class BallSprite(game_object.GameObject):
             collide_list = pygame.sprite.spritecollide(self, player_group, dokill=False, collided=pygame.sprite.collide_circle)
             if len(collide_list) > 0:
                 self.attach_to_player(collide_list[0])
+                self.tether = effect.TetherSprite(attached_ball=self, attached_player=collide_list[0])
 
         # Jos on liitetty pelaajaan ja jos on liian kaukana niin vetävät toisiaan puoleensa
         # Suht hyvä, voi viilata jos saa vielä paremmaksi
@@ -93,6 +96,8 @@ class BallSprite(game_object.GameObject):
         Tätä kutsuu PlayerSpriten shoot-metodi, joka hoitaa detachauksen ja antaa tarvittavat tiedot
         """
 
+        self.tether.destroy()
+
         if x is not None and y is not None:
             # Tämä tehdään jos annettu uudet koordinaatit
             # Jostain syystä vaatii direktion korjauksen tässä
@@ -124,5 +129,5 @@ class BallSprite(game_object.GameObject):
         if self.attached_player is not None:
             self.attached_player.detach()
             self.attached_player = None
-            # self.tether.kill()
+            self.tether.destroy()
             # self.tether = None
