@@ -219,7 +219,7 @@ class EffectSprite(game_object.GameObject):
         self.effect_type = effect_type
         self.visible = visible
 
-    def update(self):
+    def update(self, viewscreen_rect):
         if self.visible:
             player_dir_radians = math.radians(self.attached_player.heading)
             dx = int(12 * math.sin(player_dir_radians))
