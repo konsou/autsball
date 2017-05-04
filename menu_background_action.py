@@ -15,8 +15,8 @@ from colors import *
 
 """ IHAN HIRVEÄ SOTKU MUTTA TOIMII PÄÄOSIN """
 # TODO: MAJOR CLEANUP
-# TODO: bulletit collideaa shippien kanssa kun ne ampuu niitä
 # TODO: äänet pois
+# TODO: suuri optimointi, tökkii
 
 background_group = pygame.sprite.GroupSingle()
 

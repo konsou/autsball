@@ -1,10 +1,4 @@
 # Credits!
-#
-# Tämän tiedoston rakenne on tärkeä automaattisen luennan kannalta!
-#   -Osion otsikon lopussa pitää olla kaksoispiste
-#   -Sen jälkeen tulee lista nimistä, jokainen omalla rivillään
-#
-#-alkuiset rivit ja tyhjät rivit skipataan
 
 Idea:
 Konso
@@ -26,3 +20,10 @@ Konso
 
 Other:
 Your name could be here!
+
+
+# Tämän tiedoston rakenne on tärkeä automaattisen luennan kannalta!
+#   -Osion otsikon lopussa pitää olla kaksoispiste
+#   -Sen jälkeen tulee lista nimistä, jokainen omalla rivillään
+#
+#-alkuiset rivit ja tyhjät rivit skipataan
