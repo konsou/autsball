@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-import pygame, math, vector, game_object, AUTSball
+import pygame, math, vector, game_object, game
 
 
 center_point = (400,300)
@@ -12,9 +12,9 @@ pygame.init()
 win = pygame.display.set_mode((800, 600))
 pygame.display.set_caption("Angle finding test")
 
-class TestBall(AUTSball.BallSprite):
+class TestBall(game.BallSprite):
     def __init__(self, level):
-        AUTSball.BallSprite.__init__(self, level=level, parent=DummyParent())
+        game.BallSprite.__init__(self, level=level, parent=DummyParent())
         self.gravity_affects = 1
         self.start_position = 400, 300
         self.rect.center = self.start_position
@@ -22,9 +22,9 @@ class TestBall(AUTSball.BallSprite):
         self.attached_player_max_distance_squared = self.attached_player_max_distance**2  # distance-laskelmia varten
 
 
-class TestPlayer(AUTSball.PlayerSprite):
+class TestPlayer(game.PlayerSprite):
     def __init__(self, level):
-        AUTSball.PlayerSprite.__init__(self, level=level, parent=DummyParent())
+        game.PlayerSprite.__init__(self, level=level, parent=DummyParent())
         self.gravity_affects = 0
         self.is_centered_on_screen = 0
         self.viewscreen_rect = 0, 0, 800, 600
@@ -36,7 +36,7 @@ class DummyParent():
 class EmptyLevel(pygame.sprite.Sprite):
     """ Level-classi. Käytännössä vain taustakuva, logiikka tapahtuu muualla. """
     def __init__(self):
-        pygame.sprite.Sprite.__init__(self, AUTSball.LevelGroup)
+        pygame.sprite.Sprite.__init__(self, game.LevelGroup)
         # self.image = pygame.image.load('gfx/test_arena_2400x1200.png').convert_alpha()
         self.image = pygame.Surface((800, 600))
         self.size_x = self.image.get_width()
@@ -81,12 +81,12 @@ while running:
         line_color = green
 
     win.fill(0)
-    AUTSball.BallGroup.update(viewscreen_rect)
-    AUTSball.PlayerGroup.update()
+    game.BallGroup.update(viewscreen_rect)
+    game.PlayerGroup.update()
 
-    AUTSball.LevelGroup.draw(win)
-    AUTSball.BallGroup.draw(win)
-    AUTSball.PlayerGroup.draw(win)
+    game.LevelGroup.draw(win)
+    game.BallGroup.draw(win)
+    game.PlayerGroup.draw(win)
 
     pygame.draw.line(win, line_color, (ball.x, ball.y), (player.x, player.y), 2)
 

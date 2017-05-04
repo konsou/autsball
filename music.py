@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 import pygame
-import AUTSball
+import game
 import random
 import tinytag
+import groups
 
 
 """
@@ -208,7 +209,7 @@ def debug_run():
     # Music
     pygame.init()
     pygame.mixer.init()
-    music_player = MusicPlayer(screen='game', window_size=(800, 600), pos='bottomleft', group=AUTSball.TextGroup)
+    music_player = MusicPlayer(screen='game', window_size=(800, 600), pos='bottomleft', group=groups.TextGroup)
     music_player.play()
 
     running = True
@@ -221,8 +222,8 @@ def debug_run():
                 music_player.next()
 
         window.fill(0)
-        AUTSball.TextGroup.update()
-        AUTSball.TextGroup.draw(window)
+        groups.TextGroup.update()
+        groups.TextGroup.draw(window)
         pygame.display.flip()
         clock.tick(30)
 
