@@ -148,6 +148,8 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.ship5 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 300))
         self.ship6 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 400))
         self.ball = DemoBall(level=self.level, parent=self)
+        game_object.AnimatedObject(level=self.level, parent=self, group=AUTSball.EffectGroup, start_position=(400, 780),
+                                   image_files=['gfx/'])
 
         coders = ['Konso', 'Muumi', 'Tursa']
         random.shuffle(coders)

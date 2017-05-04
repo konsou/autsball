@@ -261,23 +261,38 @@ class GameObject(pygame.sprite.Sprite):
         #     print("Not playing sound", sound)
 
 
-class DummyObject(GameObject):
-    """ 
-    Luo kopion alkuperäisestä GameObjectista soveltuvin osin seinän collision detektiota varten 
-    Ei taida olla enää käytössä
-    """
-    def __init__(self, original):
-        self.x = original.x
-        self.y = original.y
-        self.move_vector = original.move_vector
-        self.gravity_affects = original.gravity_affects
-        self.parent = original.parent
-        self.level = original.level
-        self.max_speed = original.max_speed
-        self.is_centered_on_screen = original.is_centered_on_screen
-        self.viewscreen_rect = original.viewscreen_rect
-        self.rect = original.rect
+class AnimatedObject(GameObject):
+    """ Objekti joka osaa animoida itseään. """
+    # TODO: tee loppuun
+    def __init__(self, level=None, parent=None, group=None, start_position=None, image_files=[], frames_per_image=5):
+        GameObject.__init__(self, level=level, parent=parent, group=group, image_file=image_files[0], start_position=start_position)
 
+        self.images = []
+        for current_image in image_files:
+            self.images.append(pygame.image.load(current_image).convert_alpha())
+        self.number_of_images = len(self.images)
+        self.image = self.images[0]
+        self.rect = self.image.get_rect()
+
+        self.frames_per_image = frames_per_image
+        self.frame_counter = 0
+        self.current_image_counter = 0
+
+    def update(self):
+        self.frame_counter += 1
+        if self.frame_counter % self.frames_per_image == 0:
+            self.next()
+
+    def next(self):
+        """ Muuttaa image:ksi seuraavan kuvan animaatiossa """
+        self.current_image_counter += 1
+        try:
+            self.image = self.images[self.current_image_counter]
+        except IndexError:
+            # Jos on menty animaatiokuvissa yli kuvamäärän niin mennään takaisin kuvaan nro 0
+            self.image = self.images[0]
+            self.current_image_counter = 0
+        self.rect = self.image.get_rect()
 
 def get_angle_difference(angle1, angle2, degrees=0):
     """ Palauttaa kahden kulman välisen eron radiaaneissa. Väli -PI...0...PI """
