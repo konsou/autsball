@@ -6,7 +6,8 @@ from colors import *
 
 class Level(pygame.sprite.Sprite):
     """ Level-classi. Käytännössä vain taustakuva, logiikka tapahtuu muualla. """
-    def __init__(self, image_file=None, image=None, group=groups.LevelGroup, background_image_file=None):
+    def __init__(self, image_file=None, image=None, group=groups.LevelGroup, background_image_file=None,
+                 colorkey=BLACK):
         pygame.sprite.Sprite.__init__(self, group)
 
         # Level-imagen lataus
@@ -18,7 +19,7 @@ class Level(pygame.sprite.Sprite):
             self.image = pygame.image.load('gfx/test_arena_vertical_challenge_alpha.png').convert()
 
         # Colorkey eli musta on transparent
-        self.image.set_colorkey(BLACK)
+        self.image.set_colorkey(colorkey)
 
         self.size_x = self.image.get_width()
         self.size_y = self.image.get_height()
