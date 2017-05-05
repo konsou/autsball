@@ -159,12 +159,12 @@ class GameObject(pygame.sprite.Sprite):
                     self.force_play_sound(self.wall_collide_sound)
             if self.is_bullet:
                 # Tuhoaa seinää törmätessä ja myös itsensä jos on bullet
-                #pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-                pixels_to_destroy = self.get_non_alpha_pixels()
-                for pixel in pixels_to_destroy:
-                    pixel[0] += self.x - self.size // 2
-                    pixel[1] += self.y - self.size // 2
-                self.level.destroy_land(pixels_to_destroy)
+                pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
+                # pixels_to_destroy = self.get_non_alpha_pixels()
+                # for pixel in pixels_to_destroy:
+                #     pixel[0] += self.x - self.size // 2
+                #     pixel[1] += self.y - self.size // 2
+                # self.level.destroy_land(pixels_to_destroy)
                 self.kill()
             else:
                 # Vauhti loppuu kuin seinään

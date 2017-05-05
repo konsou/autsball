@@ -1,6 +1,7 @@
 # -*- coding: utf8 -*-
 import pygame
 import groups
+from colors import *
 
 
 class Level(pygame.sprite.Sprite):
@@ -12,9 +13,12 @@ class Level(pygame.sprite.Sprite):
         if image is not None:
             self.image = image
         elif image_file is not None:
-            self.image = pygame.image.load(image_file).convert_alpha()
+            self.image = pygame.image.load(image_file).convert()
         else:
-            self.image = pygame.image.load('gfx/test_arena_vertical_challenge_alpha.png').convert_alpha()
+            self.image = pygame.image.load('gfx/test_arena_vertical_challenge_alpha.png').convert()
+
+        # Colorkey eli musta on transparent
+        self.image.set_colorkey(BLACK)
 
         self.size_x = self.image.get_width()
         self.size_y = self.image.get_height()
