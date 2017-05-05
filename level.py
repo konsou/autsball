@@ -2,7 +2,7 @@
 import pygame
 import groups
 from colors import *
-
+from constants import *
 
 class Level(pygame.sprite.Sprite):
     """ Level-classi. Käytännössä vain taustakuva, logiikka tapahtuu muualla. """
@@ -30,6 +30,17 @@ class Level(pygame.sprite.Sprite):
         self.background_image = None
         if background_image_file:
             self.background_image = pygame.image.load(background_image_file).convert_alpha()
+
+        # Generoidaan ulkopuolinen aines
+        self.off_level_image = pygame.image.load('gfx/cave_indestructible_rock.png').convert()
+        self.off_level_surface = pygame.Surface((self.size_x+WINDOW_SIZE[0], self.size_y+WINDOW_SIZE[1]))
+        surface_rect = self.off_level_surface.get_rect()
+        image_rect = self.off_level_image.get_rect()
+        for x in range(0, surface_rect.width, image_rect.width):
+            for y in range(0, surface_rect.height, image_rect.height):
+                self.off_level_surface.blit(self.off_level_image, (x, y))
+        self.off_level_surface.fill(BLACK, (WINDOW_SIZE[0]//2, WINDOW_SIZE[1]//2, self.size_x, self.size_y))
+        self.off_level_surface.set_colorkey(BLACK)
 
     def destroy_land(self, pixels_to_destroy):
         for pixel in pixels_to_destroy:
