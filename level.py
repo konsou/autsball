@@ -25,3 +25,7 @@ class Level(pygame.sprite.Sprite):
         self.background_image = None
         if background_image_file:
             self.background_image = pygame.image.load(background_image_file).convert_alpha()
+
+    def destroy_land(self, pixels_to_destroy):
+        for pixel in pixels_to_destroy:
+            self.image.set_at(pixel, pygame.Color(0, 0, 0, 0))
