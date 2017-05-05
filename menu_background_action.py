@@ -113,7 +113,7 @@ class DemoPlayer(player.PlayerSprite):
             if random.randint(1, 20) == 1:
                 self.shoot()
 
-        player.PlayerSprite.update(self)
+        player.PlayerSprite.update(self, self.viewscreen_rect)
 
     def shoot(self):
         """ Pitää overrideta kun randomisyystä vakioarvot ei toimi """

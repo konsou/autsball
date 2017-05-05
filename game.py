@@ -14,6 +14,9 @@ from colors import *
 
 class AUTSBallGame:
     def __init__(self):
+        self.is_running = False
+        self.local_player_id = 0
+
         # Vakioita
         self.gravity = 0.1
         self.screen_size_x = 800
@@ -31,7 +34,6 @@ class AUTSBallGame:
         # Taustamusiikki
         self.music_player = music.MusicPlayer(screen='game', window_size=(self.screen_size_x, self.screen_size_y),
                                               pos='bottomleft', group=groups.TextGroup, shuffle=0)
-        self.music_player.play()
 
         # SFX
         self.goal_green_sound = pygame.mixer.Sound(file='sfx/goal_green.wav')
@@ -44,9 +46,10 @@ class AUTSBallGame:
 
         # TODO: tähän assettien esilataus
         # Instansioidaan leveli, tämä lataa myös level-kuvan joka voi olla iiisooo
-        self.current_level = level.Level()
+        self.current_level = level.Level(background_image_file='gfx/cave_background.png')
         # Instansioidaan pelaaja ja pallo
-        self.player = { 0: player.PlayerSprite(level=self.current_level, parent=self) }
+        self.players = {}
+        self.player_count = 0
         self.ball = ball.BallSprite(level=self.current_level, parent=self)
 
         self.viewscreen_rect = None
@@ -58,54 +61,90 @@ class AUTSBallGame:
         self.quit_game = False
         self.frame_counter = 0
 
+    def start(self):
+        if not self.is_running:
+            self.is_running = True
+
+            self.music_player.play()
+
+    def destroy(self):
+        self.is_running = False
+        self.players.clear()
+        self.player_count = 0
+        groups.empty_groups()
+        self.music_player.stop()
+
+    def add_player(self, player_id=None):
+        # Lisää pelaajan pelaajalistaan
+        if player_id == None:
+            self.players[self.player_count] = player.PlayerSprite(player_id=player_id,
+                                                           level=self.current_level,
+                                                           parent=self,
+                                                           spawn_point=self.current_level.player_spawns_team_1[
+                                                               self.player_count])
+
+        else:
+            self.players[player_id] = player.PlayerSprite(player_id=player_id,
+                                                   level=self.current_level,
+                                                   parent=self,
+                                                   spawn_point=self.current_level.player_spawns_team_1[
+                                                       self.player_count])
+
+        self.player_count += 1
+
+    def remove_player(self, player_id):
+        # Poistaa pelaajan pelaajalistasta ja palauttaa kyseisen pelaajan tai Nonen jos pelaajaa ei löydy
+        return self.players.pop(player_id, None)
+
     def update(self):
-        # Tämä estää errorin quitattaessa
-        if self.quit_game is False:
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.quit_game = True
-                if event.type == music.MUSIC_FINISHED:
-                    self.music_player.next()
+        if self.is_running:
+            # Tämä estää errorin quitattaessa
+            if self.quit_game is False:
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        self.quit_game = True
+                    if event.type == music.MUSIC_FINISHED:
+                        self.music_player.next()
 
-            pressed_keys = pygame.key.get_pressed()
-            if pressed_keys[pygame.K_UP]:
-                self.player[0].accelerate()
-            else:
-                self.player[0].stop_acceleration()
-            if pressed_keys[pygame.K_RIGHT]:
-                self.player[0].rotate_right()
-            if pressed_keys[pygame.K_LEFT]:
-                self.player[0].rotate_left()
-            if pressed_keys[pygame.K_LSHIFT] or pressed_keys[pygame.K_RSHIFT]:
-                self.player[0].shoot()
-            if pressed_keys[pygame.K_BACKSPACE]:
-                self.player[0].recover()
+                pressed_keys = pygame.key.get_pressed()
+                if pressed_keys[pygame.K_UP]:
+                    self.players[self.local_player_id].accelerate()
+                else:
+                    self.players[self.local_player_id].stop_acceleration()
+                if pressed_keys[pygame.K_RIGHT]:
+                    self.players[self.local_player_id].rotate_right()
+                if pressed_keys[pygame.K_LEFT]:
+                    self.players[self.local_player_id].rotate_left()
+                if pressed_keys[pygame.K_LSHIFT] or pressed_keys[pygame.K_RSHIFT]:
+                    self.players[self.local_player_id].shoot()
+                if pressed_keys[pygame.K_BACKSPACE]:
+                    self.players[self.local_player_id].recover()
 
-            # Viewscreen rect: viewscreen absoluuttisissa koordinaateissa
-            self.viewscreen_rect = (self.player[0].x - self.screen_size_x // 2,
-                                    self.player[0].y - self.screen_size_y // 2,
-                                    self.screen_size_x,
-                                    self.screen_size_y)
+                # Viewscreen rect: viewscreen absoluuttisissa koordinaateissa
+                self.viewscreen_rect = (self.players[self.local_player_id].x - self.screen_size_x // 2,
+                                        self.players[self.local_player_id].y - self.screen_size_y // 2,
+                                        self.screen_size_x,
+                                        self.screen_size_y)
 
-            # Background view rect: näytetään levelistä oikea kohta
-            self.background_view_rect = (self.screen_size_x // 2 - self.player[0].x,
-                                         self.screen_size_y // 2 - self.player[0].y,
-                                         self.screen_size_x,
-                                         self.screen_size_y)
+                # Background view rect: näytetään levelistä oikea kohta
+                self.background_view_rect = (self.screen_size_x // 2 - self.players[self.local_player_id].x,
+                                             self.screen_size_y // 2 - self.players[self.local_player_id].y,
+                                             self.screen_size_x,
+                                             self.screen_size_y)
 
-            # Spritejen päivitykset tässä
-            groups.BulletGroup.update(self.viewscreen_rect)
-            groups.BallGroup.update(self.viewscreen_rect)
-            groups.PlayerGroup.update()
-            groups.EffectGroup.update()
-            groups.TextGroup.update()
+                # Spritejen päivitykset tässä
+                groups.BulletGroup.update(self.viewscreen_rect)
+                groups.BallGroup.update(self.viewscreen_rect)
+                groups.PlayerGroup.update(self.viewscreen_rect)
+                groups.EffectGroup.update()
+                groups.TextGroup.update()
 
-            # Päivitetään graffat vaan joka toisessa framessa
-            if self.frame_counter % 2 == 0:
-                self.update_graphics()
+                # Päivitetään graffat vaan joka toisessa framessa
+                if self.frame_counter % 2 == 0:
+                    self.update_graphics()
 
-            # Pelilogiikan FPS target 60, eli graffoilla siis 30
-            self.clock.tick(60)
+                # Pelilogiikan FPS target 60, eli graffoilla siis 30
+                self.clock.tick(60)
 
         if self.quit_game:
             self.exit()
@@ -115,6 +154,12 @@ class AUTSBallGame:
 
         # Ruutu tyhjäksi
         self.win.fill((0, 0, 0))
+        # Piirretään taustakuva jos on
+        if self.current_level.background_image:
+            image_width, image_height = self.current_level.background_image.get_size()
+            for y in range(0, self.screen_size_y, image_height):
+                for x in range(0, self.screen_size_x, image_width):
+                    self.win.blit(self.current_level.background_image, (x, y))
         # Piirretään levelistä vain viewscreenin kokoinen alue, pelaaja keskellä
         self.win.blit(self.current_level.image, self.background_view_rect)
 
@@ -134,7 +179,7 @@ class AUTSBallGame:
         # Näytetään pallonsuuntamarkkeri
         # TODO: muuta pallon sijaan nuoli joka osoittaa oikeaan suuntaan
         # TODO: tee niin että jos pallo on lähempänä kuin 100 pikseliä niin markkeri on pallon päällä
-        if self.player[0].attached_ball is None:
+        if self.players[self.local_player_id].attached_ball is None:
             ball_angle = self.get_ball_angle_in_radians(self.ball)
             vx = int(100 * math.cos(ball_angle))
             vy = int(100 * math.sin(ball_angle))

@@ -23,7 +23,7 @@ class DisappearingText(pygame.sprite.Sprite):
         self.frames_visible = frames_visible
 
         font = pygame.font.Font(None, font_size)
-        self.image = font.render(text, 1, color, bgcolor)
+        self.image = font.render(text, 1, color)#, bgcolor)
         self.original_position = pos
         self.rect = self.image.get_rect()
         self.rect.center = pos
@@ -58,7 +58,7 @@ class ScrollingText(pygame.sprite.Sprite):
         self.frame_counter = 0
 
         font = pygame.font.Font(None, font_size)
-        self.image = font.render(text, 1, color, bgcolor)
+        self.image = font.render(text, 1, color)#, bgcolor)
         self.original_image = self.image
         self.empty_image = pygame.Surface((0, 0))
         self.rect = self.image.get_rect()

@@ -5,11 +5,14 @@ import game_object
 import effect
 import bullet
 import groups
+import text
 from colors import *
 
 
 class PlayerSprite(game_object.GameObject):
-    def __init__(self, level=None, parent=None, group=groups.PlayerGroup):
+    def __init__(self, player_id=None, level=None, parent=None, group=groups.PlayerGroup, spawn_point=None):
+        self.owning_player_id = player_id
+
         # Lisätään ryhmään
         game_object.GameObject.__init__(self, group=group, level=level, parent=parent,
                                         image_file='gfx/ship1_red_20px.png')
@@ -19,7 +22,10 @@ class PlayerSprite(game_object.GameObject):
         self.thrust_gfx = effect.EffectSprite(attached_player=self, image=self.motor_flame_image,
                                        effect_type='motorflame', visible=0, parent=parent)
         self.rect.center = self.parent.screen_center_point
-        self.is_centered_on_screen = 1
+        if self.owning_player_id == parent.local_player_id:
+            self.is_centered_on_screen = 1
+        else:
+            self.is_centered_on_screen = 0
 
         # Sound effex
         self.motor_sound = pygame.mixer.Sound(file='sfx/shhhh_v2.wav')
@@ -31,7 +37,10 @@ class PlayerSprite(game_object.GameObject):
         self.bullet_collide_sound = pygame.mixer.Sound(file='sfx/metal_thud_2.wav')
 
         # Koordinaatit
-        self.start_position = (700, 1200)
+        if not spawn_point:
+            self.start_position = (700, 1200)
+        else:
+            self.start_position = spawn_point
         self.x, self.y = self.start_position
         self.x_previous, self.y_previous = self.x, self.y
 
@@ -53,7 +62,9 @@ class PlayerSprite(game_object.GameObject):
         self.recovery_time = 3  # sekunteja jopa!
         self.recovery_started_at = 0
 
-    def update(self, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
+    def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
+        self.viewscreen_rect = viewscreen_rect
+
         """ Tämä haluaa tietää player- ja bulletgroupit että ne voi tarvittaessa määrittää vapaasti """
         # Lisätään liikemäärään thrust-vektori
         # Tässä jopa ottaa jo massan huomioon!
@@ -142,7 +153,7 @@ class PlayerSprite(game_object.GameObject):
     def recover(self):
         """ Aloittaa recovery-laskennan """
         self.recovery_started_at = pygame.time.get_ticks()
-        DisappearingText(pos=self.parent.screen_center_point, text="RECOVERING...", frames_visible=240, flashes=1,
+        text.DisappearingText(pos=self.parent.screen_center_point, text="RECOVERING...", frames_visible=240, flashes=1,
                          font_size=80, color=RED)
 
 

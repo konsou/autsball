@@ -222,9 +222,13 @@ def debug_run():
                     background_action.kill_me()
                     del background_action
                     music_player.stop()
-                    del music_player
+                    #del music_player
 
                     practice_game = game.AUTSBallGame()
+                    practice_game.add_player(0)
+                    practice_game.add_player(1)
+                    practice_game.add_player(2)
+                    practice_game.start()
                     # music_player.stop()
                 if 'click' in multiplayer_button.handleEvent(event):
                     print('multiplayer button clicked')
@@ -233,14 +237,16 @@ def debug_run():
             if active_mode == 'practice':
                 if event.type == KEYUP:
                     if event.key == K_ESCAPE:
-                        groups.empty_groups()
+                        practice_game.destroy()
+                        #groups.empty_groups()
                         del practice_game
                         active_mode = 'menu'
                         window.fill(BLACK)
                         background_action = menu_background_action.BackgroundAction()
                         static_visual_components_group.draw(window)
-                        music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
+                        #music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
                         music_player.play()
+                        music_player.set_screen('menu')
             if event.type == pygame.QUIT:
                 running = False
             if event.type == music.MUSIC_FINISHED:
