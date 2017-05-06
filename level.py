@@ -29,7 +29,14 @@ class Level(pygame.sprite.Sprite):
 
         self.background_image = None
         if background_image_file:
-            self.background_image = pygame.image.load(background_image_file).convert_alpha()
+            #generoidaan taustakuva
+            background_image = pygame.image.load(background_image_file).convert_alpha()
+            self.background_image = pygame.Surface((self.size_x, self.size_y))
+            surface_rect = self.background_image.get_rect()
+            image_rect = background_image.get_rect()
+            for x in range(0, surface_rect.width, image_rect.width):
+                for y in range(0, surface_rect.height, image_rect.height):
+                    self.background_image.blit(background_image, (x, y))
 
         # Generoidaan ulkopuolinen aines
         self.off_level_image = pygame.image.load('gfx/cave_indestructible_rock.png').convert()

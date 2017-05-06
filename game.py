@@ -157,10 +157,11 @@ class AUTSBallGame:
         self.win.fill((0, 0, 0))
         # Piirretään taustakuva jos on
         if self.current_level.background_image:
-            image_width, image_height = self.current_level.background_image.get_size()
-            for y in range(0, self.screen_size_y, image_height):
-                for x in range(0, self.screen_size_x, image_width):
-                    self.win.blit(self.current_level.background_image, (x, y))
+            self.win.blit(self.current_level.background_image, self.background_view_rect)
+            #image_width, image_height = self.current_level.background_image.get_size()
+            #for y in range(0, self.screen_size_y, image_height):
+            #    for x in range(0, self.screen_size_x, image_width):
+            #        self.win.blit(self.current_level.background_image, (x, y))
 
         # Piirretään levelin ulkopuolinen tuhoutumaton alue
         off_level_rect = pygame.Rect(self.background_view_rect[0]-WINDOW_SIZE[0]//2,
