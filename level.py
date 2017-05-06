@@ -11,7 +11,10 @@ class Level(pygame.sprite.Sprite):
     def __init__(self, level_name=None, group=groups.LevelGroup):
         pygame.sprite.Sprite.__init__(self, group)
 
+        # Yritetään ladata tiedot xml-filestä.
         if not self.load_from_xml(level_name):
+            # Jos ei onnistu niin mennään näillä arvoilla:
+
             # Level-imagen lataus
             self.image = pygame.image.load('gfx/test_arena_vertical_challenge_alpha.png').convert_alpha()
 
@@ -37,7 +40,7 @@ class Level(pygame.sprite.Sprite):
                     self.background_image = pygame.image.load(current_level.find('background').text).convert_alpha()
                 except AttributeError:
                     self.background_image = None
-                self.gravity = current_level.find('gravity').text
+                self.gravity = float(current_level.find('gravity').text)
 
                 self.size_x = self.image.get_width()
                 self.size_y = self.image.get_height()

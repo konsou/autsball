@@ -333,6 +333,7 @@ class GameObject(pygame.sprite.Sprite):
         """ 
         Soitetaan määritetty ääni jos se on olemassa, pakotetaan sille kanava auki
         Kanavan auki pakottamisessa on se idea että jos on hirveesti ääniä jo soimassa niin uudet äänet soi silti
+        TODO: siirrä järkevämpään paikkaan
         """
         if sound is not None:
             pygame.mixer.find_channel(True).play(sound, duration)

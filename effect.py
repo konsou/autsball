@@ -3,21 +3,25 @@ import math
 import game_object
 import groups
 import pygame
+import vector
 from colors import *
 
 
 class EffectSprite(game_object.GameObject):
     """ Yleinen efektisprite """
     def __init__(self, image=None, image_file=None, group=groups.EffectGroup, attached_player=None, attached_ball=None,
-                 effect_type=None, visible=1, parent=None):
-        game_object.GameObject.__init__(self, group=group, image=image, image_file=image_file)
+                 effect_type=None, visible=1, parent=None, start_position=None):
+        game_object.GameObject.__init__(self, group=group, image=image, image_file=image_file, start_position=start_position)
         self.attached_player = attached_player
         self.attached_ball = attached_ball
         self.effect_type = effect_type
         self.visible = visible
+        self.gravity_affects = 0
+
 
     def update(self, viewscreen_rect):
         self.viewscreen_rect = viewscreen_rect
+
         if self.visible:
             self.animate()
             player_dir_radians = math.radians(self.attached_player.heading)
@@ -53,3 +57,37 @@ class TetherSprite(EffectSprite):
         self.rect = self.image.get_rect()
         self.rect.center = ((self.attached_player.rect.center[0] + self.attached_ball.rect.center[0]) // 2,
                             (self.attached_player.rect.center[1] + self.attached_ball.rect.center[1]) // 2)
+
+
+class Explosion(EffectSprite):
+    def __init__(self, image_file='gfx/explosion_100.png', group=groups.EffectGroup, pos=None,
+                 explosion_radius=100, explosion_force=20, frames_visible=10,
+                 player_group=groups.PlayerGroup, ball_group=groups.BallGroup):
+        EffectSprite.__init__(self, image_file=image_file, group=group, start_position=pos)
+        self.explosion_radius = explosion_radius
+        self.explosion_radius_squared = explosion_radius ** 2
+        self.explosion_force = explosion_force
+
+        self.apply_explosion(player_group)
+        self.apply_explosion(ball_group)
+
+        self._lifetime_counter = frames_visible
+
+    def update(self, viewscreen_rect):
+        self.viewscreen_rect = viewscreen_rect
+        self.update_rect()
+        self._lifetime_counter -= 1
+        if self._lifetime_counter < 0:
+            self.kill()
+
+    def apply_explosion(self, group):
+        for current_object in group:
+            if self.distance_squared(current_object) < self.explosion_radius_squared:
+                current_object.move_vector.add_vector(vector.MoveVector(
+                                                      speed=self.explosion_force,
+                                                      direction=game_object.get_angle_in_radians(
+                                                          (current_object.x, current_object.y),
+                                                          (self.x, self.y))
+                                                      ))
+
+

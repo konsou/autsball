@@ -12,6 +12,7 @@ import effect
 import bullet
 import text
 from colors import *
+from pygame.locals import *
 
 """ IHAN HIRVEÄ SOTKU MUTTA TOIMII PÄÄOSIN """
 # TODO: MAJOR CLEANUP
@@ -243,8 +244,11 @@ def debug_run():
     running = True
     while running:
         for event in pygame.event.get():
-            if event.type == pygame.QUIT:
+            if event.type == QUIT:
                 running = False
+            elif event.type == MOUSEBUTTONUP:
+                #print event.pos
+                effect.Explosion(pos=event.pos)
 
         window.fill((0, 0, 0))
         background_group.update()
