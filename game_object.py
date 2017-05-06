@@ -219,9 +219,7 @@ class GameObject(pygame.sprite.Sprite):
                     # print("Playing thump")
                     self.force_play_sound(self.wall_collide_sound)
             if self.is_bullet:
-                # Tuhoaa seinää törmätessä ja myös itsensä jos on bullet
-                pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-                self.kill()
+                self.collide_with_wall()
             else:
                 # Vauhti loppuu kuin seinään
                 self.move_vector.set_speed(0)
@@ -287,6 +285,7 @@ class GameObject(pygame.sprite.Sprite):
         collide_list = pygame.sprite.spritecollide(self, BulletGroup, dokill=True, collided=pygame.sprite.collide_circle)
         if len(collide_list) > 0:
             self.collide_circle(collide_list[0])
+            collide_list[0].collide_with_player()  # kutsutaan bulletin törmäysmetodia jos siellä on jotain mitä pitää tehdä
             if self.bullet_collide_sound is not None:
                 self.force_play_sound(self.bullet_collide_sound)
 

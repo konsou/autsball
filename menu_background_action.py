@@ -53,12 +53,13 @@ class DemoPlayer(player.PlayerSprite):
         self.max_thrust = 0.35  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
         self.max_speed = 10
         self.mass = 1.0
-        self.cooldown_basic_shot = 5  # framea
-        self.cooldown_after_ball_shot = 60  # cooldown sen jälkeen kun pallo on ammuttu
-        self.cooldown_counter = 0  # cooldown-counter1
-        self.recovery_time = 3  # sekunteja jopa!
-        self.recovery_started_at = 0
-
+        self._cooldown_basic_shot = 5  # framea
+        self._cooldown_special = 60
+        self._cooldown_after_ball_shot = 60  # cooldown sen jälkeen kun pallo on ammuttu
+        self._cooldown_counter = 0  # cooldown-counter1
+        self._cooldown_counter_special = 0
+        self._recovery_time = 3  # sekunteja jopa!
+        self._recovery_started_at = 0
 
         self.gravity_affects = 1
         self.team = team
@@ -118,12 +119,12 @@ class DemoPlayer(player.PlayerSprite):
 
     def shoot(self):
         """ Pitää overrideta kun randomisyystä vakioarvot ei toimi """
-        if self.cooldown_counter == 0:
+        if self._cooldown_counter == 0:
             bullet_x = int(28 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(28 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
+            bullet.BasicShot(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
                          speed=20)
-            self.cooldown_counter = self.cooldown_basic_shot
+            self._cooldown_counter = self._cooldown_basic_shot
 
 
 class DemoBall(ball.BallSprite):

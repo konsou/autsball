@@ -60,6 +60,7 @@ class TetherSprite(EffectSprite):
 
 
 class Explosion(EffectSprite):
+    """ Räjähdys, joka työntää pelaajia ja palloa pois keskipisteestä """
     def __init__(self, image_file='gfx/explosion_100.png', group=groups.EffectGroup, pos=None,
                  explosion_radius=100, explosion_force=20, frames_visible=10,
                  player_group=groups.PlayerGroup, ball_group=groups.BallGroup):
@@ -68,19 +69,27 @@ class Explosion(EffectSprite):
         self.explosion_radius_squared = explosion_radius ** 2
         self.explosion_force = explosion_force
 
+        # Tässä tapahtuu räjähdyksen työntöefekti
         self.apply_explosion(player_group)
         self.apply_explosion(ball_group)
 
         self._lifetime_counter = frames_visible
 
     def update(self, viewscreen_rect):
-        self.viewscreen_rect = viewscreen_rect
-        self.update_rect()
+        """ Tämä on lähinnä vain räjähdysgraffan näyttämistä määritetyn framemäärän ajan """
         self._lifetime_counter -= 1
         if self._lifetime_counter < 0:
             self.kill()
+        else:
+            self.viewscreen_rect = viewscreen_rect
+            self.update_rect()
 
     def apply_explosion(self, group):
+        """ 
+        Käy läpi ryhmän objektit ja tekee seuraavaa:
+            -jos etäisyys on alle explosion_radius:
+                -työntää objektia poispäin räjähdyksen keskipisteestä explosion_forcen verran
+        """
         for current_object in group:
             if self.distance_squared(current_object) < self.explosion_radius_squared:
                 current_object.move_vector.add_vector(vector.MoveVector(

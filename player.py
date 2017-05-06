@@ -56,11 +56,13 @@ class PlayerSprite(game_object.GameObject):
         self.max_thrust = 0.35  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
         self.max_speed = 10
         self.mass = 1.0
-        self.cooldown_basic_shot = 5 # framea
-        self.cooldown_after_ball_shot = 60 # cooldown sen jälkeen kun pallo on ammuttu
-        self.cooldown_counter = 0 # cooldown-counter1
-        self.recovery_time = 3  # sekunteja jopa!
-        self.recovery_started_at = 0
+        self._cooldown_basic_shot = 5 # framea
+        self._cooldown_special = 60
+        self._cooldown_after_ball_shot = 60 # cooldown sen jälkeen kun pallo on ammuttu
+        self._cooldown_counter = 0 # cooldown-counter1
+        self._cooldown_counter_special = 0
+        self._recovery_time = 3  # sekunteja jopa!
+        self._recovery_started_at = 0
 
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
         self.viewscreen_rect = viewscreen_rect
@@ -79,17 +81,19 @@ class PlayerSprite(game_object.GameObject):
         self.check_collision_with_bullets(bullet_group)
 
         # Lasketaan cooldownia
-        if self.cooldown_counter > 0:
-            self.cooldown_counter -= 1
+        if self._cooldown_counter > 0:
+            self._cooldown_counter -= 1
+        if self._cooldown_counter_special > 0:
+            self._cooldown_counter_special -= 1
 
         # Jos on pallo kytkettynä niin lisätään paljon cooldownia
         if self.attached_ball is not None:
-            self.cooldown_counter = self.cooldown_after_ball_shot
+            self._cooldown_counter = self._cooldown_after_ball_shot
 
-        if self.recovery_started_at != 0:
-            if (pygame.time.get_ticks() - self.recovery_started_at) // 1000 > self.recovery_time - 1:
+        if self._recovery_started_at != 0:
+            if (pygame.time.get_ticks() - self._recovery_started_at) // 1000 > self._recovery_time - 1:
                 self.reset()
-                self.recovery_started_at = 0
+                self._recovery_started_at = 0
 
     def attach_ball(self, ball):
         if self.attached_ball is None:
@@ -132,13 +136,13 @@ class PlayerSprite(game_object.GameObject):
         # Pelaajan nopeus vaikuttaa ammuksen vauhtiin
         # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
-        if self.cooldown_counter == 0:
+        if self._cooldown_counter == 0:
             self.force_play_sound(self.bullet_sound)
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.BulletSprite(level=self.level, parent=self.parent, x=bullet_x, y=bullet_y, direction=self.heading,
+            bullet.BasicShot(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
                          speed=10 + self.move_vector.get_speed())
-            self.cooldown_counter = self.cooldown_basic_shot
+            self._cooldown_counter = self._cooldown_basic_shot
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
@@ -150,9 +154,20 @@ class PlayerSprite(game_object.GameObject):
             self.attached_ball.detach()
             self.force_play_sound(self.ball_shoot_sound)
 
+    def shoot_special(self):
+        """ Ammutaan erikoisammus """
+        # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
+        if self._cooldown_counter_special == 0:
+            self.force_play_sound(self.bullet_sound)
+            bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
+            bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
+            bullet.DumbFire(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
+                         speed=10 + self.move_vector.get_speed())
+            self._cooldown_counter_special = self._cooldown_special
+
     def recover(self):
         """ Aloittaa recovery-laskennan """
-        self.recovery_started_at = pygame.time.get_ticks()
+        self._recovery_started_at = pygame.time.get_ticks()
         text.DisappearingText(pos=self.parent.screen_center_point, text="RECOVERING...", frames_visible=240, flashes=1,
                          font_size=80, color=RED)
 
