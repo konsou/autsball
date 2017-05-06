@@ -1,5 +1,5 @@
 # -*- coding: utf8 -*-
-import math, pygame
+import math
 
 
 class MoveVector:
@@ -140,6 +140,12 @@ class MoveVector:
         self.vy = self.get_vy() + value
         self._clear_speed_direction()
 
+    # Acceleration(a) = thrust(F) / mass(m)
+    # oletin että käytetty peruskaavaa F = ma
+    def add_to_velocity(self, acceleration, heading):
+        self.add_to_vx((acceleration * math.sin(math.radians(heading)) * -1))
+        self.add_to_vy((acceleration * math.cos(math.radians(heading)) * -1))
+
     def add_to_speed(self, value):
         self.speed = self.get_speed() + value
         self._clear_vx_vy()
@@ -171,7 +177,7 @@ class MoveVector:
             vector_normalized = vector
 
         return (self_normalized.get_vx() * vector_normalized.get_vx()) + (
-        self_normalized.get_vy() * vector_normalized.get_vy())
+            self_normalized.get_vy() * vector_normalized.get_vy())
 
     def normalize(self):
         """ Palauttaa vektorin, jolla on sama suunta mutta nopeus on 1 """
