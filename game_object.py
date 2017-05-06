@@ -3,18 +3,31 @@ import pygame
 import vector
 import math
 import copy
+import types
 from colors import *
 
+
 class GameObject(pygame.sprite.Sprite):
-    """ Classi joka perii pygamen Spriten ja lisää yleisiä peliobjektin käyttäytymiseen liittyviä juttuja """
-    # TODO: muuta nämä niin että vakioarvot ei tule tässä argumentteina vaan selkeämmin alempana asetetaan arvoihinsa
-    # ja sitten instansioinnissa voi tarvittaessa overrideta
-    def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None):
-        # Pygame-Spriten init
+    """ 
+    Classi joka perii pygamen Spriten ja lisää yleisiä peliobjektin käyttäytymiseen liittyviä juttuja.
+    
+    __init__:issä ottaa seuraavia argumentteja:
+        level: level-objekti
+        parent: itse peliobjekti
+        group: sprite-ryhmä, johon tämä objekti lisätään
+        image_file: objektin kuvan tiedostonimi TAI lista tiedostonimistä (animointia varten)
+        image: objektin kuva (kuvaobjekti)
+        start_position: objektin aloituspositio
+        frames_per_image: jos kuva halutaan animoida niin tässä voi määritellä animointinopeuden
+    """
+    def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None,
+                 frames_per_image=5):
+        # Pygame-Spriten init, lisäys ryhmään
         pygame.sprite.Sprite.__init__(self, group)
         
-        # Tämä laskee myös rectin, sizen ja radiuksen
-        self.load_image(image=image, image_file=image_file)
+        # Kuvan lataus - tämä laskee myös rectin, sizen ja radiuksen
+        # Hoitaa myös animointikuvien latauksen
+        self.load_image(image=image, image_file=image_file, frames_per_image=frames_per_image)
 
         # parent on itse peliobjekti
         self.parent = parent
@@ -22,7 +35,7 @@ class GameObject(pygame.sprite.Sprite):
         # level-objekti
         self.level = level
 
-        # SFX
+        # SFX placeholderit - overrideaa perivissä classeissa jos haluat ääntä
         self.wall_collide_sound = None
         self.bullet_collide_sound = None
 
@@ -50,21 +63,40 @@ class GameObject(pygame.sprite.Sprite):
         self.is_bullet = 0
         self.is_centered_on_screen = 0
 
-        # Attachit
+        # Attachit - käytetään pallon liittämiseen pelaajaan
         self.attached_player = None
         self.attached_ball = None
 
         # Tämä päivitetään myöhemmin, initoidaan kuitenkin ettei PyCharm herjaa
         self.viewscreen_rect = None
 
-    def load_image(self, image=None, image_file=None):
-        """ Lataa kuvan spritelle. Asettaa rect, radius, size."""
-        # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
-        if image is not None:
-            self.image = image
-        # Jos on annettu kuvatiedosto niin luetaan se
-        elif image_file is not None:
-            self.image = pygame.image.load(image_file).convert_alpha()
+    def load_image(self, image=None, image_file=None, frames_per_image=5):
+        """ Lataa kuvan/kuvat spritelle. Asettaa rect, radius, size."""
+
+        # Ensin katsotaan onko image_file muuta kuin yksittäinen stringi.
+        # Jos on muuta niin oletetaan sen olevan lista/tuple/dict joka sitältää tiedostonimiä
+        # ja ladataan sieltä kuvat animaatiota varten.
+        if image_file is not None and type(image_file) not in types.StringTypes:
+            self._animation_images = []
+            for current_image in image_file:
+                self._animation_images.append(pygame.image.load(current_image).convert_alpha())
+            self.image = self._animation_images[0]
+
+            self.animation_frames_per_image = frames_per_image
+            self._animation_frame_counter = 0
+            self._animation_current_image_counter = 0
+            self._animation_enabled = 1
+
+        # Jos animaatio ei enabloitu niin jatketaan normaalisti
+        else:
+            # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
+            if image is not None:
+                self.image = image
+            # Jos on annettu kuvatiedosto niin luetaan se
+            elif image_file is not None:
+                self.image = pygame.image.load(image_file).convert_alpha()
+            self._animation_enabled = 0
+
         # Tämä tarvitaan rotaatioita varten
         self.original_image = self.image
         # Size on tämmöinen yhden luvun approksimaatio objektin koosta - neliöllä sivun pituus, ympyrällä halkaisija
@@ -73,10 +105,18 @@ class GameObject(pygame.sprite.Sprite):
         # Radiusta tarvii collision detectionissa
         self.rect = self.image.get_rect()
         self.radius = (self.size + 1) // 2
-        self.original_radius = self.radius
+        # original_radius oli käytössä vähän aikaa kun pallo liitettiin pelaajaan suoraan mutta ei enää ole
+        # self.original_radius = self.radius
 
     def reset(self):
-        """ Resetoi position ja asettaa nopeuden nollaan. Päivittää rectin. """
+        """ 
+        -resetoi position (eli muuttaa start_position:iksi)
+        -asettaa nopeuden nollaan
+        -päivittää rectin
+        -poistaa palloliitoksen
+        
+        Tätä kutsutaan esim. pelaajan recoveryssä ja pallolle kun tulee maali.
+        """
         self.x, self.y = self.start_position
         self.move_vector.set_speed(0)
         self.update_rect()
@@ -86,8 +126,6 @@ class GameObject(pygame.sprite.Sprite):
         if self.attached_ball is not None:
             self.attached_ball.detach()
             self.detach()
-
-
 
     def update_rect(self):
         """ 
@@ -117,6 +155,29 @@ class GameObject(pygame.sprite.Sprite):
 
         # Päivitetään rect että ottaa viewscreenin huomioon
         self.update_rect()
+
+    def animate(self):
+        """ 
+        Tätä kun kutsuu update():ssa niin animoi objektin kuvan
+        
+        Tarkastaa onko aika päivittää animaatioon seuraava image ja tekee sen tarvittaessa
+        """
+        if self._animation_enabled:
+            self._animation_frame_counter += 1
+            if self._animation_frame_counter % self.animation_frames_per_image == 0:
+                self.animate_next_frame()
+
+    def animate_next_frame(self):
+        """ Muuttaa image:ksi ja original_image:ksi seuraavan kuvan animaatiossa """
+        self._animation_current_image_counter += 1
+        try:
+            self.image = self._animation_images[self._animation_current_image_counter]
+        except IndexError:
+            # Jos on menty animaatiokuvissa yli kuvamäärän niin mennään takaisin kuvaan nro 0
+            self.image = self._animation_images[0]
+            self._animation_current_image_counter = 0
+        self.original_image = self.image
+        self.rect = self.image.get_rect()
 
     def rot_self_image_keep_size(self, angle):
         """rotate an image while keeping its center and size"""
@@ -164,7 +225,8 @@ class GameObject(pygame.sprite.Sprite):
             else:
                 # Vauhti loppuu kuin seinään
                 self.move_vector.set_speed(0)
-                # Vähän estetään seinän sisään menemistä tällä
+                # Estetään seinän sisään menemistä tällä - eli jos olisi seinän sisällä niin vaihdetaan
+                # koordinaateiksi edelliset lukemat (jolloin oletettavasti ei ollut seinän sisällä)
                 self.x = self.x_previous
                 self.y = self.y_previous
 
@@ -180,7 +242,14 @@ class GameObject(pygame.sprite.Sprite):
                 self.reset()
 
     def speculate_collision_with_wall(self):
-        """ Spekuloi mahdollista törmäystä walliin - onpahan taas huonosti toteutettu (duplikoi koodia) mutta toimii """
+        """ 
+        Spekuloi mahdollista törmäystä walliin
+        
+        Palauttaa 1 jos törmäisi
+        Palauttaa 0 jos ei törmäisi
+        
+        TODO: turhaa koodin duplikointia, keksi tapa parantaa? 
+        """
         move_vector_copy = copy.copy(self.move_vector)
 
         # Gravityn vaikutus
@@ -211,6 +280,10 @@ class GameObject(pygame.sprite.Sprite):
 
 
     def check_collision_with_bullets(self, BulletGroup):
+        """ Tarkastaa törmääkö objekti bulletteihin. Jos törmää niin laskee törmäyksen ja soittaa törmäysäänen. """
+        # dokill=True eli bullet tapetaan törmäyksessä
+        # Käyttää tällä hetkellä pygamen collide_circle:ä eli laskee radius-attribuutin mukaan törmäykset
+        # TODO: törmäyksissä käyttöön bitmask?
         collide_list = pygame.sprite.spritecollide(self, BulletGroup, dokill=True, collided=pygame.sprite.collide_circle)
         if len(collide_list) > 0:
             self.collide_circle(collide_list[0])
@@ -218,15 +291,20 @@ class GameObject(pygame.sprite.Sprite):
                 self.force_play_sound(self.bullet_collide_sound)
 
     def check_collision_with_players(self, playergroup):
+        """ Tarkastaa törmääkö objekti pelaajiin. Jos törmää niin laskee törmäyksen. """
+        # TODO: törmäysääni
+        # TODO: törmäyksissä käyttöön bitmask?
         collide_list = pygame.sprite.spritecollide(self, playergroup, dokill=False,
                                                    collided=pygame.sprite.collide_circle)
         for colliding_player in collide_list:
+            # Emme halua törmätä itseemme
             if colliding_player != self:
                 self.collide_circle(collide_list[0])
         
     def collide_circle(self, other_object):
         """ 
-        Törmäyttää kaksi ympyrän muotoista GameObjectia ja laskee niiden suunnat ja liikemäärät uusiksi.
+        Törmäyttää kaksi GameObjectia, jotka oletetaan ympyrän muotoisiksi.
+        Laskee suunnat ja liikemäärät uusiksi.
         Jopa ottaa massat huomioon!
         Vähän luulen että tässä on vielä viilaamisen varaa, ei tunnu aivan oikealta kaikissa tilanteissa...
         """
@@ -252,57 +330,12 @@ class GameObject(pygame.sprite.Sprite):
         return math.hypot(self.x - other_object.x, self.y - other_object.y)
 
     def force_play_sound(self, sound, duration=0):
-        # Soitetaan ääni, pakotetaan sille kanava auki
-        # if sound.get_num_channels() == 0:
-        # print("Playing sound", sound)
+        """ 
+        Soitetaan määritetty ääni jos se on olemassa, pakotetaan sille kanava auki
+        Kanavan auki pakottamisessa on se idea että jos on hirveesti ääniä jo soimassa niin uudet äänet soi silti
+        """
         if sound is not None:
             pygame.mixer.find_channel(True).play(sound, duration)
-        # else:
-        #     print("Not playing sound", sound)
-
-
-class AnimatedObject(GameObject):
-    """ 
-    Objekti joka osaa animoida itseään. Perii GameObjectin. 
-    Lisäystä:
-        -init-parametri image_files: lista kuvien tiedostonimistä, joista animointi tehdään
-        -init-parametri frames_per_image: kuinka monen framen välein kuvaa vaihdetaan
-        
-    Mietittävää: onko tarpeen periä juuri GameObject vai voisiko jotenkin olla yleinen classi, jonka perimällä
-    muut classit voi lisätä animaation ominaisuuksiinsa?
-    """
-    def __init__(self, level=None, parent=None, group=None, start_position=None, image_files=[], frames_per_image=5):
-        GameObject.__init__(self, level=level, parent=parent, group=group, image_file=image_files[0], start_position=start_position)
-
-        # Tämä sisältää animoinnissa käytettävät kuvat
-        self._images = []
-        for current_image in image_files:
-            self._images.append(pygame.image.load(current_image).convert_alpha())
-        self.image = self._images[0]
-        self.rect = self.image.get_rect()
-
-        self.frames_per_image = frames_per_image
-        self.frame_counter = 0
-        self.current_image_counter = 0
-
-    def update(self, viewscreen_rect):
-        # Tällä hetkellä overrideaa GameObjectin update:n. Ehkä voisi lisätä kutsun siihen?
-        self.viewscreen_rect = viewscreen_rect
-        self.frame_counter += 1
-        if self.frame_counter % self.frames_per_image == 0:
-            self.next()
-        self.update_rect()
-
-    def next(self):
-        """ Muuttaa image:ksi seuraavan kuvan animaatiossa """
-        self.current_image_counter += 1
-        try:
-            self.image = self._images[self.current_image_counter]
-        except IndexError:
-            # Jos on menty animaatiokuvissa yli kuvamäärän niin mennään takaisin kuvaan nro 0
-            self.image = self._images[0]
-            self.current_image_counter = 0
-        self.rect = self.image.get_rect()
 
 
 def get_angle_difference(angle1, angle2, degrees=0):

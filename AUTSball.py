@@ -93,7 +93,7 @@ class AUTSBallGame:
             BulletGroup.update(self.viewscreen_rect)
             BallGroup.update(self.viewscreen_rect)
             PlayerGroup.update()
-            EffectGroup.update()
+            EffectGroup.update(self.viewscreen_rect)
             TextGroup.update()
 
             # Päivitetään graffat vaan joka toisessa framessa
@@ -212,8 +212,9 @@ class Level(pygame.sprite.Sprite):
 
 class EffectSprite(game_object.GameObject):
     """ Yleinen efektisprite, tällä hetkellä tosin vain moottorin liekit """
-    def __init__(self, image=None, attached_player=None, attached_ball=None, effect_type=None, visible=1, parent=None):
-        game_object.GameObject.__init__(self, group=EffectGroup, image=image)
+    def __init__(self, image=None, image_file=None, attached_player=None, attached_ball=None, effect_type=None,
+                 visible=1, parent=None):
+        game_object.GameObject.__init__(self, group=EffectGroup, image=image, image_file=image_file)
         self.attached_player = attached_player
         self.attached_ball = attached_ball
         self.effect_type = effect_type
@@ -221,6 +222,7 @@ class EffectSprite(game_object.GameObject):
 
     def update(self, viewscreen_rect):
         if self.visible:
+            self.animate()
             player_dir_radians = math.radians(self.attached_player.heading)
             dx = int(12 * math.sin(player_dir_radians))
             dy = int(12 * math.cos(player_dir_radians))
@@ -412,8 +414,8 @@ class PlayerSprite(game_object.GameObject):
                                         image_file='gfx/ship1_red_20px.png')
 
         # Graffat
-        self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
-        self.thrust_gfx = EffectSprite(attached_player=self, image=self.motor_flame_image,
+        #self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
+        self.thrust_gfx = EffectSprite(attached_player=self, image_file=['gfx/motor_flame_10.png', 'gfx/motor_flame_10b.png'],
                                        effect_type='motorflame', visible=0, parent=parent)
         self.rect.center = self.parent.screen_center_point
         self.is_centered_on_screen = 1
@@ -484,7 +486,7 @@ class PlayerSprite(game_object.GameObject):
 
     def detach(self):
         self.attached_ball = None
-        self.radius = self.original_radius
+        # self.radius = self.original_radius
 
     def accelerate(self):
         self.thrust = self.max_thrust

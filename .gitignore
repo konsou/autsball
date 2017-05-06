@@ -2,3 +2,5 @@
 codestyles/
 inspection/
 _windows/
+*.pyc
+.idea/

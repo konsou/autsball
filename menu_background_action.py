@@ -130,6 +130,24 @@ class DemoBall(AUTSball.BallSprite):
         self.x_previous, self.y_previous = self.start_position
 
 
+class Mouse(game_object.GameObject):
+    def __init__(self, level=None, parent=None, group=AUTSball.EffectGroup, start_position=(400, 579),
+                 image_file=['gfx/mouse_1.png', 'gfx/mouse_2.png'], follows=None,
+                 x_offset=0, y_offset=0):
+        game_object.GameObject.__init__(self, level=level, parent=parent, group=group, start_position=start_position,
+                                        image_file=image_file)
+        self.follows = follows
+        self.x_offset = x_offset
+        self.y_offset = y_offset
+
+    def update(self, viewscreen_rect):
+        self.viewscreen_rect = viewscreen_rect
+        self.animate()
+        self.x = self.follows.rect.topleft[0] + self.x_offset
+        self.y = self.follows.rect.topleft[1] + self.y_offset
+        self.update_rect()
+
+
 class BackgroundAction(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, background_group)
@@ -148,14 +166,14 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.ship5 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 300))
         self.ship6 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 400))
         self.ball = DemoBall(level=self.level, parent=self)
-        self.mouse = game_object.AnimatedObject(level=self.level, parent=self, group=AUTSball.EffectGroup, start_position=(400, 579),
-                                   image_files=['gfx/mouse_1.png', 'gfx/mouse_2.png'])
 
         coders = ['Konso', 'Muumi', 'Tursa']
         random.shuffle(coders)
         coders_string = ', '.join(coders)
         credits_text = "Idea: Konso"+30*" "+"Code: "+coders_string+30*" "+"Music: Pera"+30*" "+"Your name can be here!"
         self.credits_text = AUTSball.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
+        self.mouse = Mouse(level=self.level, parent=self, group=AUTSball.EffectGroup, follows=self.credits_text,
+                           x_offset=45, y_offset=-3)
 
         self.image = pygame.Surface((800, 600))
         self.rect = self.image.get_rect()
@@ -176,8 +194,6 @@ class BackgroundAction(pygame.sprite.Sprite):
         AUTSball.PlayerGroup.update()
         AUTSball.EffectGroup.update(self.viewscreen_rect)
         AUTSball.TextGroup.update()
-
-        self.mouse.x = self.credits_text.rect.topleft[0] + 44
 
         AUTSball.LevelGroup.draw(self.image)
         AUTSball.BallGroup.draw(self.image)
