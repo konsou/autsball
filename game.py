@@ -136,7 +136,7 @@ class AUTSBallGame:
                 groups.BulletGroup.update(self.viewscreen_rect)
                 groups.BallGroup.update(self.viewscreen_rect)
                 groups.PlayerGroup.update(self.viewscreen_rect)
-                groups.EffectGroup.update()
+                groups.EffectGroup.update(self.viewscreen_rect)
                 groups.TextGroup.update()
 
                 # Päivitetään graffat vaan joka toisessa framessa

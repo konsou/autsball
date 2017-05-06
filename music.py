@@ -11,7 +11,7 @@ Pitää sisällään seuraavaa:
 
 class MusicPlayer(pygame.sprite.Sprite): taustamusiikin soittajaclass, osaa näyttää infoblurbin biisistä
 class MusicFile(object): lukee tiedoston tagit ja tallettaa tiedon siitä, missä ruuduissa biisiä saa soittaa
-MUSIC_FINISHED -pygame-eventti. Tämä nousee kun biisi on soitettu loppuun. Silloin pitää kutsua MusicPlayer.next()
+MUSIC_FINISHED -pygame-eventti. Tämä nousee kun biisi on soitettu loppuun. Silloin pitää kutsua MusicPlayer.animate_next_frame()
 
 Katso luokkien ja metodien docstringeistä lisää.
 """

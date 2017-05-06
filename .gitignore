@@ -1,6 +1,6 @@
 *.xml
+*.pyc
 codestyles/
 inspection/
 _windows/
 .idea/
-*.pyc
