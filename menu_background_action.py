@@ -12,6 +12,7 @@ import effect
 import bullet
 import text
 from colors import *
+from constants import *
 
 """ IHAN HIRVEÄ SOTKU MUTTA TOIMII PÄÄOSIN """
 # TODO: MAJOR CLEANUP
@@ -161,11 +162,11 @@ class BackgroundAction(pygame.sprite.Sprite):
 
         # Vakioita
         self.gravity = 0.1
-        self.screen_size_x = 800
-        self.screen_size_y = 600
+        self.screen_size_x = WINDOW_SIZE[0]
+        self.screen_size_y = WINDOW_SIZE[1]
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
 
-        self.level = level.Level(image_file='gfx/menu_background_level.png')
+        self.level = level.Level(image_file='gfx/menu_background_level.png', colorkey=None)
         self.ship1 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 200))
         self.ship2 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 300))
         self.ship3 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 400))
@@ -179,9 +180,9 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.mouse = Mouse(level=self.level, parent=self, group=groups.EffectGroup, follows=self.credits,
                            x_offset=48, y_offset=-3)
 
-        self.image = pygame.Surface((800, 600))
+        self.image = pygame.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]))
         self.rect = self.image.get_rect()
-        self.viewscreen_rect = (0, 0, 800, 600)
+        self.viewscreen_rect = (0, 0, WINDOW_SIZE[0], WINDOW_SIZE[1])
 
         self.ball_pos = (self.ball.x, self.ball.y)
 
@@ -233,7 +234,7 @@ class BackgroundAction(pygame.sprite.Sprite):
 def debug_run():
     pygame.init()
     global window
-    window = pygame.display.set_mode((800, 600))
+    window = pygame.display.set_mode((WINDOW_SIZE[0], WINDOW_SIZE[1]))
     pygame.display.set_caption("Menu test")
     clock = pygame.time.Clock()
 

@@ -204,7 +204,7 @@ class GameObject(pygame.sprite.Sprite):
             self.move_vector.set_vy(0)
 
     def check_collision_with_wall_and_goal(self):
-        """ Tarkastaa törkmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
+        """ Tarkastaa törmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
         # Katotaan mikä väri on levelissä tässä pisteessä - skipataan alfa
         current_point = self.level.image.get_at((self.x, self.y))[:3]
 
@@ -221,6 +221,11 @@ class GameObject(pygame.sprite.Sprite):
             if self.is_bullet:
                 # Tuhoaa seinää törmätessä ja myös itsensä jos on bullet
                 pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
+                # pixels_to_destroy = self.get_non_alpha_pixels()
+                # for pixel in pixels_to_destroy:
+                #     pixel[0] += self.x - self.size // 2
+                #     pixel[1] += self.y - self.size // 2
+                # self.level.destroy_land(pixels_to_destroy)
                 self.kill()
             else:
                 # Vauhti loppuu kuin seinään
