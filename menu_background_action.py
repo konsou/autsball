@@ -138,7 +138,7 @@ class DemoBall(ball.BallSprite):
 
 
 class Mouse(game_object.GameObject):
-    def __init__(self, level=None, parent=None, group=AUTSball.EffectGroup, start_position=(400, 579),
+    def __init__(self, level=None, parent=None, group=groups.EffectGroup, start_position=(400, 579),
                  image_file=['gfx/mouse_1.png', 'gfx/mouse_2.png'], follows=None,
                  x_offset=0, y_offset=0):
         game_object.GameObject.__init__(self, level=level, parent=parent, group=group, start_position=start_position,
@@ -177,7 +177,7 @@ class BackgroundAction(pygame.sprite.Sprite):
         credits_text = text.make_credits_string()
         self.credits = text.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
         self.mouse = Mouse(level=self.level, parent=self, group=groups.EffectGroup, follows=self.credits,
-                           x_offset=45, y_offset=-3)
+                           x_offset=48, y_offset=-3)
 
         self.image = pygame.Surface((800, 600))
         self.rect = self.image.get_rect()

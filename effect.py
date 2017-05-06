@@ -7,16 +7,19 @@ from colors import *
 
 
 class EffectSprite(game_object.GameObject):
-    """ Yleinen efektisprite, tällä hetkellä tosin vain moottorin liekit """
-    def __init__(self, image=None, group=groups.EffectGroup, attached_player=None, attached_ball=None, effect_type=None, visible=1, parent=None):
-        game_object.GameObject.__init__(self, group=group, image=image)
+    """ Yleinen efektisprite """
+    def __init__(self, image=None, image_file=None, group=groups.EffectGroup, attached_player=None, attached_ball=None,
+                 effect_type=None, visible=1, parent=None):
+        game_object.GameObject.__init__(self, group=group, image=image, image_file=image_file)
         self.attached_player = attached_player
         self.attached_ball = attached_ball
         self.effect_type = effect_type
         self.visible = visible
 
-    def update(self):
+    def update(self, viewscreen_rect):
+        self.viewscreen_rect = viewscreen_rect
         if self.visible:
+            self.animate()
             player_dir_radians = math.radians(self.attached_player.heading)
             dx = int(12 * math.sin(player_dir_radians))
             dy = int(12 * math.cos(player_dir_radians))
@@ -39,7 +42,8 @@ class TetherSprite(EffectSprite):
                               attached_player=attached_player, attached_ball=attached_ball, parent=parent)
         self.effect_type = 'tether'
 
-    def update(self):
+    def update(self, viewscreen_rect):
+        self.viewscreen_rect = viewscreen_rect
         ball_player_distance = self.attached_player.distance(self.attached_ball)
         ball_player_angle = game_object.get_angle_in_radians((self.attached_player.x, self.attached_player.y),
                                                              (self.attached_ball.x, self.attached_ball.y))

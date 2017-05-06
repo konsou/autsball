@@ -14,7 +14,8 @@ class BulletSprite(game_object.GameObject):
         self.rect.center = (x, y)
         self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
         self.max_speed = 20
-        self.explosion_force = 1
+        self.mass = 0.1
+        # self.explosion_force = 1
 
         self.is_bullet = 1
         self.group = group

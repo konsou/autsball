@@ -18,8 +18,8 @@ class PlayerSprite(game_object.GameObject):
                                         image_file='gfx/ship1_red_20px.png')
 
         # Graffat
-        self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
-        self.thrust_gfx = effect.EffectSprite(attached_player=self, image=self.motor_flame_image,
+        # self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
+        self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=['gfx/motor_flame_10.png', 'gfx/motor_flame_10b.png'],
                                        effect_type='motorflame', visible=0, parent=parent)
         self.rect.center = self.parent.screen_center_point
         if self.owning_player_id == parent.local_player_id:
