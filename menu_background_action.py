@@ -137,6 +137,24 @@ class DemoBall(ball.BallSprite):
         self.x_previous, self.y_previous = self.start_position
 
 
+class Mouse(game_object.GameObject):
+    def __init__(self, level=None, parent=None, group=AUTSball.EffectGroup, start_position=(400, 579),
+                 image_file=['gfx/mouse_1.png', 'gfx/mouse_2.png'], follows=None,
+                 x_offset=0, y_offset=0):
+        game_object.GameObject.__init__(self, level=level, parent=parent, group=group, start_position=start_position,
+                                        image_file=image_file)
+        self.follows = follows
+        self.x_offset = x_offset
+        self.y_offset = y_offset
+
+    def update(self, viewscreen_rect):
+        self.viewscreen_rect = viewscreen_rect
+        self.animate()
+        self.x = self.follows.rect.topleft[0] + self.x_offset
+        self.y = self.follows.rect.topleft[1] + self.y_offset
+        self.update_rect()
+
+
 class BackgroundAction(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, background_group)
@@ -157,7 +175,9 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.ball = DemoBall(level=self.level, parent=self)
 
         credits_text = text.make_credits_string()
-        text.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
+        self.credits = text.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
+        self.mouse = Mouse(level=self.level, parent=self, group=groups.EffectGroup, follows=self.credits,
+                           x_offset=45, y_offset=-3)
 
         self.image = pygame.Surface((800, 600))
         self.rect = self.image.get_rect()
@@ -174,7 +194,7 @@ class BackgroundAction(pygame.sprite.Sprite):
         groups.BulletGroup.update(self.viewscreen_rect)
         groups.BallGroup.update(self.viewscreen_rect)
         groups.PlayerGroup.update()
-        groups.EffectGroup.update()
+        groups.EffectGroup.update(self.viewscreen_rect)
         groups.TextGroup.update()
 
         groups.LevelGroup.draw(self.image)
