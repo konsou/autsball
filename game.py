@@ -46,7 +46,8 @@ class AUTSBallGame:
 
         # TODO: tähän assettien esilataus
         # Instansioidaan leveli, tämä lataa myös level-kuvan joka voi olla iiisooo
-        self.current_level = level.Level(background_image_file='gfx/cave_background.png')
+        # self.current_level = level.Level(background_image_file='gfx/cave_background.png')
+        self.current_level = level.Level(level_name='Test Level')
         # Instansioidaan pelaaja ja pallo
         self.players = {}
         self.player_count = 0

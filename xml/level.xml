@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<data>
+
+    <level name="Vertical Challenge" public="1">
+        <image>gfx/test_arena_vertical_challenge.png</image>
+        <background>gfx/cave_background.png</background>
+
+        <width>1200</width>
+        <height>2400</height>
+        <gravity>0.1</gravity>
+
+        <player_spawns>
+            <team1>
+                <spawn_coordinates x='500' y='200' />
+                <spawn_coordinates x='600' y='200' />
+                <spawn_coordinates x='700' y='200' />
+            </team1>
+            <team2>
+                <spawn_coordinates x='500' y='2200' />
+                <spawn_coordinates x='600' y='2200' />
+                <spawn_coordinates x='700' y='2200' />
+            </team2>
+        </player_spawns>
+
+        <ball_spawns>
+            <spawn_coordinates x="600" y="1200" />
+        </ball_spawns>
+    </level>
+
+    <level name="Test Level" public="1">
+        <image>gfx/test_arena_2400x1200.png</image>
+        <background>gfx/cave_background.png</background>
+
+        <width>2400</width>
+        <height>1200</height>
+        <gravity>0.1</gravity>
+
+        <player_spawns>
+            <team1>
+                <spawn_coordinates x='200' y='500' />
+                <spawn_coordinates x='200' y='600' />
+                <spawn_coordinates x='200' y='700' />
+            </team1>
+            <team2>
+                <spawn_coordinates x='2200' y='500' />
+                <spawn_coordinates x='2200' y='600' />
+                <spawn_coordinates x='2200' y='700' />
+            </team2>
+        </player_spawns>
+
+        <ball_spawns>
+            <spawn_coordinates x="600" y="1200" />
+        </ball_spawns>
+    </level>
+
+    <level name="Menu Background" public="0">
+        <image>gfx/menu_background_level.png</image>
+
+        <width>800</width>
+        <height>600</height>
+        <gravity>0.1</gravity>
+
+        <player_spawns>
+            <team1>
+                <spawn_coordinates x='700' y='200' />
+                <spawn_coordinates x='700' y='300' />
+                <spawn_coordinates x='700' y='400' />
+            </team1>
+            <team2>
+                <spawn_coordinates x='100' y='200' />
+                <spawn_coordinates x='100' y='300' />
+                <spawn_coordinates x='100' y='400' />
+            </team2>
+        </player_spawns>
+
+        <ball_spawns>
+            <spawn_coordinates x="400" y="300" />
+        </ball_spawns>
+    </level>
+
+</data>

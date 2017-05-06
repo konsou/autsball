@@ -165,7 +165,8 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.screen_size_y = 600
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
 
-        self.level = level.Level(image_file='gfx/menu_background_level.png')
+        #self.level = level.Level(image_file='gfx/menu_background_level.png')
+        self.level = level.Level(level_name='Menu Background')
         self.ship1 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 200))
         self.ship2 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 300))
         self.ship3 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 400))
