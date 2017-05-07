@@ -53,3 +53,11 @@ class TetherSprite(EffectSprite):
         self.rect = self.image.get_rect()
         self.rect.center = ((self.attached_player.rect.center[0] + self.attached_ball.rect.center[0]) // 2,
                             (self.attached_player.rect.center[1] + self.attached_ball.rect.center[1]) // 2)
+
+
+class SmokeEffect(EffectSprite):
+
+    def __init__(self, start_position, fade_time=5):
+        self.x, self.y = start_position
+        self.fade_time = fade_time
+        # TODO: tee tämä loppuun
