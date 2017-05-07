@@ -1,30 +1,17 @@
 <?xml version="1.0"?>
-<!-- Level.xml:n ensimmäinen hahmotelma -->
 <data>
-    <!--
-    Levelit ladataan name-attribuutin perusteella.
-    public=1 tarkoittaa että leveli näkyy käyttäjälle silloin kun pelattavaa leveliä valitaan jostain listasta tms.
-    public=0 tarkoittaa että leveli on vain ohjelman sisäistä käyttöä varten (esim. menu background)
-    -->
-    <level name="Vertical Challenge" public="1">
-        <!-- Itse levelikuva. Pakollinen. -->
-        <image>gfx/test_arena_vertical_challenge.png</image>
-        <!-- Background-kuva. Ei pakollinen - jos ei löydy niin määritetään Noneksi. -->
-        <background>gfx/cave_background.png</background>
-        <!-- TODO: thumbnail-kuva -->
 
-        <!-- Levelin leveys ja korkeus että nämä tiedot voi näyttää tulevassa levelinvalintaruudussa ilman että
-        pitää ladata koko level-kuvaa -->
+    <level name="V-Wing" public="1">
+        <images>
+            <!-- TODO: vapaasti määritettävät motor flamet ja niiden offset -->
+            <team1_image>ship1_red_20px.png</team1_image>
+            <team2_image>ship1_green_20px.png</team2_image>
+        </images>
+
         <width>1200</width>
         <height>2400</height>
-        <!-- TODO: gravityn lataus tästä eikä peliobjektissa -->
-        <!-- TODO: gravityn suunta vapaasti määritettäväksi? -->
         <gravity>0.1</gravity>
 
-        <!--
-        Pelaajien spawnpointit. Näitä voi olla kummallekin tiimille niin monta kuin haluaa.
-        TODO: ota käyttöön team2 koodissa
-        -->
         <player_spawns>
             <team1>
                 <spawn_coordinates x='500' y='200' />
@@ -38,10 +25,6 @@
             </team2>
         </player_spawns>
 
-        <!--
-        Pallo(je)n spawnpointit. Teknisesti sallii useamman spawnpointin olemassaolon.
-        TODO: implementoi koodissa
-        -->
         <ball_spawns>
             <spawn_coordinates x="600" y="1200" />
         </ball_spawns>
