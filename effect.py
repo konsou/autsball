@@ -100,3 +100,11 @@ class Explosion(EffectSprite):
                                                       ))
 
 
+
+
+class SmokeEffect(EffectSprite):
+
+    def __init__(self, start_position, fade_time=5):
+        self.x, self.y = start_position
+        self.fade_time = fade_time
+        # TODO: tee tämä loppuun

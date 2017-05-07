@@ -67,6 +67,9 @@ class AUTSBallGame:
         self.quit_game = False
         self.frame_counter = 0
 
+        # Ladataan numerokuvat
+        text.init_scores()
+
     def start(self):
         if not self.is_running:
             self.is_running = True
@@ -195,9 +198,11 @@ class AUTSBallGame:
 
         # HUD
         # self.show_text((10, 10), "Speed: " + str(math.hypot(self.player[0].vx, self.player[0].vy)))
-        text.show_text(self.win, (10, 50), "FPS: " + str(self.clock.get_fps()))
-        text.show_text(self.win, (10, 10), str(self.score_green), color=GREEN, font_size=40)
-        text.show_text(self.win, (750, 10), str(self.score_red), color=RED, font_size=40)
+        text.show_text(self.win, (10, 70), "FPS: " + str(self.clock.get_fps()))
+        #text.show_text(self.win, (10, 10), str(self.score_green), color=GREEN, font_size=40)
+        #text.show_text(self.win, (750, 10), str(self.score_red), color=RED, font_size=40)
+        text.show_score(self.win, (50, 10), self.score_green, team=0)
+        text.show_score(self.win, (700, 10), self.score_red, team=1)
 
         # Näytetään pallonsuuntamarkkeri
         # TODO: muuta pallon sijaan nuoli joka osoittaa oikeaan suuntaan
