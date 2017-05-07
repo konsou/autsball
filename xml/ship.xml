@@ -1,84 +1,36 @@
 <?xml version="1.0"?>
 <data>
-
-    <level name="V-Wing" public="1">
+    <!-- EI VIELÄ KÄYTÖSSÄ KOODIN PUOLELLA -->
+    <ship name="V-Wing" public="1">
         <images>
             <!-- TODO: vapaasti määritettävät motor flamet ja niiden offset -->
             <team1_image>ship1_red_20px.png</team1_image>
             <team2_image>ship1_green_20px.png</team2_image>
+            <!-- Idea tässä: jos samalla tagilla useita kuvia niin niistä tehdään animaatio -->
+            <motor_flame_image>motor_flame_10.png</motor_flame_image>
+            <motor_flame_image>motor_flame_10b.png</motor_flame_image>
         </images>
+        <sounds>
+            <motor_sound>sfx/shhhh_v2.wav</motor_sound>
+            <bullet_sound>sfx/pop.wav</bullet_sound>
+            <ball_shoot_sound>sfx/pchou.wav</ball_shoot_sound>
+            <ball_capture_sound>sfx/ball_capture.wav</ball_capture_sound>
+            <wall_collide_sound>sfx/thump4.wav</wall_collide_sound>
+            <bullet_collide_sound>sfx/metal_thud_2.wav</bullet_collide_sound>
+        </sounds>
 
-        <width>1200</width>
-        <height>2400</height>
-        <gravity>0.1</gravity>
+        <width>20</width>
+        <height>20</height>
 
-        <player_spawns>
-            <team1>
-                <spawn_coordinates x='500' y='200' />
-                <spawn_coordinates x='600' y='200' />
-                <spawn_coordinates x='700' y='200' />
-            </team1>
-            <team2>
-                <spawn_coordinates x='500' y='2200' />
-                <spawn_coordinates x='600' y='2200' />
-                <spawn_coordinates x='700' y='2200' />
-            </team2>
-        </player_spawns>
+        <handling>5</handling>
+        <max_thrust>0.35</max_thrust>
+        <max_speed>10</max_speed>
+        <mass>1.0</mass>
+        <cooldown_basic_shot>5</cooldown_basic_shot>
+        <cooldown_special>60</cooldown_special>
+        <cooldown_after_ball_shot>60</cooldown_after_ball_shot>
+        <recovery_time>3</recovery_time>
 
-        <ball_spawns>
-            <spawn_coordinates x="600" y="1200" />
-        </ball_spawns>
-    </level>
-
-    <level name="Test Level" public="1">
-        <image>gfx/test_arena_2400x1200.png</image>
-        <background>gfx/cave_background.png</background>
-
-        <width>2400</width>
-        <height>1200</height>
-        <gravity>0.1</gravity>
-
-        <player_spawns>
-            <team1>
-                <spawn_coordinates x='200' y='500' />
-                <spawn_coordinates x='200' y='600' />
-                <spawn_coordinates x='200' y='700' />
-            </team1>
-            <team2>
-                <spawn_coordinates x='2200' y='500' />
-                <spawn_coordinates x='2200' y='600' />
-                <spawn_coordinates x='2200' y='700' />
-            </team2>
-        </player_spawns>
-
-        <ball_spawns>
-            <spawn_coordinates x="600" y="1200" />
-        </ball_spawns>
-    </level>
-
-    <level name="Menu Background" public="0">
-        <image>gfx/menu_background_level.png</image>
-
-        <width>800</width>
-        <height>600</height>
-        <gravity>0.1</gravity>
-
-        <player_spawns>
-            <team1>
-                <spawn_coordinates x='700' y='200' />
-                <spawn_coordinates x='700' y='300' />
-                <spawn_coordinates x='700' y='400' />
-            </team1>
-            <team2>
-                <spawn_coordinates x='100' y='200' />
-                <spawn_coordinates x='100' y='300' />
-                <spawn_coordinates x='100' y='400' />
-            </team2>
-        </player_spawns>
-
-        <ball_spawns>
-            <spawn_coordinates x="400" y="300" />
-        </ball_spawns>
-    </level>
+    </ship>
 
 </data>
