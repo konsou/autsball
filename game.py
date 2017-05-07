@@ -230,5 +230,9 @@ class AUTSBallGame:
 
 if __name__ == '__main__':
     game = AUTSBallGame()
+    game.add_player(0)
+    game.add_player(1)
+    game.add_player(2)
+    game.start()
     while True:
         game.update()
