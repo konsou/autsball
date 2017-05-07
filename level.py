@@ -29,7 +29,14 @@ class Level(pygame.sprite.Sprite):
 
         self.background_image = None
         if background_image_file:
-            self.background_image = pygame.image.load(background_image_file).convert_alpha()
+            #generoidaan taustakuva
+            background_image = pygame.image.load(background_image_file).convert_alpha()
+            self.background_image = pygame.Surface((self.size_x, self.size_y))
+            surface_rect = self.background_image.get_rect()
+            image_rect = background_image.get_rect()
+            for x in range(0, surface_rect.width, image_rect.width):
+                for y in range(0, surface_rect.height, image_rect.height):
+                    self.background_image.blit(background_image, (x, y))
 
         # Generoidaan ulkopuolinen aines
         self.off_level_image = pygame.image.load('gfx/cave_indestructible_rock.png').convert()
@@ -39,7 +46,10 @@ class Level(pygame.sprite.Sprite):
         for x in range(0, surface_rect.width, image_rect.width):
             for y in range(0, surface_rect.height, image_rect.height):
                 self.off_level_surface.blit(self.off_level_image, (x, y))
-        self.off_level_surface.fill(BLACK, (WINDOW_SIZE[0]//2, WINDOW_SIZE[1]//2, self.size_x, self.size_y))
+        if self.background_image:
+            self.off_level_surface.blit(self.background_image, (WINDOW_SIZE[0]//2, WINDOW_SIZE[1]//2, self.size_x, self.size_y))
+        else:
+            self.off_level_surface.fill(BLACK, (WINDOW_SIZE[0]//2, WINDOW_SIZE[1]//2, self.size_x, self.size_y))
         self.off_level_surface.set_colorkey(BLACK)
 
     def destroy_land(self, pixels_to_destroy):

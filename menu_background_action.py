@@ -53,6 +53,7 @@ class DemoPlayer(player.PlayerSprite):
         self.max_thrust = 0.35  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
         self.max_speed = 10
         self.mass = 1.0
+        self._max_acceleration = self.max_thrust / self.mass
         self.cooldown_basic_shot = 5  # framea
         self.cooldown_after_ball_shot = 60  # cooldown sen jälkeen kun pallo on ammuttu
         self.cooldown_counter = 0  # cooldown-counter1

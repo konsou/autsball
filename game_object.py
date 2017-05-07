@@ -283,7 +283,6 @@ class GameObject(pygame.sprite.Sprite):
         else:
             return 0
 
-
     def check_collision_with_bullets(self, BulletGroup):
         """ Tarkastaa törmääkö objekti bulletteihin. Jos törmää niin laskee törmäyksen ja soittaa törmäysäänen. """
         # dokill=True eli bullet tapetaan törmäyksessä
@@ -358,5 +357,3 @@ def get_angle_in_radians(point1, point2):
     x_difference = point1[0] - point2[0]
     y_difference = point1[1] - point2[1]
     return math.atan2(y_difference, x_difference)
-
-
