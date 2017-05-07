@@ -167,11 +167,11 @@ class AUTSBallGame:
             #        self.win.blit(self.current_level.background_image, (x, y))
 
         # Piirretään levelin ulkopuolinen tuhoutumaton alue
-        off_level_rect = pygame.Rect(self.background_view_rect[0]-WINDOW_SIZE[0]//2,
-                                     self.background_view_rect[1]-WINDOW_SIZE[1]//2,
-                                     self.background_view_rect[2],
-                                     self.background_view_rect[3])
-        self.win.blit(self.current_level.off_level_surface, off_level_rect)
+        # off_level_rect = pygame.Rect(self.background_view_rect[0]-WINDOW_SIZE[0]//2,
+        #                              self.background_view_rect[1]-WINDOW_SIZE[1]//2,
+        #                              self.background_view_rect[2],
+        #                              self.background_view_rect[3])
+        # self.win.blit(self.current_level.off_level_surface, off_level_rect)
 
         # Piirretään levelistä vain viewscreenin kokoinen alue, pelaaja keskellä
         self.win.blit(self.current_level.image, self.background_view_rect)
