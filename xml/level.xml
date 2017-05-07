@@ -11,10 +11,11 @@
         <image>gfx/test_arena_vertical_challenge.png</image>
         <!-- Background-kuva. Ei pakollinen - jos ei löydy niin määritetään Noneksi. -->
         <background>gfx/cave_background.png</background>
-        <!-- TODO: thumbnail-kuva -->
+        <!-- TODO: off-level-kuva -->
 
         <!-- Levelin leveys ja korkeus että nämä tiedot voi näyttää tulevassa levelinvalintaruudussa ilman että
         pitää ladata koko level-kuvaa -->
+        <!-- TODO: thumbnail-kuva -->
         <width>1200</width>
         <height>2400</height>
         <!-- TODO: gravityn lataus tästä eikä peliobjektissa -->
@@ -26,16 +27,16 @@
         TODO: ota käyttöön team2 koodissa
         -->
         <player_spawns>
-            <team1>
+            <team_red>
                 <spawn_coordinates x='500' y='200' />
                 <spawn_coordinates x='600' y='200' />
                 <spawn_coordinates x='700' y='200' />
-            </team1>
-            <team2>
+            </team_red>
+            <team_green>
                 <spawn_coordinates x='500' y='2200' />
                 <spawn_coordinates x='600' y='2200' />
                 <spawn_coordinates x='700' y='2200' />
-            </team2>
+            </team_green>
         </player_spawns>
 
         <!--
@@ -56,16 +57,16 @@
         <gravity>0.1</gravity>
 
         <player_spawns>
-            <team1>
-                <spawn_coordinates x='200' y='500' />
-                <spawn_coordinates x='200' y='600' />
-                <spawn_coordinates x='200' y='700' />
-            </team1>
-            <team2>
+            <team_red>
                 <spawn_coordinates x='2200' y='500' />
                 <spawn_coordinates x='2200' y='600' />
                 <spawn_coordinates x='2200' y='700' />
-            </team2>
+            </team_red>
+            <team_green>
+                <spawn_coordinates x='200' y='500' />
+                <spawn_coordinates x='200' y='600' />
+                <spawn_coordinates x='200' y='700' />
+            </team_green>
         </player_spawns>
 
         <ball_spawns>
@@ -81,16 +82,16 @@
         <gravity>0.1</gravity>
 
         <player_spawns>
-            <team1>
+            <team_red>
                 <spawn_coordinates x='700' y='200' />
                 <spawn_coordinates x='700' y='300' />
                 <spawn_coordinates x='700' y='400' />
-            </team1>
-            <team2>
+            </team_red>
+            <team_green>
                 <spawn_coordinates x='100' y='200' />
                 <spawn_coordinates x='100' y='300' />
                 <spawn_coordinates x='100' y='400' />
-            </team2>
+            </team_green>
         </player_spawns>
 
         <ball_spawns>

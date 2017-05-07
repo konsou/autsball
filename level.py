@@ -22,7 +22,7 @@ class Level(pygame.sprite.Sprite):
             self.size_y = self.image.get_height()
             self.rect = self.image.get_rect()
             self.center_point = self.size_x // 2, self.size_y // 2
-            self.player_spawns_team_1 = [(700, 1200), (400, 1200), (500, 1000)]
+            self.player_spawns_team_red = [(700, 1200), (400, 1200), (500, 1000)]
 
             self.background_image = None
             self.background_image = pygame.image.load('gfx/cave_background.png').convert_alpha()
@@ -47,12 +47,12 @@ class Level(pygame.sprite.Sprite):
             self.rect = self.image.get_rect()
             self.center_point = self.size_x // 2, self.size_y // 2
 
-            self.player_spawns_team_1 = []
-            self.player_spawns_team_2 = []
+            self.player_spawns_team_red = []
+            self.player_spawns_team_green = []
 
-            for current_spawn in current_level.find('player_spawns').find('team1'):
-                self.player_spawns_team_1.append((int(current_spawn.attrib['x']), int(current_spawn.attrib['y'])))
-            for current_spawn in current_level.find('player_spawns').find('team2'):
-                self.player_spawns_team_2.append((int(current_spawn.attrib['x']), int(current_spawn.attrib['y'])))
+            for current_spawn in current_level.find('player_spawns').find('team_red'):
+                self.player_spawns_team_red.append((int(current_spawn.attrib['x']), int(current_spawn.attrib['y'])))
+            for current_spawn in current_level.find('player_spawns').find('team_green'):
+                self.player_spawns_team_green.append((int(current_spawn.attrib['x']), int(current_spawn.attrib['y'])))
 
         return level_found

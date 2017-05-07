@@ -81,14 +81,14 @@ class AUTSBallGame:
             self.players[self.player_count] = player.PlayerSprite(player_id=player_id,
                                                            level=self.current_level,
                                                            parent=self,
-                                                           spawn_point=self.current_level.player_spawns_team_1[
+                                                           spawn_point=self.current_level.player_spawns_team_red[
                                                                self.player_count])
 
         else:
             self.players[player_id] = player.PlayerSprite(player_id=player_id,
                                                    level=self.current_level,
                                                    parent=self,
-                                                   spawn_point=self.current_level.player_spawns_team_1[
+                                                   spawn_point=self.current_level.player_spawns_team_red[
                                                        self.player_count])
 
         self.player_count += 1
