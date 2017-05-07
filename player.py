@@ -56,6 +56,7 @@ class PlayerSprite(game_object.GameObject):
         self.max_thrust = 0.35  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
         self.max_speed = 10
         self.mass = 1.0
+        self._max_acceleration = self.max_thrust / self.mass
         self._cooldown_basic_shot = 5 # framea
         self._cooldown_special = 60
         self._cooldown_after_ball_shot = 60 # cooldown sen jälkeen kun pallo on ammuttu
@@ -70,8 +71,8 @@ class PlayerSprite(game_object.GameObject):
         """ Tämä haluaa tietää player- ja bulletgroupit että ne voi tarvittaessa määrittää vapaasti """
         # Lisätään liikemäärään thrust-vektori
         # Tässä jopa ottaa jo massan huomioon!
-        self.move_vector.add_to_vx((self.thrust / self.mass * math.sin(math.radians(self.heading)) * -1))
-        self.move_vector.add_to_vy((self.thrust / self.mass * math.cos(math.radians(self.heading)) * -1))
+        if self.thrust:
+            self.move_vector.add_to_velocity(self._max_acceleration, self.heading)
 
         self.update_movement()
 
@@ -105,18 +106,20 @@ class PlayerSprite(game_object.GameObject):
         # self.radius = self.original_radius
 
     def accelerate(self):
-        self.thrust = self.max_thrust
-        self.thrust_gfx.visible = 1
-        if not self.motor_sound_playing:
-            if self.motor_sound is not None:
-                self.force_play_sound(self.motor_sound, -1)
-                self.motor_sound_playing = 1
+        if self.thrust == 0:
+            self.thrust = self.max_thrust
+            self.thrust_gfx.visible = 1
+            if not self.motor_sound_playing:
+                if self.motor_sound is not None:
+                    self.force_play_sound(self.motor_sound, -1)
+                    self.motor_sound_playing = 1
 
     def stop_acceleration(self):
-        self.thrust = 0
-        self.thrust_gfx.visible = 0
-        self.motor_sound.stop()
-        self.motor_sound_playing = 0
+        if self.thrust > 0:
+            self.thrust = 0
+            self.thrust_gfx.visible = 0
+            self.motor_sound.stop()
+            self.motor_sound_playing = 0
 
     def rotate_right(self):
         self.heading -= self.handling
