@@ -47,6 +47,14 @@ class BulletSprite(game_object.GameObject):
             self.y = 0
             self.kill()
 
+    def get_non_alpha_pixels(self):
+        pixels = []
+        for x in range(0, self.image.get_width()):
+            for y in range(0, self.image.get_height()):
+                if self.image.get_at((x, y)).a > 0:
+                    pixels.append([x, y])
+        return pixels
+
     def collide_with_wall(self):
         """ 
         Tämä tapahtuu kun ammus törmää seinään 

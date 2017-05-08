@@ -1,0 +1,369 @@
++------------------------+
+| game_object.GameObject |
++------------------------+
+        .                                                                                                                                                                                             
+       /_\                                                                                                                                                                                            
+        |                 [ game_object.GameObject ]                                               [ game_object.GameObject ]                                               [ game_object.GameObject ]
+        |                             .                                                                        .                                                                      .               
+        |                            /_\                                                                      /_\                                                                    /_\              
+        |                             |                                                                        |                                                                      |               
+        |                             |                                                                        |                                                                      |               
++-----------------+       +--------------------------+                                       +--------------------------------------+                                       +----------------------+  
+|   EffectSprite  |       |       PlayerSprite       |                                       |              BallSprite              |                                       |     BulletSprite     |  
+|-----------------|       |--------------------------|                                       |--------------------------------------|                                       |----------------------|  
+| attached_player |       | owning_player_id         |  ---->  [ effect.EffectSprite ]       | start_position                       |  ---->  [ effect.TetherSprite ]       | rect                 |  
+| attached_ball   |       | motor_flame_image        |                                       | x                                    |                                       | max_speed            |  
+| effect_type     |       | thrust_gfx               |                                       | attached_player                      |                                       | explosion_force      |  
+| visible         |       | rect                     |                                       | attached_player_max_distance         |                                       | is_bullet            |  
+| rect            |       | is_centered_on_screen    |                                       | attached_player_max_distance_squared |                                       | group                |  
+|-----------------|       | motor_sound              |                                       | tether                               |                                       | wall_collide_sound   |  
+| __init__        |       | motor_sound_playing      |                                       | mass                                 |                                       | viewscreen_rect      |  
+| update          |       | bullet_sound             |                                       | max_speed                            |                                       | x                    |  
+| destroy         |       | ball_shoot_sound         |                                       | is_ball                              |                                       | y                    |  
++-----------------+       | ball_capture_sound       |                                       | wall_collide_sound                   |                                       |----------------------|  
+        |                 | wall_collide_sound       |                                       | bullet_collide_sound                 |                                       | __init__             |  
+        |                 | bullet_collide_sound     |                                       | viewscreen_rect                      |                                       | update               |  
+        |                 | start_position           |                                       | y                                    |                                       | check_out_of_bounds  |  
+        |                 | x                        |                                       |--------------------------------------|                                       | get_non_alpha_pixels |  
+        |                 | x_previous               |                                       | __init__                             |                                       +----------------------+  
+        |                 | heading                  |                                       | update                               |                                                                 
+        |                 | thrust                   |                                       | collide_tether                       |                                                                 
+        |                 | attached_ball            |                                       | shoot                                |                                                                 
+        |                 | handling                 |                                       | attach_to_player                     |                                                                 
+        |                 | max_thrust               |                                       | detach                               |                                                                 
+        |                 | max_speed                |                                       +--------------------------------------+                                                                 
+        |                 | mass                     |                                                                                                                                                
+        |                 | cooldown_basic_shot      |                                                                                                                                                
+        |                 | cooldown_after_ball_shot |                                                                                                                                                
+        |                 | cooldown_counter         |                                                                                                                                                
+        |                 | recovery_time            |                                                                                                                                                
+        |                 | recovery_started_at      |                                                                                                                                                
+        |                 | viewscreen_rect          |                                                                                                                                                
+        |                 |--------------------------|                                                                                                                                                
+        |                 | __init__                 |                                                                                                                                                
+        |                 | update                   |                                                                                                                                                
+        |                 | attach_ball              |                                                                                                                                                
+        |                 | detach                   |                                                                                                                                                
+        |                 | accelerate               |                                                                                                                                                
+        |                 | stop_acceleration        |                                                                                                                                                
+        |                 | rotate_right             |                                                                                                                                                
+        |                 | rotate_left              |                                                                                                                                                
+        |                 | shoot                    |                                                                                                                                                
+        |                 | recover                  |                                                                                                                                                
+        |                 +--------------------------+                                                                                                                                                
+      .         
+     /_\        
+      |         
+      |         
+      |         
+      |         
+      |         
++--------------+
+| TetherSprite |
+|--------------|
+| effect_type  |
+| image        |
+| rect         |
+|--------------|
+| __init__     |
+| update       |
++--------------+
+                                      
+                                      
+                                      
+                                      
++------------------------------------+
+|        pygame.sprite.Sprite        |
++------------------------------------+
+                 .                                                                                                                                                                                                                                                                                              
+                /_\                                                                                                                                                                                                                                                                                             
+                 |                                                          [ pygame.sprite.Sprite ]                                     [ pygame.sprite.Sprite ]                                 [ pygame.sprite.Sprite ]                               [ pygame.sprite.Sprite ]       [ pygame.sprite.Sprite ]
+                 |                                                                     .                                                           .                                                       .                                                      .                               .             
+                 |                                                                    /_\                                                         /_\                                                     /_\                                                    /_\                             /_\            
+                 |                                                                     |                                                           |                                                       |                                                      |                               |             
+                 |                                                                     |                                                           |                                                       |                                                      |                               |             
++------------------------------------+                                     +--------------------------+                                  +---------------------+                                  +-------------------+                                  +-------------------+          +----------------------+
+|             GameObject             |                                     |       MusicPlayer        |                                  |   BackgroundAction  |                                  |   ScrollingText   |                                  |  DisappearingText |          |        Level         |
+|------------------------------------|                                     |--------------------------|                                  |---------------------|                                  |-------------------|                                  |-------------------|          |----------------------|
+| parent                             |  ---->  [ vector.MoveVector ]       | _shuffle                 |  ---->  [ MusicFile ]            | gravity             |  ---->  [ DemoBall ]             | frame_counter     |  ---->  [ pygame.Surface ]       | frame_counter     |          | image                |
+| level                              |                                     | _screen                  |  ---->  [ pygame.Surface ]       | screen_size_x       |  ---->  [ pygame.Surface ]       | image             |                                  | frames_visible    |          | size_x               |
+| wall_collide_sound                 |                                     | image                    |                                  | screen_size_y       |  ---->  [ level.Level ]          | original_image    |                                  | image             |          | size_y               |
+| bullet_collide_sound               |                                     | rect                     |                                  | screen_center_point |  ---->  [ DemoPlayer ]           | empty_image       |                                  | original_position |          | rect                 |
+| start_position                     |                                     | _window_size             |                                  | level               |                                  | rect              |                                  | rect              |          | center_point         |
+| x                                  |                                     | pos                      |                                  | ship1               |                                  | screen_size_x     |                                  | flashes           |          | player_spawns_team_1 |
+| x_previous                         |                                     | text_color               |                                  | ship2               |                                  | scroll_direction  |                                  | flash_interval    |          | background_image     |
+| move_vector                        |                                     | bg_color                 |                                  | ship3               |                                  | original_position |                                  | visible           |          |----------------------|
+| mass                               |                                     | border_color             |                                  | ship4               |                                  | scroll_speed      |                                  |-------------------|          | __init__             |
+| max_speed                          |                                     | info_padding             |                                  | ship5               |                                  | flashes           |                                  | __init__          |          | destroy_land         |
+| gravity_affects                    |                                     | border_width             |                                  | ship6               |                                  | flash_interval    |                                  | update            |          +----------------------+
+| is_ball                            |                                     | screen_border_margin     |                                  | ball                |                                  | visible           |                                  | toggle_image      |                                  
+| is_bullet                          |                                     | fadeout_counter          |                                  | image               |                                  |-------------------|                                  +-------------------+                                  
+| is_centered_on_screen              |                                     | fadeout_counter_start    |                                  | rect                |                                  | __init__          |                                                                                         
+| attached_player                    |                                     | fadeout_decrement        |                                  | viewscreen_rect     |                                  | update            |                                                                                         
+| attached_ball                      |                                     | playlist                 |                                  | ball_pos            |                                  | toggle_image      |                                                                                         
+| viewscreen_rect                    |                                     | playlist_pointer         |                                  | score_green         |                                  +-------------------+                                                                                         
+| image                              |                                     |--------------------------|                                  | score_red           |                                                                                                                                                
+| original_image                     |                                     | __init__                 |                                  |---------------------|                                                                                                                                                
+| size                               |                                     | play                     |                                  | __init__            |                                                                                                                                                
+| rect                               |                                     | update                   |                                  | update              |                                                                                                                                                
+| radius                             |                                     | stop                     |                                  | score               |                                                                                                                                                
+| original_radius                    |                                     | now_playing              |                                  | kill_me             |                                                                                                                                                
+| y_previous                         |                                     | _calculate_rect_position |                                  +---------------------+                                                                                                                                                
+| y                                  |                                     | set_screen               |                                                                                                                                                                                                         
+|------------------------------------|                                     | shuffle_playlist         |                                                                                                                                                                                                         
+| __init__                           |                                     | next                     |                                                                                                                                                                                                         
+| load_image                         |                                     +--------------------------+                                                                                                                                                                                                         
+| reset                              |                                                                                                                                                                                                                                                                          
+| update_rect                        |                                                                                                                                                                                                                                                                          
+| update_movement                    |                                                                                                                                                                                                                                                                          
+| rot_self_image_keep_size           |                                                                                                                                                                                                                                                                          
+| check_out_of_bounds                |                                                                                                                                                                                                                                                                          
+| check_collision_with_wall_and_goal |                                                                                                                                                                                                                                                                          
+| speculate_collision_with_wall      |                                                                                                                                                                                                                                                                          
+| check_collision_with_bullets       |                                                                                                                                                                                                                                                                          
+| check_collision_with_players       |                                                                                                                                                                                                                                                                          
+| collide_circle                     |                                                                                                                                                                                                                                                                          
+| distance_squared                   |                                                                                                                                                                                                                                                                          
+| distance                           |                                                                                                                                                                                                                                                                          
+| force_play_sound                   |                                                                                                                                                                                                                                                                          
++------------------------------------+                                                                                                                                                                                                                                                                          
+           .             
+          /_\            
+           |             
+           |             
+           |             
+           |             
+           |             
++-----------------------+
+|      DummyObject      |
+|-----------------------|
+| x                     |
+| y                     |
+| move_vector           |
+| gravity_affects       |
+| parent                |
+| level                 |
+| max_speed             |
+| is_centered_on_screen |
+| viewscreen_rect       |
+| rect                  |
+|-----------------------|
+| __init__              |
++-----------------------+
+                   
+                   
+                   
+                   
++-----------------+
+| ball.BallSprite |
++-----------------+
+        .          
+       /_\         
+        |          
+        |          
+        |          
+        |          
+        |          
++-----------------+
+|     DemoBall    |
+|-----------------|
+| gravity_affects |
+| image           |
+| rect            |
+| start_position  |
+| x               |
+| x_previous      |
+|-----------------|
+| __init__        |
++-----------------+
+                            
+                            
+                            
+                            
++--------------------------+
+|   player.PlayerSprite    |
++--------------------------+
+            .                                               
+           /_\                                              
+            |                                               
+            |                                               
+            |                                               
+            |                                               
+            |                                               
++--------------------------+                                
+|        DemoPlayer        |                                
+|--------------------------|                                
+| motor_flame_image        |  ---->  [ effect.EffectSprite ]
+| thrust_gfx               |                                
+| viewscreen_rect          |                                
+| heading                  |                                
+| thrust                   |                                
+| attached_ball            |                                
+| handling                 |                                
+| max_thrust               |                                
+| max_speed                |                                
+| mass                     |                                
+| cooldown_basic_shot      |                                
+| cooldown_after_ball_shot |                                
+| cooldown_counter         |                                
+| recovery_time            |                                
+| recovery_started_at      |                                
+| gravity_affects          |                                
+| team                     |                                
+| start_position           |                                
+| x                        |                                
+| x_previous               |                                
+| goal_green_pos           |                                
+| goal_red_pos             |                                
+| goal                     |                                
+| motor_sound_playing      |                                
+| motor_sound              |                                
+| ball_capture_sound       |                                
+|--------------------------|                                
+| __init__                 |                                
+| update                   |                                
+| shoot                    |                                
++--------------------------+                                
+                                                                                                                       
+                                                                                                                       
+                                                                                                                       
+                                                                                                                       
++---------------------+       +---------------------------+                                       +-------------------+
+| effect.TetherSprite |       |        AUTSBallGame       |                                       | music.MusicPlayer |
++---------------------+       |---------------------------|                                       +-------------------+
+                              | is_running                |  ---->  [ ball.BallSprite ]                                
+                              | local_player_id           |  ---->  [ player.PlayerSprite ]                            
+                              | gravity                   |  ---->  [ level.Level ]                                    
+                              | screen_size_x             |  ---->  [ music.MusicPlayer ]                              
+                              | screen_size_y             |                                                            
+                              | screen_center_point       |                                                            
+                              | win                       |                                                            
+                              | clock                     |                                                            
+                              | music_player              |                                                            
+                              | goal_green_sound          |                                                            
+                              | goal_red_sound            |                                                            
+                              | loading_image             |                                                            
+                              | current_level             |                                                            
+                              | players                   |                                                            
+                              | player_count              |                                                            
+                              | ball                      |                                                            
+                              | viewscreen_rect           |                                                            
+                              | background_view_rect      |                                                            
+                              | score_green               |                                                            
+                              | score_red                 |                                                            
+                              | quit_game                 |                                                            
+                              | frame_counter             |                                                            
+                              |---------------------------|                                                            
+                              | __init__                  |                                                            
+                              | start                     |                                                            
+                              | destroy                   |                                                            
+                              | add_player                |                                                            
+                              | remove_player             |                                                            
+                              | update                    |                                                            
+                              | update_graphics           |                                                            
+                              | score                     |                                                            
+                              | get_ball_angle_in_radians |                                                            
+                              | exit                      |                                                            
+                              +---------------------------+                                                            
+                                                                                                        
+                                                                                                        
+                                                                                                        
+                                                                                                        
++-------------+       +-------------------+       +-------------------------+                           
+| level.Level |       | vector.MoveVector |       |          Button         |                           
++-------------+       +-------------------+       |-------------------------|                           
+                                                  | _rect                   |  ---->  [ pygame.Surface ]
+                                                  | _text                   |                           
+                                                  | _bgcolor                |                           
+                                                  | _textcolor              |                           
+                                                  | _font                   |                           
+                                                  | buttonDown              |                           
+                                                  | mouseOverButton         |                           
+                                                  | lastMouseDownOverButton |                           
+                                                  | _visible                |                           
+                                                  | surfaceNormal           |                           
+                                                  | surfaceDown             |                           
+                                                  | surfaceHighlight        |                           
+                                                  | text                    |                           
+                                                  | rect                    |                           
+                                                  | visible                 |                           
+                                                  | textcolor               |                           
+                                                  | bgcolor                 |                           
+                                                  |-------------------------|                           
+                                                  | __init__                |                           
+                                                  | handleEvent             |                           
+                                                  | draw                    |                           
+                                                  | update                  |                           
+                                                  | mouseClick              |                           
+                                                  | mouseEnter              |                           
+                                                  | mouseMove               |                           
+                                                  | mouseExit               |                           
+                                                  | mouseDown               |                           
+                                                  | mouseUp                 |                           
+                                                  | _propGetText            |                           
+                                                  | _propSetText            |                           
+                                                  | _propGetRect            |                           
+                                                  | _propSetRect            |                           
+                                                  | _propGetVisible         |                           
+                                                  | _propSetVisible         |                           
+                                                  | _propGetTextColor       |                           
+                                                  | _propSetTextColor       |                           
+                                                  | _propGetBgColor         |                           
+                                                  | _propSetBgColor         |                           
+                                                  +-------------------------+                           
+                                                                          
+                                                                          
+                                                                          
+                                                                          
++----------------+       +---------------------+       +-----------------+
+| pygame.Surface |       | effect.EffectSprite |       |    MusicFile    |
++----------------+       +---------------------+       |-----------------|
+                                                       | filename        |
+                                                       | artist          |
+                                                       | title           |
+                                                       | allowed_screens |
+                                                       |-----------------|
+                                                       | __init__        |
+                                                       +-----------------+
+                              
+                              
+                              
+                              
++----------------------------+
+|         MoveVector         |
+|----------------------------|
+| vx                         |
+| vy                         |
+| speed                      |
+| direction                  |
+|----------------------------|
+| __init__                   |
+| _clear_speed_direction     |
+| _clear_vx_vy               |
+| _calculate_speed_direction |
+| _calculate_vx_vy           |
+| set_vx_vy                  |
+| set_vx                     |
+| set_vy                     |
+| set_speed_direction        |
+| set_speed                  |
+| set_direction              |
+| get_vx_vy                  |
+| get_vx                     |
+| get_vy                     |
+| get_speed_direction        |
+| get_speed                  |
+| get_direction              |
+| get_all                    |
+| add_to_vx                  |
+| add_to_vy                  |
+| add_to_speed               |
+| add_to_direction           |
+| add_vector                 |
+| get_dot_product            |
+| get_dot_product_normalized |
+| normalize                  |
+| normalize_ip               |
+| flip                       |
+| flip_ip                    |
++----------------------------+

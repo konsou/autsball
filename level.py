@@ -3,6 +3,7 @@ import pygame
 import groups
 import text
 from colors import *
+from constants import *
 import xml.etree.ElementTree as ET
 
 

@@ -204,7 +204,7 @@ class GameObject(pygame.sprite.Sprite):
             self.move_vector.set_vy(0)
 
     def check_collision_with_wall_and_goal(self):
-        """ Tarkastaa törkmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
+        """ Tarkastaa törmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
         # Katotaan mikä väri on levelissä tässä pisteessä - skipataan alfa
         current_point = self.level.image.get_at((self.x, self.y))[:3]
 
@@ -275,7 +275,6 @@ class GameObject(pygame.sprite.Sprite):
             return 1
         else:
             return 0
-
 
     def check_collision_with_bullets(self, BulletGroup):
         """ Tarkastaa törmääkö objekti bulletteihin. Jos törmää niin laskee törmäyksen ja soittaa törmäysäänen. """

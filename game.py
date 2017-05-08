@@ -10,6 +10,7 @@ import ball
 import text
 from pygame.locals import *
 from colors import *
+from constants import *
 
 
 class AUTSBallGame:
@@ -19,8 +20,8 @@ class AUTSBallGame:
 
         # Vakioita
         # self.gravity = 0.1
-        self.screen_size_x = 800
-        self.screen_size_y = 600
+        self.screen_size_x = WINDOW_SIZE[0]
+        self.screen_size_y = WINDOW_SIZE[1]
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
 
         # Pygamen inittejä
@@ -166,11 +167,20 @@ class AUTSBallGame:
         # Ruutu tyhjäksi
         self.win.fill((0, 0, 0))
         # Piirretään taustakuva jos on
-        if self.current_level.background_image:
-            image_width, image_height = self.current_level.background_image.get_size()
-            for y in range(0, self.screen_size_y, image_height):
-                for x in range(0, self.screen_size_x, image_width):
-                    self.win.blit(self.current_level.background_image, (x, y))
+        #if self.current_level.background_image:
+            #self.win.blit(self.current_level.background_image, self.background_view_rect)
+            #image_width, image_height = self.current_level.background_image.get_size()
+            #for y in range(0, self.screen_size_y, image_height):
+            #    for x in range(0, self.screen_size_x, image_width):
+            #        self.win.blit(self.current_level.background_image, (x, y))
+
+        # Piirretään levelin ulkopuolinen tuhoutumaton alue
+        # off_level_rect = pygame.Rect(self.background_view_rect[0]-WINDOW_SIZE[0]//2,
+        #                              self.background_view_rect[1]-WINDOW_SIZE[1]//2,
+        #                              self.background_view_rect[2],
+        #                              self.background_view_rect[3])
+        # self.win.blit(self.current_level.off_level_surface, off_level_rect)
+
         # Piirretään levelistä vain viewscreenin kokoinen alue, pelaaja keskellä
         self.win.blit(self.current_level.image, self.background_view_rect)
 

@@ -6,6 +6,7 @@ import music
 import groups
 from colors import *
 from pygame.locals import *
+from constants import *
 
 pygame.font.init()
 
@@ -167,7 +168,7 @@ class Button(object):
 
 
 def debug_run():
-    window = pygame.display.set_mode((800, 600))
+    window = pygame.display.set_mode((WINDOW_SIZE[0], WINDOW_SIZE[1]))
     pygame.display.set_caption("Menu test")
     clock = pygame.time.Clock()
 
@@ -206,7 +207,7 @@ def debug_run():
     # Background action
     background_action = menu_background_action.BackgroundAction()
     # Tämä tummentaa tausta-actionin
-    darken_surface = pygame.Surface((800, 600))
+    darken_surface = pygame.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]))
     darken_surface.set_alpha(128)
 
     running = True
