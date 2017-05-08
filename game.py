@@ -18,7 +18,7 @@ class AUTSBallGame:
         self.local_player_id = 0
 
         # Vakioita
-        self.gravity = 0.1
+        # self.gravity = 0.1
         self.screen_size_x = 800
         self.screen_size_y = 600
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
@@ -47,10 +47,14 @@ class AUTSBallGame:
         # TODO: tähän assettien esilataus
         # Instansioidaan leveli, tämä lataa myös level-kuvan joka voi olla iiisooo
         # self.current_level = level.Level(background_image_file='gfx/cave_background.png')
-        self.current_level = level.Level(level_name='Test Level')
+        self.current_level = level.Level(level_name='Vertical Challenge')
+        self.gravity = self.current_level.gravity
+
         # Instansioidaan pelaaja ja pallo
         self.players = {}
         self.player_count = 0
+        self.player_count_team = {'red': 0, 'green': 0}
+
         self.ball = ball.BallSprite(level=self.current_level, parent=self)
 
         self.viewscreen_rect = None
@@ -72,26 +76,30 @@ class AUTSBallGame:
         self.is_running = False
         self.players.clear()
         self.player_count = 0
+        self.player_count_team = {'red': 0, 'green': 0}
         groups.empty_groups()
         self.music_player.stop()
 
-    def add_player(self, player_id=None):
+    def add_player(self, player_id=None, team=None):
         # Lisää pelaajan pelaajalistaan
-        if player_id == None:
+        if player_id is None:
             self.players[self.player_count] = player.PlayerSprite(player_id=player_id,
-                                                           level=self.current_level,
-                                                           parent=self,
-                                                           spawn_point=self.current_level.player_spawns_team_red[
-                                                               self.player_count])
+                                                                  team=team,
+                                                                  level=self.current_level,
+                                                                  parent=self,
+                                                                  spawn_point=self.current_level.player_spawns[team][
+                                                                              self.player_count_team[team]])
 
         else:
             self.players[player_id] = player.PlayerSprite(player_id=player_id,
-                                                   level=self.current_level,
-                                                   parent=self,
-                                                   spawn_point=self.current_level.player_spawns_team_red[
-                                                       self.player_count])
+                                                          team=team,
+                                                          level=self.current_level,
+                                                          parent=self,
+                                                          spawn_point=self.current_level.player_spawns[team][
+                                                                      self.player_count_team[team]])
 
         self.player_count += 1
+        self.player_count_team[team] += 1
 
     def remove_player(self, player_id):
         # Poistaa pelaajan pelaajalistasta ja palauttaa kyseisen pelaajan tai Nonen jos pelaajaa ei löydy
@@ -223,5 +231,10 @@ class AUTSBallGame:
 
 if __name__ == '__main__':
     game = AUTSBallGame()
+    game.add_player(0, team='red')
+    game.add_player(1, team='green')
+    game.add_player(2, team='red')
+    game.start()
+
     while True:
         game.update()

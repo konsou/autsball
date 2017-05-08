@@ -12,7 +12,9 @@ class BallSprite(game_object.GameObject):
     """ Pallo. Osaa liittää itsensä pelaajaan ja poistaa liitoksen. """
     def __init__(self, level=None, parent=None, group=groups.BallGroup):
         game_object.GameObject.__init__(self, group=group, image_file='gfx/ball_50_red.png', level=level, parent=parent)
-        self.start_position = self.level.center_point
+
+        # Otetaan start_position levelin tiedoista
+        self.start_position = self.level.ball_spawns[0]
         self.x, self.y = self.start_position
 
         # Player attachment

@@ -18,30 +18,27 @@
         <!-- TODO: thumbnail-kuva -->
         <width>1200</width>
         <height>2400</height>
-        <!-- TODO: gravityn lataus tästä eikä peliobjektissa -->
         <!-- TODO: gravityn suunta vapaasti määritettäväksi? -->
         <gravity>0.1</gravity>
 
         <!--
         Pelaajien spawnpointit. Näitä voi olla kummallekin tiimille niin monta kuin haluaa.
-        TODO: ota käyttöön team2 koodissa
         -->
         <player_spawns>
             <team_red>
-                <spawn_coordinates x='500' y='200' />
-                <spawn_coordinates x='600' y='200' />
-                <spawn_coordinates x='700' y='200' />
-            </team_red>
-            <team_green>
                 <spawn_coordinates x='500' y='2200' />
                 <spawn_coordinates x='600' y='2200' />
                 <spawn_coordinates x='700' y='2200' />
+            </team_red>
+            <team_green>
+                <spawn_coordinates x='500' y='200' />
+                <spawn_coordinates x='600' y='200' />
+                <spawn_coordinates x='700' y='200' />
             </team_green>
         </player_spawns>
 
         <!--
-        Pallo(je)n spawnpointit. Teknisesti sallii useamman spawnpointin olemassaolon.
-        TODO: implementoi koodissa
+        Pallo(je)n spawnpointit. Teknisesti sallii useamman spawnpointin olemassaolon tässä mutta ei koodissa.
         -->
         <ball_spawns>
             <spawn_coordinates x="600" y="1200" />
@@ -70,11 +67,12 @@
         </player_spawns>
 
         <ball_spawns>
-            <spawn_coordinates x="600" y="1200" />
+            <spawn_coordinates x="1200" y="600" />
         </ball_spawns>
     </level>
 
     <level name="Menu Background" public="0">
+        <!-- TODO: ota käyttöön oikeasti tämä menu backgroundissa -->
         <image>gfx/menu_background_level.png</image>
 
         <width>800</width>
@@ -95,7 +93,7 @@
         </player_spawns>
 
         <ball_spawns>
-            <spawn_coordinates x="400" y="300" />
+            <spawn_coordinates x="100" y="100" />
         </ball_spawns>
     </level>
 

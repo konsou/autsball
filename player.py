@@ -10,12 +10,19 @@ from colors import *
 
 
 class PlayerSprite(game_object.GameObject):
-    def __init__(self, player_id=None, level=None, parent=None, group=groups.PlayerGroup, spawn_point=None):
+    def __init__(self, player_id=None, team=None, level=None, parent=None, group=groups.PlayerGroup, spawn_point=None):
         self.owning_player_id = player_id
+
+        # Tiimi, kuva tiimin mukaisesti
+        self.team = team
+        if team == 'red':
+            image_file = 'gfx/ship1_red_20px.png'
+        else:
+            image_file = 'gfx/ship1_green_20px.png'
 
         # Lisätään ryhmään
         game_object.GameObject.__init__(self, group=group, level=level, parent=parent,
-                                        image_file='gfx/ship1_red_20px.png')
+                                        image_file=image_file)
 
         # Graffat
         # self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
