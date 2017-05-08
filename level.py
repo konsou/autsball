@@ -41,9 +41,7 @@ class Level(pygame.sprite.Sprite):
         self.center_point = self.size_x // 2, self.size_y // 2
 
         # Spawn pointit
-        self.player_spawns = {}
-        self.player_spawns['red'] = []
-        self.player_spawns['green'] = []
+        self.player_spawns = {'red': [], 'green': []}
         self.ball_spawns = []
 
         for current_spawn in current_level.find('player_spawns').find('team_red'):
