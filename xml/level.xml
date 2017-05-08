@@ -11,6 +11,7 @@
         <image>gfx/test_arena_vertical_challenge.png</image>
         <!-- Background-kuva. Ei pakollinen - jos ei löydy niin määritetään Noneksi. -->
         <background>gfx/cave_background.png</background>
+        <off-level>gfx/cave_indestructible_rock.png</off-level>
         <!-- TODO: off-level-kuva -->
 
         <!-- Levelin leveys ja korkeus että nämä tiedot voi näyttää tulevassa levelinvalintaruudussa ilman että
@@ -48,6 +49,7 @@
     <level name="Test Level" public="1">
         <image>gfx/test_arena_2400x1200.png</image>
         <background>gfx/cave_background.png</background>
+        <off-level>gfx/cave_indestructible_rock.png</off-level>
 
         <width>2400</width>
         <height>1200</height>
