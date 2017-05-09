@@ -43,6 +43,9 @@ class PlayerSprite(game_object.GameObject):
         else:
             self.is_centered_on_screen = 0
 
+        self._smoke_interval = 50  # Smoken spawn tiheys millisekunteina
+        self._smoke_counter = 0
+
         # Sound effex
         self.motor_sound = pygame.mixer.Sound(file=current_ship.find('sounds/motor_sound').text)
         self.motor_sound_playing = 0
@@ -129,6 +132,12 @@ class PlayerSprite(game_object.GameObject):
                 if self.motor_sound is not None:
                     self.force_play_sound(self.motor_sound, -1)
                     self.motor_sound_playing = 1
+        else:
+            if type(self).__name__ is not 'DemoPlayer':
+                self._smoke_counter += self.parent.clock.get_time()
+                if self._smoke_counter > self._smoke_interval:
+                    effect.SmokeEffect(start_position=(self.x, self.y), parent=self.parent)
+                    self._smoke_counter = 0
 
     def stop_acceleration(self):
         if self.thrust > 0:
