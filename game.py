@@ -28,7 +28,7 @@ class AUTSBallGame:
         pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
         pygame.init()
         pygame.mixer.init()
-        self.win = pygame.display.set_mode((self.screen_size_x, self.screen_size_y))
+        self.win = pygame.display.set_mode((self.screen_size_x, self.screen_size_y), pygame.HWSURFACE | pygame.DOUBLEBUF)
         pygame.display.set_caption("AUTSball")
         self.clock = pygame.time.Clock()
 
@@ -43,7 +43,7 @@ class AUTSBallGame:
         # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
         self.loading_image = pygame.image.load('gfx/loading.png').convert_alpha()
         self.win.blit(self.loading_image, self.loading_image.get_rect())
-        pygame.display.update()
+        pygame.display.flip()
 
         # TODO: tähän assettien esilataus
         # Instansioidaan leveli, tämä lataa myös level-kuvan joka voi olla iiisooo
@@ -208,7 +208,7 @@ class AUTSBallGame:
                                (self.screen_size_x // 2 + vx, self.screen_size_y // 2 + vy), 5)
 
         # Displayn update
-        pygame.display.update()
+        pygame.display.flip()
 
     def score(self, scoring_team):
         """ Tätä kutsutaan kun tulee maali """
