@@ -27,9 +27,9 @@ class Level(pygame.sprite.Sprite):
 
         # Background
         try:
-            self.background_image = pygame.image.load(current_level.find('background').text).convert()
+            background_image = pygame.image.load(current_level.find('background').text).convert()
         except AttributeError:
-            self.background_image = pygame.image.load('gfx/cave_background.png').convert()
+            background_image = pygame.image.load('gfx/cave_background.png').convert()
         try:
             self.off_level_image = pygame.image.load(current_level.find('off-level').text).convert()
         except AttributeError:
@@ -41,16 +41,16 @@ class Level(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.center_point = self.size_x // 2, self.size_y // 2
 
-        if self.background_image is not None:
-            self.background_image.set_colorkey(BLACK)
+        if background_image is not None:
+            # background_image.set_colorkey(BLACK)
             #generoidaan taustakuva
             #background_image = pygame.image.load(background_image_file).convert_alpha()
             self.background_image = pygame.Surface((self.size_x, self.size_y))
             surface_rect = self.background_image.get_rect()
-            image_rect = self.background_image.get_rect()
+            image_rect = background_image.get_rect()
             for x in range(0, surface_rect.width, image_rect.width):
                 for y in range(0, surface_rect.height, image_rect.height):
-                    self.background_image.blit(self.background_image, (x, y))
+                    self.background_image.blit(background_image, (x, y))
 
         # Generoidaan ulkopuolinen aines
         self.off_level_surface = pygame.Surface((self.size_x+WINDOW_SIZE[0], self.size_y+WINDOW_SIZE[1]),
