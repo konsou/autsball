@@ -7,12 +7,16 @@
     public=0 tarkoittaa että leveli on vain ohjelman sisäistä käyttöä varten (esim. menu background)
     -->
     <level name="Vertical Challenge" public="1">
-        <!-- Itse levelikuva. Pakollinen. -->
-        <image>gfx/test_arena_vertical_challenge.png</image>
-        <!-- Background-kuva. Ei pakollinen - jos ei löydy niin määritetään Noneksi. -->
-        <background>gfx/cave_background.png</background>
-        <off-level>gfx/cave_indestructible_rock.png</off-level>
-        <!-- TODO: off-level-kuva -->
+        <images>
+            <!-- Itse levelikuva. Pakollinen. -->
+            <level-image>gfx/test_arena_vertical_challenge.png</level-image>
+            <!--
+            Background- ja off-level-kuvat.
+            Määrittelyt ei pakollisia - jos määrittelyjä ei löydy niin ladataan mustaa pintaa tilalle.
+            -->
+            <background>gfx/cave_background.png</background>
+            <off-level>gfx/cave_indestructible_rock.png</off-level>
+        </images>
 
         <!-- Levelin leveys ja korkeus että nämä tiedot voi näyttää tulevassa levelinvalintaruudussa ilman että
         pitää ladata koko level-kuvaa -->
@@ -39,7 +43,7 @@
         </player_spawns>
 
         <!--
-        Pallo(je)n spawnpointit. Teknisesti sallii useamman spawnpointin olemassaolon tässä mutta ei koodissa.
+        Pallo(je)n spawnpointit. Teknisesti sallii useamman spawnpointin olemassaolon tässä mutta ei (vielä) koodissa.
         -->
         <ball_spawns>
             <spawn_coordinates x="600" y="1200" />
@@ -47,9 +51,11 @@
     </level>
 
     <level name="Test Level" public="1">
-        <image>gfx/test_arena_2400x1200.png</image>
-        <background>gfx/cave_background.png</background>
-        <off-level>gfx/cave_indestructible_rock.png</off-level>
+        <images>
+            <level-image>gfx/test_arena_2400x1200.png</level-image>
+            <background>gfx/cave_background.png</background>
+            <off-level>gfx/cave_indestructible_rock.png</off-level>
+        </images>
 
         <width>2400</width>
         <height>1200</height>
@@ -75,7 +81,9 @@
 
     <level name="Menu Background" public="0">
         <!-- TODO: ota käyttöön oikeasti tämä menu backgroundissa -->
-        <image>gfx/menu_background_level.png</image>
+        <images>
+            <level-image>gfx/menu_background_level.png</level-image>
+        </images>
 
         <width>800</width>
         <height>600</height>
