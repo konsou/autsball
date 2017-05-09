@@ -25,15 +25,15 @@ class Level(pygame.sprite.Sprite):
         self.image = pygame.image.load(current_level.find('image').text).convert()
         self.image.set_colorkey(colorkey)
 
-        # Background - None jos ei ole määritetty
+        # Background
         try:
             self.background_image = pygame.image.load(current_level.find('background').text).convert()
         except AttributeError:
-            self.background_image = None
+            self.background_image = pygame.image.load('gfx/cave_background.png').convert()
         try:
             self.off_level_image = pygame.image.load(current_level.find('off-level').text).convert()
         except AttributeError:
-            self.off_level_image = None
+            self.off_level_image = pygame.image.load('gfx/cave_indestructible_rock.png').convert()
 
         # Levelin koko, rect, center_point
         self.size_x = self.image.get_width()
