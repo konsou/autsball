@@ -57,7 +57,36 @@ class TetherSprite(EffectSprite):
 
 class SmokeEffect(EffectSprite):
 
-    def __init__(self, start_position, fade_time=5):
-        self.x, self.y = start_position
-        self.fade_time = fade_time
-        # TODO: tee tämä loppuun
+    def __init__(self, start_position, parent=None):
+        # TODO: lataa kuvat vain kerran ja käytä uudestaan instansseissa
+
+        EffectSprite.__init__(self, image_file=['gfx/smoke_16_0.png',
+                                                'gfx/smoke_16_1.png',
+                                                'gfx/smoke_16_2.png',
+                                                'gfx/smoke_16_3.png',
+                                                'gfx/smoke_16_4.png'],
+                              group=groups.EffectGroup, parent=parent)
+        self.parent = parent
+        if self.parent is not None and type(parent).__name__ is not 'BackgroundAction':
+            try:
+                self.timer = parent.clock
+            except AttributeError:
+                self.timer = pygame.time.Clock()
+            self.x, self.y = start_position
+            self.first_image = True
+            self.gravity_affects = 1
+            self._animation_enabled = 1
+
+            # TODO: spawnaa oikeaan paikkaan (ei pelaajan sisään)
+        else:
+            self.kill()
+
+    def update(self, viewscreen_rect):
+        if self.parent is not None and type(self.parent).__name__ is not 'BackgroundAction':
+            self.viewscreen_rect = viewscreen_rect
+            self.update_movement()
+            self.animate()
+            if self._animation_current_image_counter is 0 and not self.first_image:
+                self.kill()
+            elif self._animation_current_image_counter > 0:
+                self.first_image = False
