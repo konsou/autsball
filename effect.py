@@ -99,8 +99,6 @@ class Explosion(EffectSprite):
                                                       ))
 
 
-
-
 class SmokeEffect(EffectSprite):
 
     image_files = []
