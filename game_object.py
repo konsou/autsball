@@ -86,7 +86,14 @@ class GameObject(pygame.sprite.Sprite):
             self._animation_frame_counter = 0
             self._animation_current_image_counter = 0
             self._animation_enabled = 1
-
+        # Animaatio valmiiksi ladatuista kuvista
+        elif type(image) is types.ListType:
+            self._animation_images = image
+            self.image = self._animation_images[0]
+            self.animation_frames_per_image = frames_per_image
+            self._animation_frame_counter = 0
+            self._animation_current_image_counter = 0
+            self._animation_enabled = 1
         # Jos animaatio ei enabloitu niin jatketaan normaalisti
         else:
             # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
@@ -177,7 +184,7 @@ class GameObject(pygame.sprite.Sprite):
             self.image = self._animation_images[0]
             self._animation_current_image_counter = 0
         self.original_image = self.image
-        self.rect = self.image.get_rect()
+        self.rect.size = self.image.get_rect().size  # pidä positio samana, muuten siirtyy hetkeksi yläkulmaan
 
     def rot_self_image_keep_size(self, angle):
         """rotate an image while keeping its center and size"""
