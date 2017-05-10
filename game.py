@@ -81,13 +81,14 @@ class AUTSBallGame:
         groups.empty_groups()
         self.music_player.stop()
 
-    def add_player(self, player_id=None, team=None):
+    def add_player(self, player_id=None, team=None, ship_name='V-Wing'):
         # Lisää pelaajan pelaajalistaan
         if player_id is None:
             self.players[self.player_count] = player.PlayerSprite(player_id=player_id,
                                                                   team=team,
                                                                   level=self.current_level,
                                                                   parent=self,
+                                                                  ship_name=ship_name,
                                                                   spawn_point=self.current_level.player_spawns[team][
                                                                               self.player_count_team[team]])
 
@@ -96,6 +97,7 @@ class AUTSBallGame:
                                                           team=team,
                                                           level=self.current_level,
                                                           parent=self,
+                                                          ship_name=ship_name,
                                                           spawn_point=self.current_level.player_spawns[team][
                                                                       self.player_count_team[team]])
 
@@ -231,7 +233,6 @@ class AUTSBallGame:
         y_difference = point1[1] - point2[1]
         return math.atan2(y_difference, x_difference)
 
-
     def exit(self):
         """ Tähän voi laittaa jotain mitä tulee ennen poistumista """
         pygame.quit()
@@ -241,7 +242,7 @@ class AUTSBallGame:
 
 if __name__ == '__main__':
     game = AUTSBallGame()
-    game.add_player(0, team='red')
+    game.add_player(0, team='red', ship_name='Fatship')
     game.add_player(1, team='green')
     game.add_player(2, team='red')
     game.start()

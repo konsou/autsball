@@ -10,23 +10,32 @@ from colors import *
 
 
 class PlayerSprite(game_object.GameObject):
-    def __init__(self, player_id=None, team=None, level=None, parent=None, group=groups.PlayerGroup, spawn_point=None):
+    def __init__(self, player_id=None, team=None, level=None, parent=None, ship_name=None,
+                 group=groups.PlayerGroup, spawn_point=None):
         self.owning_player_id = player_id
-
-        # Tiimi, kuva tiimin mukaisesti
         self.team = team
+        self.name = ship_name
+
+        # Ladataan xml-file
+        root = text.read_xml('xml/ship.xml')
+        current_ship = root.find(".//ship[@name='" + ship_name + "']")
+
+        # Kuva
         if team == 'red':
-            image_file = 'gfx/ship1_red_20px.png'
+            image = pygame.image.load(current_ship.find('images/team_red_image').text).convert_alpha()
         else:
-            image_file = 'gfx/ship1_green_20px.png'
+            image = pygame.image.load(current_ship.find('images/team_green_image').text).convert_alpha()
 
         # Lisätään ryhmään
         game_object.GameObject.__init__(self, group=group, level=level, parent=parent,
-                                        image_file=image_file)
+                                        image=image)
 
-        # Graffat
-        # self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
-        self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=['gfx/motor_flame_10.png', 'gfx/motor_flame_10b.png'],
+        # Thrust-gfx
+        image_file = []
+        for value in current_ship.findall('images/motor_flame_image'):
+            image_file.append(value.text)
+        # print thrust_gfx_file
+        self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=image_file,
                                        effect_type='motorflame', visible=0, parent=parent)
         self.rect.center = self.parent.screen_center_point
         if self.owning_player_id == parent.local_player_id:
@@ -35,13 +44,13 @@ class PlayerSprite(game_object.GameObject):
             self.is_centered_on_screen = 0
 
         # Sound effex
-        self.motor_sound = pygame.mixer.Sound(file='sfx/shhhh_v2.wav')
+        self.motor_sound = pygame.mixer.Sound(file=current_ship.find('sounds/motor_sound').text)
         self.motor_sound_playing = 0
-        self.bullet_sound = pygame.mixer.Sound(file='sfx/pop.wav')
-        self.ball_shoot_sound = pygame.mixer.Sound(file='sfx/pchou.wav')
-        self.ball_capture_sound = pygame.mixer.Sound(file='sfx/ball_capture.wav')
-        self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump4.wav')
-        self.bullet_collide_sound = pygame.mixer.Sound(file='sfx/metal_thud_2.wav')
+        self.bullet_sound = pygame.mixer.Sound(file=current_ship.find('sounds/bullet_sound').text)
+        self.ball_shoot_sound = pygame.mixer.Sound(file=current_ship.find('sounds/ball_shoot_sound').text)
+        self.ball_capture_sound = pygame.mixer.Sound(file=current_ship.find('sounds/ball_capture_sound').text)
+        self.wall_collide_sound = pygame.mixer.Sound(file=current_ship.find('sounds/wall_collide_sound').text)
+        self.bullet_collide_sound = pygame.mixer.Sound(file=current_ship.find('sounds/bullet_collide_sound').text)
 
         # Koordinaatit
         if not spawn_point:
@@ -59,17 +68,17 @@ class PlayerSprite(game_object.GameObject):
         self.attached_ball = None
 
         # Shipin ominaisuudet
-        self.handling = int(5)  # kuinka monta astetta kääntyy per frame
-        self.max_thrust = 0.35  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
-        self.max_speed = 10
-        self.mass = 1.0
+        self.handling = int(current_ship.find('handling').text)  # kuinka monta astetta kääntyy per frame
+        self.max_thrust = float(current_ship.find('max_thrust').text)  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
+        self.max_speed = int(current_ship.find('max_speed').text)
+        self.mass = float(current_ship.find('mass').text)
         self._max_acceleration = self.max_thrust / self.mass
-        self._cooldown_basic_shot = 5 # framea
-        self._cooldown_special = 60
-        self._cooldown_after_ball_shot = 60 # cooldown sen jälkeen kun pallo on ammuttu
+        self._cooldown_basic_shot = int(current_ship.find('cooldown_basic_shot').text) # framea
+        self._cooldown_special = int(current_ship.find('cooldown_special').text)
+        self._cooldown_after_ball_shot = int(current_ship.find('cooldown_after_ball_shot').text) # cooldown sen jälkeen kun pallo on ammuttu
         self._cooldown_counter = 0 # cooldown-counter1
         self._cooldown_counter_special = 0
-        self._recovery_time = 3  # sekunteja jopa!
+        self._recovery_time = float(current_ship.find('recovery_time').text)  # sekunteja jopa!
         self._recovery_started_at = 0
 
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
@@ -180,5 +189,4 @@ class PlayerSprite(game_object.GameObject):
         self._recovery_started_at = pygame.time.get_ticks()
         text.DisappearingText(pos=self.parent.screen_center_point, text="RECOVERING...", frames_visible=240, flashes=1,
                          font_size=80, color=RED)
-
 
