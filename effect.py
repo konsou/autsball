@@ -25,7 +25,6 @@ class EffectSprite(game_object.GameObject):
             dy = int(12 * math.cos(player_dir_radians))
             self.rect.center = self.attached_player.rect.center[0] + dx, self.attached_player.rect.center[1] + dy
             self.rot_self_image_keep_size(self.attached_player.heading)
-
         else:
             # jos ei visible niin heitetään vaan jonnekin kuuseen
             self.rect.center = -100, -100
@@ -57,27 +56,36 @@ class TetherSprite(EffectSprite):
 
 class SmokeEffect(EffectSprite):
 
-    def __init__(self, start_position, parent=None):
-        # TODO: lataa kuvat vain kerran ja käytä uudestaan instansseissa
+    image_files = []
 
-        EffectSprite.__init__(self, image_file=['gfx/smoke_16_0.png',
-                                                'gfx/smoke_16_1.png',
-                                                'gfx/smoke_16_2.png',
-                                                'gfx/smoke_16_3.png',
-                                                'gfx/smoke_16_4.png'],
-                              group=groups.EffectGroup, parent=parent)
+    @staticmethod
+    def preload_images():
+        SmokeEffect.image_files = []
+        SmokeEffect.image_files.append(pygame.image.load('gfx/smoke_32_0.png').convert_alpha())
+        SmokeEffect.image_files.append(pygame.image.load('gfx/smoke_32_1.png').convert_alpha())
+        SmokeEffect.image_files.append(pygame.image.load('gfx/smoke_32_2.png').convert_alpha())
+        SmokeEffect.image_files.append(pygame.image.load('gfx/smoke_32_3.png').convert_alpha())
+        SmokeEffect.image_files.append(pygame.image.load('gfx/smoke_32_4.png').convert_alpha())
+
+    def __init__(self, start_position, parent=None, attached_player=None, effect_type='smoke', viewscreen_rect=None):
+
+        EffectSprite.__init__(self, image=SmokeEffect.image_files, image_file=None,
+                              group=groups.EffectGroup, parent=parent, effect_type=effect_type,
+                              attached_player=attached_player)
         self.parent = parent
+        self.viewscreen_rect = viewscreen_rect
         if self.parent is not None and type(parent).__name__ is not 'BackgroundAction':
-            try:
-                self.timer = parent.clock
-            except AttributeError:
-                self.timer = pygame.time.Clock()
             self.x, self.y = start_position
             self.first_image = True
             self.gravity_affects = 1
             self._animation_enabled = 1
 
-            # TODO: spawnaa oikeaan paikkaan (ei pelaajan sisään)
+            # spawnaa oikeaan paikkaan (ei pelaajan sisään)
+            player_dir_radians = math.radians(self.attached_player.heading)
+            dx = int(20 * math.sin(player_dir_radians))
+            dy = int(20 * math.cos(player_dir_radians))
+            self.x, self.y = self.x + dx, self.y + dy
+            self.rot_self_image_keep_size(self.attached_player.heading)  # en tiedä onko tästä iloa savun kanssa
         else:
             self.kill()
 
