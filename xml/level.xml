@@ -1,0 +1,110 @@
+<?xml version="1.0"?>
+<!-- Level.xml:n ensimmäinen hahmotelma -->
+<data>
+    <!--
+    Levelit ladataan name-attribuutin perusteella.
+    public=1 tarkoittaa että leveli näkyy käyttäjälle silloin kun pelattavaa leveliä valitaan jostain listasta tms.
+    public=0 tarkoittaa että leveli on vain ohjelman sisäistä käyttöä varten (esim. menu background)
+    -->
+    <level name="Vertical Challenge" public="1">
+        <images>
+            <!-- Itse levelikuva. Pakollinen. -->
+            <level-image>gfx/test_arena_vertical_challenge.png</level-image>
+            <!--
+            Background- ja off-level-kuvat.
+            Määrittelyt ei pakollisia - jos määrittelyjä ei löydy niin ladataan mustaa pintaa tilalle.
+            -->
+            <background>gfx/cave_background.png</background>
+            <off-level>gfx/cave_indestructible_rock.png</off-level>
+        </images>
+
+        <!-- Levelin leveys ja korkeus että nämä tiedot voi näyttää tulevassa levelinvalintaruudussa ilman että
+        pitää ladata koko level-kuvaa -->
+        <!-- TODO: thumbnail-kuva -->
+        <width>1200</width>
+        <height>2400</height>
+        <!-- TODO: gravityn suunta vapaasti määritettäväksi? -->
+        <gravity>0.1</gravity>
+
+        <!--
+        Pelaajien spawnpointit. Näitä voi olla kummallekin tiimille niin monta kuin haluaa.
+        -->
+        <player_spawns>
+            <team_red>
+                <spawn_coordinates x='500' y='2200' />
+                <spawn_coordinates x='600' y='2200' />
+                <spawn_coordinates x='700' y='2200' />
+            </team_red>
+            <team_green>
+                <spawn_coordinates x='500' y='200' />
+                <spawn_coordinates x='600' y='200' />
+                <spawn_coordinates x='700' y='200' />
+            </team_green>
+        </player_spawns>
+
+        <!--
+        Pallo(je)n spawnpointit. Teknisesti sallii useamman spawnpointin olemassaolon tässä mutta ei (vielä) koodissa.
+        -->
+        <ball_spawns>
+            <spawn_coordinates x="600" y="1200" />
+        </ball_spawns>
+    </level>
+
+    <level name="Test Level" public="1">
+        <images>
+            <level-image>gfx/test_arena_2400x1200.png</level-image>
+            <background>gfx/cave_background.png</background>
+            <off-level>gfx/cave_indestructible_rock.png</off-level>
+        </images>
+
+        <width>2400</width>
+        <height>1200</height>
+        <gravity>0.1</gravity>
+
+        <player_spawns>
+            <team_red>
+                <spawn_coordinates x='2200' y='500' />
+                <spawn_coordinates x='2200' y='600' />
+                <spawn_coordinates x='2200' y='700' />
+            </team_red>
+            <team_green>
+                <spawn_coordinates x='200' y='500' />
+                <spawn_coordinates x='200' y='600' />
+                <spawn_coordinates x='200' y='700' />
+            </team_green>
+        </player_spawns>
+
+        <ball_spawns>
+            <spawn_coordinates x="1200" y="600" />
+        </ball_spawns>
+    </level>
+
+    <level name="Menu Background" public="0">
+        <!-- TODO: ota käyttöön oikeasti tämä menu backgroundissa -->
+        <images>
+            <level-image>gfx/menu_background_level.png</level-image>
+        </images>
+
+        <width>800</width>
+        <height>600</height>
+        <gravity>0.1</gravity>
+
+        <player_spawns>
+            <team_red>
+                <spawn_coordinates x='700' y='200' />
+                <spawn_coordinates x='700' y='300' />
+                <spawn_coordinates x='700' y='400' />
+            </team_red>
+            <team_green>
+                <spawn_coordinates x='100' y='200' />
+                <spawn_coordinates x='100' y='300' />
+                <spawn_coordinates x='100' y='400' />
+            </team_green>
+        </player_spawns>
+
+        <ball_spawns>
+            <spawn_coordinates x="100" y="100" />
+        </ball_spawns>
+    </level>
+
+</data>

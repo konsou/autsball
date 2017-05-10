@@ -8,7 +8,7 @@ import level
 import player
 import ball
 import text
-
+from pygame.locals import *
 from colors import *
 from constants import *
 
@@ -19,7 +19,7 @@ class AUTSBallGame:
         self.local_player_id = 0
 
         # Vakioita
-        self.gravity = 0.1
+        # self.gravity = 0.1
         self.screen_size_x = WINDOW_SIZE[0]
         self.screen_size_y = WINDOW_SIZE[1]
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
@@ -28,7 +28,7 @@ class AUTSBallGame:
         pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
         pygame.init()
         pygame.mixer.init()
-        self.win = pygame.display.set_mode((self.screen_size_x, self.screen_size_y))
+        self.win = pygame.display.set_mode((self.screen_size_x, self.screen_size_y), pygame.HWSURFACE | pygame.DOUBLEBUF)
         pygame.display.set_caption("AUTSball")
         self.clock = pygame.time.Clock()
 
@@ -43,14 +43,19 @@ class AUTSBallGame:
         # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
         self.loading_image = pygame.image.load('gfx/loading.png').convert_alpha()
         self.win.blit(self.loading_image, self.loading_image.get_rect())
-        pygame.display.update()
+        pygame.display.flip()
 
         # TODO: tähän assettien esilataus
         # Instansioidaan leveli, tämä lataa myös level-kuvan joka voi olla iiisooo
-        self.current_level = level.Level(background_image_file='gfx/cave_background.png')
+        # self.current_level = level.Level(background_image_file='gfx/cave_background.png')
+        self.current_level = level.Level(level_name='Test Level')
+        self.gravity = self.current_level.gravity
+
         # Instansioidaan pelaaja ja pallo
         self.players = {}
         self.player_count = 0
+        self.player_count_team = {'red': 0, 'green': 0}
+
         self.ball = ball.BallSprite(level=self.current_level, parent=self)
 
         self.viewscreen_rect = None
@@ -72,26 +77,32 @@ class AUTSBallGame:
         self.is_running = False
         self.players.clear()
         self.player_count = 0
+        self.player_count_team = {'red': 0, 'green': 0}
         groups.empty_groups()
         self.music_player.stop()
 
-    def add_player(self, player_id=None):
+    def add_player(self, player_id=None, team=None, ship_name='V-Wing'):
         # Lisää pelaajan pelaajalistaan
-        if player_id == None:
+        if player_id is None:
             self.players[self.player_count] = player.PlayerSprite(player_id=player_id,
-                                                           level=self.current_level,
-                                                           parent=self,
-                                                           spawn_point=self.current_level.player_spawns_team_1[
-                                                               self.player_count])
+                                                                  team=team,
+                                                                  level=self.current_level,
+                                                                  parent=self,
+                                                                  ship_name=ship_name,
+                                                                  spawn_point=self.current_level.player_spawns[team][
+                                                                              self.player_count_team[team]])
 
         else:
             self.players[player_id] = player.PlayerSprite(player_id=player_id,
-                                                   level=self.current_level,
-                                                   parent=self,
-                                                   spawn_point=self.current_level.player_spawns_team_1[
-                                                       self.player_count])
+                                                          team=team,
+                                                          level=self.current_level,
+                                                          parent=self,
+                                                          ship_name=ship_name,
+                                                          spawn_point=self.current_level.player_spawns[team][
+                                                                      self.player_count_team[team]])
 
         self.player_count += 1
+        self.player_count_team[team] += 1
 
     def remove_player(self, player_id):
         # Poistaa pelaajan pelaajalistasta ja palauttaa kyseisen pelaajan tai Nonen jos pelaajaa ei löydy
@@ -102,22 +113,24 @@ class AUTSBallGame:
             # Tämä estää errorin quitattaessa
             if self.quit_game is False:
                 for event in pygame.event.get():
-                    if event.type == pygame.QUIT:
+                    if event.type == QUIT:
                         self.quit_game = True
                     if event.type == music.MUSIC_FINISHED:
                         self.music_player.next()
 
                 pressed_keys = pygame.key.get_pressed()
-                if pressed_keys[pygame.K_UP]:
+                if pressed_keys[K_UP]:
                     self.players[self.local_player_id].accelerate()
                 else:
                     self.players[self.local_player_id].stop_acceleration()
-                if pressed_keys[pygame.K_RIGHT]:
+                if pressed_keys[K_RIGHT]:
                     self.players[self.local_player_id].rotate_right()
-                if pressed_keys[pygame.K_LEFT]:
+                if pressed_keys[K_LEFT]:
                     self.players[self.local_player_id].rotate_left()
-                if pressed_keys[pygame.K_LSHIFT] or pressed_keys[pygame.K_RSHIFT]:
+                if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
                     self.players[self.local_player_id].shoot()
+                if pressed_keys[K_LCTRL] or pressed_keys[K_RCTRL]:
+                    self.players[self.local_player_id].shoot_special()
                 if pressed_keys[pygame.K_BACKSPACE]:
                     self.players[self.local_player_id].recover()
 
@@ -197,7 +210,7 @@ class AUTSBallGame:
                                (self.screen_size_x // 2 + vx, self.screen_size_y // 2 + vy), 5)
 
         # Displayn update
-        pygame.display.update()
+        pygame.display.flip()
 
     def score(self, scoring_team):
         """ Tätä kutsutaan kun tulee maali """
@@ -220,7 +233,6 @@ class AUTSBallGame:
         y_difference = point1[1] - point2[1]
         return math.atan2(y_difference, x_difference)
 
-
     def exit(self):
         """ Tähän voi laittaa jotain mitä tulee ennen poistumista """
         pygame.quit()
@@ -230,5 +242,10 @@ class AUTSBallGame:
 
 if __name__ == '__main__':
     game = AUTSBallGame()
+    game.add_player(0, team='red', ship_name='Fatship')
+    game.add_player(1, team='green')
+    game.add_player(2, team='red')
+    game.start()
+
     while True:
         game.update()

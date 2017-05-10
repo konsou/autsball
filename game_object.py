@@ -219,14 +219,7 @@ class GameObject(pygame.sprite.Sprite):
                     # print("Playing thump")
                     self.force_play_sound(self.wall_collide_sound)
             if self.is_bullet:
-                # Tuhoaa seinää törmätessä ja myös itsensä jos on bullet
-                pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-                # pixels_to_destroy = self.get_non_alpha_pixels()
-                # for pixel in pixels_to_destroy:
-                #     pixel[0] += self.x - self.size // 2
-                #     pixel[1] += self.y - self.size // 2
-                # self.level.destroy_land(pixels_to_destroy)
-                self.kill()
+                self.collide_with_wall()
             else:
                 # Vauhti loppuu kuin seinään
                 self.move_vector.set_speed(0)
@@ -291,6 +284,7 @@ class GameObject(pygame.sprite.Sprite):
         collide_list = pygame.sprite.spritecollide(self, BulletGroup, dokill=True, collided=pygame.sprite.collide_circle)
         if len(collide_list) > 0:
             self.collide_circle(collide_list[0])
+            collide_list[0].collide_with_player()  # kutsutaan bulletin törmäysmetodia jos siellä on jotain mitä pitää tehdä
             if self.bullet_collide_sound is not None:
                 self.force_play_sound(self.bullet_collide_sound)
 
@@ -337,6 +331,7 @@ class GameObject(pygame.sprite.Sprite):
         """ 
         Soitetaan määritetty ääni jos se on olemassa, pakotetaan sille kanava auki
         Kanavan auki pakottamisessa on se idea että jos on hirveesti ääniä jo soimassa niin uudet äänet soi silti
+        TODO: siirrä järkevämpään paikkaan
         """
         if sound is not None:
             pygame.mixer.find_channel(True).play(sound, duration)
@@ -357,3 +352,5 @@ def get_angle_in_radians(point1, point2):
     x_difference = point1[0] - point2[0]
     y_difference = point1[1] - point2[1]
     return math.atan2(y_difference, x_difference)
+
+

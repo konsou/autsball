@@ -3,6 +3,7 @@ import pygame
 import groups
 import string
 import random
+import xml.etree.ElementTree as ET
 from colors import *
 
 
@@ -155,4 +156,10 @@ def make_credits_string(creditsfile='CREDITS', numspaces=30):
         return_string += ',  '.join(credits_dict[current_key])
         return_string += ' ' * numspaces
     return return_string
+
+
+def read_xml(filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+    return root
 
