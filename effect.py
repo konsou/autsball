@@ -18,7 +18,6 @@ class EffectSprite(game_object.GameObject):
         self.visible = visible
         self.gravity_affects = 0
 
-
     def update(self, viewscreen_rect):
         self.viewscreen_rect = viewscreen_rect
 
@@ -29,7 +28,6 @@ class EffectSprite(game_object.GameObject):
             dy = int(12 * math.cos(player_dir_radians))
             self.rect.center = self.attached_player.rect.center[0] + dx, self.attached_player.rect.center[1] + dy
             self.rot_self_image_keep_size(self.attached_player.heading)
-
         else:
             # jos ei visible niin heitetään vaan jonnekin kuuseen
             self.rect.center = -100, -100
@@ -100,3 +98,52 @@ class Explosion(EffectSprite):
                                                       ))
 
 
+class SmokeEffect(EffectSprite):
+
+    @staticmethod
+    def preload_images(image_files=None):
+        smoke_image_files = []
+        if len(image_files) > 0:
+            for file_name in image_files:
+                smoke_image_files.append(pygame.image.load(file_name).convert_alpha())
+        else:
+            smoke_image_files.append(pygame.image.load('gfx/smoke_32_0.png').convert_alpha())
+            smoke_image_files.append(pygame.image.load('gfx/smoke_32_1.png').convert_alpha())
+            smoke_image_files.append(pygame.image.load('gfx/smoke_32_2.png').convert_alpha())
+            smoke_image_files.append(pygame.image.load('gfx/smoke_32_3.png').convert_alpha())
+            smoke_image_files.append(pygame.image.load('gfx/smoke_32_4.png').convert_alpha())
+
+        return smoke_image_files
+
+    def __init__(self, start_position, parent=None, attached_player=None, effect_type='smoke', viewscreen_rect=None,
+                 image_files=None):
+
+        EffectSprite.__init__(self, image=image_files, image_file=None,
+                              group=groups.EffectGroup, parent=parent, effect_type=effect_type,
+                              attached_player=attached_player)
+        self.parent = parent
+        self.viewscreen_rect = viewscreen_rect
+        if self.parent is not None and type(parent).__name__ is not 'BackgroundAction':
+            self.x, self.y = start_position
+            self.first_image = True
+            self.gravity_affects = 1
+            self._animation_enabled = 1
+
+            # spawnaa oikeaan paikkaan (ei pelaajan sisään)
+            player_dir_radians = math.radians(self.attached_player.heading)
+            dx = int(20 * math.sin(player_dir_radians))
+            dy = int(20 * math.cos(player_dir_radians))
+            self.x, self.y = self.x + dx, self.y + dy
+            self.rot_self_image_keep_size(self.attached_player.heading)  # en tiedä onko tästä iloa savun kanssa
+        else:
+            self.kill()
+
+    def update(self, viewscreen_rect):
+        if self.parent is not None and type(self.parent).__name__ is not 'BackgroundAction':
+            self.viewscreen_rect = viewscreen_rect
+            self.update_movement()
+            self.animate()
+            if self._animation_current_image_counter is 0 and not self.first_image:
+                self.kill()
+            elif self._animation_current_image_counter > 0:
+                self.first_image = False

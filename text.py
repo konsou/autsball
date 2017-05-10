@@ -6,6 +6,17 @@ import random
 import xml.etree.ElementTree as ET
 from colors import *
 
+num_images = {}
+last_scores = [0, 0]
+last_score_images = [None, None]
+
+
+def init_scores():
+    global last_score_images
+    for i in range(0, 10):
+        num_images[i] = pygame.image.load('gfx/num_%d.png' % i).convert_alpha()
+    last_score_images = [num_images[0], num_images[0]]
+
 
 def show_text(win, pos, text, color=(255, 255, 255), bgcolor=(0, 0, 0), font_size=24):
     """ Utilityfunktio tekstin näyttämiseen ruudulla """
@@ -13,6 +24,21 @@ def show_text(win, pos, text, color=(255, 255, 255), bgcolor=(0, 0, 0), font_siz
     textimg = font.render(text, 1, color, bgcolor)
     win.blit(textimg, pos)
 
+
+def show_score(win, pos, score, team):
+    if score != last_scores[team]:
+        last_scores[team] = score
+        score_numbers = map(int, str(score))
+        score_image = pygame.Surface((len(score_numbers)*32, 64), pygame.HWSURFACE)
+        score_image.set_colorkey(BLACK)
+        i = 0
+        for number in score_numbers:
+            score_image.blit(num_images[number], (i*32, 0))
+            i += 1
+        last_score_images[team] = score_image
+        win.blit(score_image, pos)
+    else:
+        win.blit(last_score_images[team], pos)
 
 class DisappearingText(pygame.sprite.Sprite):
     """ Näyttää ruudulla tekstin x framen ajan """
