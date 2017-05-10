@@ -226,7 +226,7 @@ def debug_run():
                     #del music_player
 
                     practice_game = game.AUTSBallGame()
-                    practice_game.add_player(0, team='red')
+                    practice_game.add_player(0, team='red', ship_name='Fatship')
                     practice_game.add_player(1, team='green')
                     practice_game.add_player(2, team='red')
                     practice_game.add_player(3, team='green')
