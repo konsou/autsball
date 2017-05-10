@@ -1,0 +1,82 @@
+# PynSource Version 1.1
+{'type':'meta', 'info1':'Lorem ipsum dolor sit amet, consectetur adipiscing elit is latin.'}
+{'type':'umlshape', 'id':'BallSprite', 'x':491, 'y':1608, 'width':298, 'height':365, 'attrs':'start_position|x|attached_player|attached_player_max_distance|attached_player_max_distance_squared|tether|mass|max_speed|is_ball|wall_collide_sound|bullet_collide_sound|viewscreen_rect|y', 'meths':'__init__|update|collide_tether|shoot|attach_to_player|detach'}
+{'type':'umlshape', 'id':'BasicShot', 'x':991, 'y':1964, 'width':109, 'height':93, 'attrs':'mass', 'meths':'__init__'}
+{'type':'umlshape', 'id':'DumbFire', 'x':794, 'y':1964, 'width':162, 'height':173, 'attrs':'mass|explosion_force|explosion_radius', 'meths':'__init__|collide_with_wall|collide_with_player|collide_with_ball'}
+{'type':'umlshape', 'id':'BulletSprite', 'x':895, 'y':1602, 'width':170, 'height':317, 'attrs':'rect|max_speed|mass|is_bullet|group|wall_collide_sound|viewscreen_rect|x|y', 'meths':'__init__|update|check_out_of_bounds|get_non_alpha_pixels|collide_with_wall|collide_with_player|collide_with_ball'}
+{'type':'umlshape', 'id':'Explosion', 'x':229, 'y':1871, 'width':202, 'height':189, 'attrs':'explosion_radius|explosion_radius_squared|explosion_force|_lifetime_counter|viewscreen_rect', 'meths':'__init__|update|apply_explosion'}
+{'type':'umlshape', 'id':'TetherSprite', 'x':54, 'y':1872, 'width':142, 'height':157, 'attrs':'effect_type|viewscreen_rect|image|rect', 'meths':'__init__|update'}
+{'type':'umlshape', 'id':'EffectSprite', 'x':184, 'y':1615, 'width':142, 'height':221, 'attrs':'attached_player|attached_ball|effect_type|visible|gravity_affects|viewscreen_rect|rect', 'meths':'__init__|update|destroy'}
+{'type':'umlshape', 'id':'AUTSBallGame', 'x':35, 'y':21, 'width':210, 'height':589, 'attrs':'is_running|local_player_id|screen_size_x|screen_size_y|screen_center_point|win|clock|music_player|goal_green_sound|goal_red_sound|loading_image|current_level|gravity|players|player_count|player_count_team|ball|viewscreen_rect|background_view_rect|score_green|score_red|quit_game|frame_counter', 'meths':'__init__|start|destroy|add_player|remove_player|update|update_graphics|score|get_ball_angle_in_radians|exit'}
+{'type':'umlshape', 'id':'GameObject', 'x':289, 'y':792, 'width':282, 'height':797, 'attrs':'parent|level|wall_collide_sound|bullet_collide_sound|start_position|x|x_previous|move_vector|mass|max_speed|gravity_affects|is_ball|is_bullet|is_centered_on_screen|attached_player|attached_ball|viewscreen_rect|_animation_images|image|animation_frames_per_image|_animation_frame_counter|_animation_current_image_counter|_animation_enabled|original_image|size|rect|radius|y_previous|y', 'meths':'__init__|load_image|reset|update_rect|update_movement|animate|animate_next_frame|rot_self_image_keep_size|check_out_of_bounds|check_collision_with_wall_and_goal|speculate_collision_with_wall|check_collision_with_bullets|check_collision_with_players|collide_circle|distance_squared|distance|force_play_sound'}
+{'type':'umlshape', 'id':'Level', 'x':607, 'y':796, 'width':146, 'height':269, 'attrs':'name|image|off_level_image|size_x|size_y|rect|center_point|background_image|off_level_surface|gravity|player_spawns|ball_spawns', 'meths':'__init__'}
+{'type':'umlshape', 'id':'MusicPlayer', 'x':294, 'y':112, 'width':202, 'height':477, 'attrs':'_shuffle|_screen|image|rect|_window_size|pos|text_color|bg_color|border_color|info_padding|border_width|screen_border_margin|fadeout_counter|fadeout_counter_start|fadeout_decrement|playlist|playlist_pointer', 'meths':'__init__|play|update|stop|now_playing|_calculate_rect_position|set_screen|shuffle_playlist|next'}
+{'type':'umlshape', 'id':'MusicFile', 'x':325, 'y':625, 'width':130, 'height':141, 'attrs':'filename|artist|title|allowed_screens', 'meths':'__init__'}
+{'type':'umlshape', 'id':'PlayerSprite', 'x':1185, 'y':1596, 'width':210, 'height':749, 'attrs':'owning_player_id|team|name|thrust_gfx|rect|is_centered_on_screen|motor_sound|motor_sound_playing|bullet_sound|ball_shoot_sound|ball_capture_sound|wall_collide_sound|bullet_collide_sound|start_position|x|x_previous|heading|thrust|attached_ball|handling|max_thrust|max_speed|mass|_max_acceleration|_cooldown_basic_shot|_cooldown_special|_cooldown_after_ball_shot|_cooldown_counter|_cooldown_counter_special|_recovery_time|_recovery_started_at|viewscreen_rect', 'meths':'__init__|update|attach_ball|detach|accelerate|stop_acceleration|rotate_right|rotate_left|shoot|shoot_special|recover'}
+{'type':'umlshape', 'id':'DisappearingText', 'x':982, 'y':797, 'width':186, 'height':237, 'attrs':'frame_counter|frames_visible|image|original_position|rect|flashes|flash_interval|visible', 'meths':'__init__|update|toggle_image'}
+{'type':'umlshape', 'id':'ScrollingText', 'x':789, 'y':795, 'width':153, 'height':301, 'attrs':'frame_counter|image|original_image|empty_image|rect|screen_size_x|scroll_direction|original_position|scroll_speed|flashes|flash_interval|visible', 'meths':'__init__|update|toggle_image'}
+{'type':'umlshape', 'id':'MoveVector', 'x':41, 'y':793, 'width':218, 'height':605, 'attrs':'vx|vy|speed|direction', 'meths':'__init__|_clear_speed_direction|_clear_vx_vy|_calculate_speed_direction|_calculate_vx_vy|set_vx_vy|set_vx|set_vy|set_speed_direction|set_speed|set_direction|get_vx_vy|get_vx|get_vy|get_speed_direction|get_speed|get_direction|get_all|add_to_vx|add_to_vy|add_to_velocity|add_to_speed|add_to_direction|add_vector|get_dot_product|get_dot_product_normalized|normalize|normalize_ip|flip|flip_ip'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'MusicFile_to_MusicPlayer', 'source':'MusicFile', 'target':'MusicPlayer', 'uml_edge_type':'composition'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'MusicFile_to_MusicPlayer', 'source':'MusicFile', 'target':'MusicPlayer', 'uml_edge_type':'composition'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'MusicFile_to_MusicPlayer', 'source':'MusicFile', 'target':'MusicPlayer', 'uml_edge_type':'composition'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'MusicFile_to_MusicPlayer', 'source':'MusicFile', 'target':'MusicPlayer', 'uml_edge_type':'composition'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'MusicFile_to_MusicPlayer', 'source':'MusicFile', 'target':'MusicPlayer', 'uml_edge_type':'composition'}
+{'type':'edge', 'id':'BasicShot_to_BulletSprite', 'source':'BasicShot', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'DumbFire_to_BulletSprite', 'source':'DumbFire', 'target':'BulletSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'Explosion_to_EffectSprite', 'source':'Explosion', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'TetherSprite_to_EffectSprite', 'source':'TetherSprite', 'target':'EffectSprite', 'uml_edge_type':'generalisation'}
+{'type':'edge', 'id':'MusicFile_to_MusicPlayer', 'source':'MusicFile', 'target':'MusicPlayer', 'uml_edge_type':'composition'}
