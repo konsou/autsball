@@ -45,7 +45,10 @@ class PlayerSprite(game_object.GameObject):
 
         self._smoke_interval = 30  # Smoken spawn tiheys millisekunteina
         self._smoke_counter = 0
-        effect.SmokeEffect.preload_images()  # ladataan kuvat etukäteen
+        smoke_image_file = []
+        for value in current_ship.findall('images/rear_smoke_image'):
+            smoke_image_file.append(value.text)
+        self.smoke_effect_images = effect.SmokeEffect.preload_images(smoke_image_file)  # ladataan kuvat etukäteen
 
         # Sound effex
         self.motor_sound = pygame.mixer.Sound(file=current_ship.find('sounds/motor_sound').text)
@@ -141,7 +144,8 @@ class PlayerSprite(game_object.GameObject):
                                        effect_type='smoke',
                                        parent=self.parent,
                                        attached_player=self,
-                                       viewscreen_rect=self.viewscreen_rect)
+                                       viewscreen_rect=self.viewscreen_rect,
+                                       image_files=self.smoke_effect_images)
                     self._smoke_counter = 0
 
     def stop_acceleration(self):

@@ -18,7 +18,6 @@ class EffectSprite(game_object.GameObject):
         self.visible = visible
         self.gravity_affects = 0
 
-
     def update(self, viewscreen_rect):
         self.viewscreen_rect = viewscreen_rect
 
@@ -101,20 +100,25 @@ class Explosion(EffectSprite):
 
 class SmokeEffect(EffectSprite):
 
-    image_files = []
-
     @staticmethod
-    def preload_images():
-        SmokeEffect.image_files = []
-        SmokeEffect.image_files.append(pygame.image.load('gfx/smoke_32_0.png').convert_alpha())
-        SmokeEffect.image_files.append(pygame.image.load('gfx/smoke_32_1.png').convert_alpha())
-        SmokeEffect.image_files.append(pygame.image.load('gfx/smoke_32_2.png').convert_alpha())
-        SmokeEffect.image_files.append(pygame.image.load('gfx/smoke_32_3.png').convert_alpha())
-        SmokeEffect.image_files.append(pygame.image.load('gfx/smoke_32_4.png').convert_alpha())
+    def preload_images(image_files=None):
+        smoke_image_files = []
+        if len(image_files) > 0:
+            for file_name in image_files:
+                smoke_image_files.append(pygame.image.load(file_name).convert_alpha())
+        else:
+            smoke_image_files.append(pygame.image.load('gfx/smoke_32_0.png').convert_alpha())
+            smoke_image_files.append(pygame.image.load('gfx/smoke_32_1.png').convert_alpha())
+            smoke_image_files.append(pygame.image.load('gfx/smoke_32_2.png').convert_alpha())
+            smoke_image_files.append(pygame.image.load('gfx/smoke_32_3.png').convert_alpha())
+            smoke_image_files.append(pygame.image.load('gfx/smoke_32_4.png').convert_alpha())
 
-    def __init__(self, start_position, parent=None, attached_player=None, effect_type='smoke', viewscreen_rect=None):
+        return smoke_image_files
 
-        EffectSprite.__init__(self, image=SmokeEffect.image_files, image_file=None,
+    def __init__(self, start_position, parent=None, attached_player=None, effect_type='smoke', viewscreen_rect=None,
+                 image_files=None):
+
+        EffectSprite.__init__(self, image=image_files, image_file=None,
                               group=groups.EffectGroup, parent=parent, effect_type=effect_type,
                               attached_player=attached_player)
         self.parent = parent
