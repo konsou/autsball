@@ -73,6 +73,42 @@
         <recovery_time>1</recovery_time>
     </ship>
 
+    <ship name="Rocket" public="1">
+        <images>
+            <team_red_image>gfx/ship_rocket_red_84.png</team_red_image>
+            <team_green_image>gfx/ship_rocket_green_84.png</team_green_image>
+            <!-- TODO: motor flamen offsetin määritys -->
+            <!-- Idea tässä: jos samalla tagilla useita kuvia niin niistä tehdään animaatio -->
+            <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
+            <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
+            <motor_flame_image>gfx/motor_flame_10c.png</motor_flame_image>
+            <rear_smoke_image>gfx/smoke_32_0.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_32_1.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_32_2.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_32_3.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_32_4.png</rear_smoke_image>
+        </images>
+        <sounds>
+            <motor_sound>sfx/shhhh_v2.wav</motor_sound>
+            <!-- Oikeampi paikka bullet soundille bullet-classin määrittelyssä? -->
+            <bullet_sound>sfx/pop.wav</bullet_sound>
+            <ball_shoot_sound>sfx/pchou.wav</ball_shoot_sound>
+            <ball_capture_sound>sfx/ball_capture.wav</ball_capture_sound>
+            <wall_collide_sound>sfx/thump4.wav</wall_collide_sound>
+            <bullet_collide_sound>sfx/metal_thud_2.wav</bullet_collide_sound>
+            <!-- TODO: lisää player collide sound -->        </sounds>
+        
+        <handling>1</handling>
+        <max_thrust>0.35</max_thrust>
+        <max_speed>50</max_speed>
+        <mass>0.3</mass>
+        <cooldown_basic_shot>5</cooldown_basic_shot>
+        <cooldown_special>60</cooldown_special>
+        <cooldown_after_ball_shot>60</cooldown_after_ball_shot>
+        <recovery_time>1</recovery_time>
+    </ship>
+    
+    
     <ship name="Muumi" public="1">
         <images>
             <team_red_image>gfx/ship_muumi_32.png</team_red_image>
