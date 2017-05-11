@@ -5,10 +5,20 @@ import time
 from constants import *
 from pygame.locals import *
 
+# Sisältää esiladatut kuvat ja äänet. Key = filename
+# esim. assets['gfx/ball.png']
 assets = {}
+# Sisältää esirotatoidut kuvat. Keyt = filename ja rotaatiokulma
+# esim. assets_rot['gfx/ball.png'][45]
 assets_rot = {}
 
+INCLUDED_IMAGE_EXTENSIONS = ['.png']
+INCLUDED_SOUND_EXTENSIONS = ['.wav', '.ogg']
+
+# Vakiona rotatoidaan kaikki kuvat PAITSI:
+# -ne joiden tiedoston koko on suurempi kuin tässä määritetty:
 ROT_IMAGE_MAX_FILESIZE = 10240
+# -ne jotka on listattu tähän:
 DONT_ROTATE_IMAGES = ['menu_background_level.png', 'ball.png', 'ball_50.png', 'ball_50_red.png',
                       'bullet.png', 'bullet_5.png', 'bullet_10.png']
 
@@ -19,7 +29,7 @@ def load_assets():
         for current_file in files_list:
             extension = current_file[-4:]
             filepath = os.path.join(current_directory, current_file)
-            if extension == '.png':
+            if extension in INCLUDED_IMAGE_EXTENSIONS:
                 assets[filepath] = pygame.image.load(filepath).convert_alpha()
                 print "Loaded:", filepath
                 file_size = os.stat(filepath).st_size
@@ -29,7 +39,7 @@ def load_assets():
                     for angle in range(360):
                         if angle == 0:
                             assets_rot[filepath] = {}
-                        assets_rot[filepath][angle] = rot_image_keep_size(assets[filepath], angle)
+                        assets_rot[filepath][angle] = rot_image(assets[filepath], angle)
                         print "Loaded rotation:", filepath, angle
                         window.fill(0)
                         window.blit(assets_rot[filepath][angle], (400, 300))
@@ -38,11 +48,11 @@ def load_assets():
 
 
                 # print current_file, file_size, can_be_rotated
-            elif extension == '.wav' or extension == '.ogg':
+            elif extension in INCLUDED_SOUND_EXTENSIONS:
                 print current_file, "is sound"
 
 
-def rot_image_keep_size(original_image, angle):
+def rot_image(original_image, angle):
     """rotate an image while keeping its center and size"""
     # Tämä copypastettu jostain netistä. Loppujen lopuksi en ole varma onko tarpeen vai ei.
     orig_rect = original_image.get_rect()
