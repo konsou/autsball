@@ -6,12 +6,13 @@ import vector
 import groups
 import effect
 from colors import *
+from assets import assets, assets_rot
 
 
 class BallSprite(game_object.GameObject):
     """ Pallo. Osaa liittää itsensä pelaajaan ja poistaa liitoksen. """
     def __init__(self, level=None, parent=None, group=groups.BallGroup):
-        game_object.GameObject.__init__(self, group=group, image_file='gfx/ball_50_red.png', level=level, parent=parent)
+        game_object.GameObject.__init__(self, group=group, image=assets['gfx/ball_50_red.png'], level=level, parent=parent)
 
         # Otetaan start_position levelin tiedoista
         self.start_position = self.level.ball_spawns[0]
@@ -30,8 +31,8 @@ class BallSprite(game_object.GameObject):
         self.is_ball = 1
 
         # SFX
-        self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump4.wav')
-        self.bullet_collide_sound = pygame.mixer.Sound(file='sfx/metal_thud_3.wav')
+        self.wall_collide_sound = assets['sfx/thump4.wav']
+        self.bullet_collide_sound = assets['sfx/metal_thud_3.wav']
 
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
         """ Päivittää palloa. Vaatii viewscreen_rect:in että osaa laskea näyttämisen oikein. """
@@ -47,19 +48,20 @@ class BallSprite(game_object.GameObject):
 
         # Jos on liitetty pelaajaan ja jos on liian kaukana niin vetävät toisiaan puoleensa
         # Suht hyvä, voi viilata jos saa vielä paremmaksi
-        # TODO: weightit ei tunnu vaikuttavan?
-        # TODO: graffat tetherille
+        # Lisätty weightien vaikutus
         if self.attached_player is not None:
             distance_to_player = self.distance(self.attached_player)
             if distance_to_player >= self.attached_player_max_distance:
                 player_angle = game_object.get_angle_in_radians((self.attached_player.x, self.attached_player.y),
-                                                                 (self.x, self.y))
+                                                                (self.x, self.y))
 
                 pull_vector_speed = (distance_to_player - self.attached_player_max_distance) * 0.02
 
-                ball_pull_vector = vector.MoveVector(speed=pull_vector_speed, direction=player_angle)
+                ball_pull_vector = vector.MoveVector(speed=pull_vector_speed / self.mass * self.attached_player.mass,
+                                                     direction=player_angle)
                 # Tässä rikotaan voiman ja vastavoiman lakia mutta who cares! (Newton pyörii haudassaan)
-                player_pull_vector = vector.MoveVector(speed=pull_vector_speed * -1 * 0.4, direction=player_angle)
+                player_pull_vector = vector.MoveVector(speed=pull_vector_speed * -1 * 0.4 / self.attached_player.mass * self.mass,
+                                                       direction=player_angle)
 
                 self.move_vector.add_vector(ball_pull_vector)
                 self.attached_player.move_vector.add_vector(player_pull_vector)
@@ -114,22 +116,14 @@ class BallSprite(game_object.GameObject):
 
     def attach_to_player(self, player):
         """ 
-        Tämä metodi liittää pallon pelaajaan. Olisi tarkoitus myös lisätä painoa mutta paino ei toimi
-        oikein vielä.
+        Tämä metodi liittää pallon pelaajaan. 
         """
         self.attached_player = player
         player.attach_ball(self)
-        # self.tether = EffectSprite(image=pygame.Surface((0,0)), effect_type='tether',
-        #                            attached_ball=self, attached_player=player, parent=self.parent)
-        # TODO: korjaa weight että tämä voidaan enabloida
-        # self.attached_player.weight += self.weight
 
     def detach(self):
         """ Tämä metodi poistaa liitoksen pelaajaan. """
-        # self.attached_player.weight -= self.weight
-        # print("Ball detach method called. Attached player:", self.attached_player)
         if self.attached_player is not None:
             self.attached_player.detach()
             self.attached_player = None
             self.tether.destroy()
-            # self.tether = None

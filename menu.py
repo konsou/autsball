@@ -7,6 +7,7 @@ import groups
 from colors import *
 from pygame.locals import *
 from constants import *
+from assets import assets, assets_rot, load_assets
 
 pygame.font.init()
 
@@ -174,12 +175,21 @@ def debug_run():
 
     window.fill((0, 0, 0))
 
+    # Groupit
     static_visual_components_group = pygame.sprite.Group()
     music_player_group = pygame.sprite.Group()
 
+    # Music
+    pygame.mixer.init()
+    music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
+    music_player.play()
+
+    # Assettien esilataus
+    load_assets(window)
+
     # Logo
     logo_sprite = pygame.sprite.Sprite()
-    logo_sprite.image = pygame.image.load('gfx/AUTSBall_logo.png').convert_alpha()
+    logo_sprite.image = assets['gfx/AUTSBall_Logo.png']
     logo_sprite.rect = logo_sprite.image.get_rect()
     logo_sprite.rect.center = (400, 110)
     static_visual_components_group.add(logo_sprite)
@@ -196,13 +206,6 @@ def debug_run():
 
     active_mode = 'menu'
     practice_game = None
-
-    # Music
-    pygame.mixer.init()
-    music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
-    music_player.play()
-    # pygame.mixer.music.load('sfx/cavern_rain.ogg')
-    # pygame.mixer.music.play(-1)
 
     # Background action
     background_action = menu_background_action.BackgroundAction()
