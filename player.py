@@ -7,6 +7,8 @@ import bullet
 import groups
 import text
 from colors import *
+from pygame.locals import *
+from assets import assets, assets_rot
 
 
 class PlayerSprite(game_object.GameObject):
@@ -22,21 +24,21 @@ class PlayerSprite(game_object.GameObject):
 
         # Kuva
         if team == 'red':
-            image = pygame.image.load(current_ship.find('images/team_red_image').text).convert_alpha()
+            image = assets[current_ship.find('images/team_red_image').text]
         else:
-            image = pygame.image.load(current_ship.find('images/team_green_image').text).convert_alpha()
+            image = assets[current_ship.find('images/team_green_image').text]
 
         # Lisätään ryhmään
         game_object.GameObject.__init__(self, group=group, level=level, parent=parent,
                                         image=image)
 
         # Thrust-gfx
-        image_file = []
+        thrust_image = []
         for value in current_ship.findall('images/motor_flame_image'):
-            image_file.append(value.text)
-        # print thrust_gfx_file
-        self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=image_file,
-                                       effect_type='motorflame', visible=0, parent=parent)
+            thrust_image.append(assets[value.text])
+
+        self.thrust_gfx = effect.EffectSprite(attached_player=self, image=thrust_image,
+                                              visible=0, parent=parent)
         self.rect.center = self.parent.screen_center_point
         if self.owning_player_id == parent.local_player_id:
             self.is_centered_on_screen = 1

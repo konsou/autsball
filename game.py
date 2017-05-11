@@ -67,7 +67,6 @@ class AUTSBallGame:
     def start(self):
         if not self.is_running:
             self.is_running = True
-
             self.music_player.play()
 
     def destroy(self):
@@ -81,6 +80,7 @@ class AUTSBallGame:
     def add_player(self, player_id=None, team=None, ship_name='V-Wing'):
         # Lisää pelaajan pelaajalistaan
         if player_id is None:
+            # TÄHÄN ASTI PÄÄSTY ASSETTIEN MÄÄRITTELYSSÄ #
             self.players[self.player_count] = player.PlayerSprite(player_id=player_id,
                                                                   team=team,
                                                                   level=self.current_level,
