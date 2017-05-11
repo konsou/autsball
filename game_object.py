@@ -187,7 +187,10 @@ class GameObject(pygame.sprite.Sprite):
         self.rect.size = self.image.get_rect().size  # pidä positio samana, muuten siirtyy hetkeksi yläkulmaan
 
     def rot_self_image_keep_size(self, angle):
-        """rotate an image while keeping its center and size"""
+        """
+        Rotate an image while keeping its center and size
+        HUOM HUOM! Tällä hetkellä vaatii että kuva on neliö.
+        """
         # Tämä copypastettu jostain netistä. Loppujen lopuksi en ole varma onko tarpeen vai ei.
         orig_rect = self.rect
         rot_image = pygame.transform.rotate(self.original_image, angle)
