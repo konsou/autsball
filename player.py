@@ -47,19 +47,19 @@ class PlayerSprite(game_object.GameObject):
 
         self._smoke_interval = 30  # Smoken spawn tiheys millisekunteina
         self._smoke_counter = 0
-        smoke_image_file = []
+        self.smoke_effect_images = []
         for value in current_ship.findall('images/rear_smoke_image'):
-            smoke_image_file.append(value.text)
-        self.smoke_effect_images = effect.SmokeEffect.preload_images(smoke_image_file)  # ladataan kuvat etukäteen
+            self.smoke_effect_images.append(assets[value.text])
+        # self.smoke_effect_images = effect.SmokeEffect.preload_images(smoke_image_file)  # ladataan kuvat etukäteen
 
         # Sound effex
-        self.motor_sound = pygame.mixer.Sound(file=current_ship.find('sounds/motor_sound').text)
+        self.motor_sound = assets[current_ship.find('sounds/motor_sound').text]
         self.motor_sound_playing = 0
-        self.bullet_sound = pygame.mixer.Sound(file=current_ship.find('sounds/bullet_sound').text)
-        self.ball_shoot_sound = pygame.mixer.Sound(file=current_ship.find('sounds/ball_shoot_sound').text)
-        self.ball_capture_sound = pygame.mixer.Sound(file=current_ship.find('sounds/ball_capture_sound').text)
-        self.wall_collide_sound = pygame.mixer.Sound(file=current_ship.find('sounds/wall_collide_sound').text)
-        self.bullet_collide_sound = pygame.mixer.Sound(file=current_ship.find('sounds/bullet_collide_sound').text)
+        self.bullet_sound = assets[current_ship.find('sounds/bullet_sound').text]
+        self.ball_shoot_sound = assets[current_ship.find('sounds/ball_shoot_sound').text]
+        self.ball_capture_sound = assets[current_ship.find('sounds/ball_capture_sound').text]
+        self.wall_collide_sound = assets[current_ship.find('sounds/wall_collide_sound').text]
+        self.bullet_collide_sound = assets[current_ship.find('sounds/bullet_collide_sound').text]
 
         # Koordinaatit
         if not spawn_point:
@@ -77,15 +77,15 @@ class PlayerSprite(game_object.GameObject):
         self.attached_ball = None
 
         # Shipin ominaisuudet
-        self.handling = int(current_ship.find('handling').text)  # kuinka monta astetta kääntyy per frame
+        self.handling = float(current_ship.find('handling').text)  # kuinka monta astetta kääntyy per frame
         self.max_thrust = float(current_ship.find('max_thrust').text)  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
         self.max_speed = int(current_ship.find('max_speed').text)
         self.mass = float(current_ship.find('mass').text)
         self._max_acceleration = self.max_thrust / self.mass
-        self._cooldown_basic_shot = int(current_ship.find('cooldown_basic_shot').text) # framea
+        self._cooldown_basic_shot = int(current_ship.find('cooldown_basic_shot').text)  # framea
         self._cooldown_special = int(current_ship.find('cooldown_special').text)
         self._cooldown_after_ball_shot = int(current_ship.find('cooldown_after_ball_shot').text) # cooldown sen jälkeen kun pallo on ammuttu
-        self._cooldown_counter = 0 # cooldown-counter1
+        self._cooldown_counter = 0  # cooldown-counter1
         self._cooldown_counter_special = 0
         self._recovery_time = float(current_ship.find('recovery_time').text)  # sekunteja jopa!
         self._recovery_started_at = 0
@@ -135,9 +135,8 @@ class PlayerSprite(game_object.GameObject):
             self.thrust = self.max_thrust
             self.thrust_gfx.visible = 1
             if not self.motor_sound_playing:
-                if self.motor_sound is not None:
-                    self.force_play_sound(self.motor_sound, -1)
-                    self.motor_sound_playing = 1
+                self.force_play_sound(self.motor_sound, -1)
+                self.motor_sound_playing = 1
         else:
             if type(self).__name__ is not 'DemoPlayer':
                 self._smoke_counter += self.parent.clock.get_time()
@@ -162,13 +161,13 @@ class PlayerSprite(game_object.GameObject):
         if self.heading < 0:
             self.heading += 360
         # TODO: laske rotaatiot latausvaiheessa valmiiksi
-        self.rot_self_image_keep_size(self.heading)
+        self.rot_self_image_keep_size(int(self.heading))
 
     def rotate_left(self):
         self.heading += self.handling
         if self.heading > 360:
             self.heading -= 360
-        self.rot_self_image_keep_size(self.heading)
+        self.rot_self_image_keep_size(int(self.heading))
 
     def shoot(self):
         # Ammutaan perusammus

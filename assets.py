@@ -56,11 +56,12 @@ def load_assets(window):
             filepath = os.path.join(current_directory, current_file)
             asset_key = current_directory + '/' + current_file
             if extension in INCLUDED_IMAGE_EXTENSIONS:
+                file_size = os.stat(filepath).st_size
+                if DEBUG_TEXT: print "Loading %r... (size: %r kB)" % (filepath, round(file_size / 1024.0, 2))
                 assets[asset_key] = pygame.image.load(filepath).convert_alpha()
                 width = assets[asset_key].get_width()
                 height = assets[asset_key].get_height()
-                if DEBUG_TEXT: print "Loaded:", filepath
-                file_size = os.stat(filepath).st_size
+                if DEBUG_TEXT: print "Loaded %r" % filepath
                 if file_size > ROT_IMAGE_MAX_FILESIZE:
                     if DEBUG_TEXT: print "Not rotating - file too big"
                 elif current_file in DONT_ROTATE_IMAGES:
@@ -68,21 +69,25 @@ def load_assets(window):
                 elif width != height:
                     if DEBUG_TEXT: print "Not rotating - not rectangular"
                 else:
+                    if DEBUG_TEXT: print "Calculating rotations..."
                     for angle in range(360):
                         if angle == 0:
                             assets_rot[asset_key] = {}
                         assets_rot[asset_key][angle] = rot_image(assets[asset_key], angle)
-                        if DEBUG_TEXT: print "Rotations calculated and loaded"
+                    if DEBUG_TEXT: print "Rotations calculated"
             elif extension in INCLUDED_SOUND_EXTENSIONS:
+                file_size = os.stat(filepath).st_size
+                if DEBUG_TEXT: print "Loading %r... (size: %r kB)" % (filepath, round(file_size / 1024.0, 2))
                 assets[asset_key] = pygame.mixer.Sound(file=filepath)
-                if DEBUG_TEXT: print "Loaded:", filepath
+                if DEBUG_TEXT: print "Loaded %r" % filepath
             else:
                 if DEBUG_TEXT: print "Skipping", current_file, "- not in included file types"
 
 
 def rot_image(original_image, angle):
     """rotate an image while keeping its center and size"""
-    # Tämä copypastettu jostain netistä. Loppujen lopuksi en ole varma onko tarpeen vai ei.
+    # Tämä copypastettu jostain netistä. Vaatii että kuva on neliö.
+    assert original_image.get_width() == original_image.get_height(), "Can't rotate image - not square. %r" % original_image
     orig_rect = original_image.get_rect()
     rot_image = pygame.transform.rotate(original_image, angle)
     rot_rect = orig_rect.copy()
@@ -91,6 +96,7 @@ def rot_image(original_image, angle):
     return rot_image
 
 if __name__ == '__main__':
+    DEBUG_TEXT = 1
     pygame.init()
     window = pygame.display.set_mode((WINDOW_SIZE[0], WINDOW_SIZE[1]))
     pygame.display.set_caption("Menu test")
