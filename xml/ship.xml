@@ -82,11 +82,10 @@
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10c.png</motor_flame_image>
-            <rear_smoke_image>gfx/smoke_32_0.png</rear_smoke_image>
-            <rear_smoke_image>gfx/smoke_32_1.png</rear_smoke_image>
-            <rear_smoke_image>gfx/smoke_32_2.png</rear_smoke_image>
-            <rear_smoke_image>gfx/smoke_32_3.png</rear_smoke_image>
-            <rear_smoke_image>gfx/smoke_32_4.png</rear_smoke_image>
+            <rear_smoke_image>gfx/slime1.png</rear_smoke_image>
+            <rear_smoke_image>gfx/slime2.png</rear_smoke_image>
+            <rear_smoke_image>gfx/slime3.png</rear_smoke_image>
+            <rear_smoke_image>gfx/slime3.png</rear_smoke_image>
         </images>
         <sounds>
             <motor_sound>sfx/shhhh_v2.wav</motor_sound>
