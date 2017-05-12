@@ -199,7 +199,7 @@ class PlayerSprite(game_object.GameObject):
             self.force_play_sound(self.bullet_sound)
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.DumbFire(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
+            bullet.Dirtball(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
                          speed=10 + self.move_vector.get_speed())
             self._cooldown_counter_special = self._cooldown_special
 

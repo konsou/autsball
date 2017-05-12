@@ -115,3 +115,24 @@ class DumbFire(BulletSprite):
         effect.Explosion(image=assets['gfx/explosion_50.png'], pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
 
+
+class Dirtball(BulletSprite):
+    """ Iso ammus joka räjähtää törmätessä """
+    def __init__(self, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0, speed=10):
+        BulletSprite.__init__(self, parent=parent, level=level, group=group, image_file='gfx/bullet_10.png',
+                              pos=pos, direction=direction, speed=speed)
+
+        self.mass = 0.2
+
+    def collide_with_wall(self):
+        pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
+        self.kill()
+
+    def collide_with_player(self):
+        pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
+
+    def collide_with_ball(self):
+        pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
+
+
+
