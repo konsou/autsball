@@ -161,7 +161,7 @@ class AUTSBallGame:
                     self.update_graphics()
 
                 # Pelilogiikan FPS target 60, eli graffoilla siis 30
-                self.clock.tick(60)
+                self.clock.tick(PHYSICS_FPS)
 
         if self.quit_game:
             self.exit()

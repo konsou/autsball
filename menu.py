@@ -4,167 +4,10 @@ import game
 import menu_background_action
 import music
 import groups
-from colors import *
 from pygame.locals import *
+from colors import *
 from constants import *
-
-pygame.font.init()
-
-
-class Button(object):
-    def __init__(self, rect=Rect(10, 10, 150, 50), text='Button', bgcolor=YELLOWISH, textcolor=BLACK, font_size=30):
-        self._rect = rect
-        self._text = text
-        self._bgcolor = bgcolor
-        self._textcolor = textcolor
-        self._font = pygame.font.Font(None, font_size)
-
-        self.buttonDown = False
-        self.mouseOverButton = False
-        self.lastMouseDownOverButton = False
-        self._visible = True
-
-        self.surfaceNormal = pygame.Surface(self._rect.size)
-        self.surfaceDown = pygame.Surface(self._rect.size)
-        self.surfaceHighlight = pygame.Surface(self._rect.size)
-
-        self.update()
-
-    def handleEvent(self, eventObj):
-        if eventObj.type not in (MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN) or not self._visible:
-            return []
-
-        retVal = []
-
-        hasExited = False
-        if not self.mouseOverButton and self._rect.collidepoint(eventObj.pos):
-            # mouse entered the button
-            self.mouseOverButton = True
-            self.mouseEnter(eventObj)
-            retVal.append('enter')
-        elif self.mouseOverButton and not self._rect.collidepoint(eventObj.pos):
-            # mouse exited the button
-            self.mouseOverButton = False
-            hasExited = True
-
-        if self._rect.collidepoint(eventObj.pos):
-            # mouse event happened over the button
-            if eventObj.type == MOUSEMOTION:
-                self.mouseMove(eventObj)
-                retVal.append('move')
-            elif eventObj.type == MOUSEBUTTONDOWN:
-                self.buttonDown = True
-                self.lastMouseDownOverButton = True
-                self.mouseDown(eventObj)
-                retVal.append('down')
-        else:
-            if eventObj.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN):
-                # Mouse up/down event happened off the button, no mouseClick()
-                self.lastMouseDownOverButton = False
-
-        doMouseClick = False
-        if eventObj.type == MOUSEBUTTONUP:
-            if self.lastMouseDownOverButton:
-                doMouseClick = True
-            self.lastMouseDownOverButton = False
-
-            if self.buttonDown:
-                self.buttonDown = False
-                self.mouseUp(eventObj)
-                retVal.append('up')
-
-            if doMouseClick:
-                self.buttonDown = False
-                self.mouseClick(eventObj)
-                retVal.append('click')
-
-        if hasExited:
-            self.mouseExit(eventObj)
-            retVal.append('exit')
-
-        return retVal
-
-    def draw(self, surfaceObj):
-        if self._visible:
-            if self.buttonDown:
-                surfaceObj.blit(self.surfaceDown, self._rect)
-            elif self.mouseOverButton:
-                surfaceObj.blit(self.surfaceHighlight, self._rect)
-            else:
-                surfaceObj.blit(self.surfaceNormal, self._rect)
-
-    def update(self):
-        width = self._rect.width
-        height = self._rect.height
-
-        self.surfaceNormal.fill(self._bgcolor)
-        self.surfaceDown.fill(WHITE)
-        self.surfaceHighlight.fill(GREEN)
-
-        text_surface = self._font.render(self._text, True, self._textcolor)
-        text_rect = text_surface.get_rect()
-        text_rect.center = (int(width / 2), int(height / 2))
-        self.surfaceNormal.blit(text_surface, text_rect)
-        self.surfaceDown.blit(text_surface, text_rect)
-        self.surfaceHighlight.blit(text_surface, text_rect)
-
-    def mouseClick(self, event):
-        pass
-
-    def mouseEnter(self, event):
-        pass
-
-    def mouseMove(self, event):
-        pass
-
-    def mouseExit(self, event):
-        pass
-
-    def mouseDown(self, event):
-        pass
-
-    def mouseUp(self, event):
-        pass
-
-    def _propGetText(self):
-        return self._text
-
-    def _propSetText(self, text):
-        self._text = text
-        self.update()
-
-    def _propGetRect(self):
-        return self._rect
-
-    def _propSetRect(self, newRect):
-        self._rect = newRect
-        self.update()
-
-    def _propGetVisible(self):
-        return self._visible
-
-    def _propSetVisible(self, setting):
-        self._visible = setting
-
-    def _propGetTextColor(self):
-        return self._textcolor
-
-    def _propSetTextColor(self, setting):
-        self._textcolor = setting
-        self.update()
-
-    def _propGetBgColor(self):
-        return self._bgcolor
-
-    def _propSetBgColor(self, setting):
-        self._bgcolor = setting
-        self.update()
-
-    text = property(_propGetText, _propSetText)
-    rect = property(_propGetRect, _propSetRect)
-    visible = property(_propGetVisible, _propSetVisible)
-    textcolor = property(_propGetTextColor, _propSetTextColor)
-    bgcolor = property(_propGetBgColor, _propSetBgColor)
+from ui_components import Button, ButtonGroup, LabelImageText, Checkbox, CheckboxGroup, Slider
 
 
 def debug_run():
@@ -176,6 +19,8 @@ def debug_run():
 
     static_visual_components_group = pygame.sprite.Group()
     music_player_group = pygame.sprite.Group()
+    main_menu_group = ButtonGroup()
+    settings_group = pygame.sprite.Group()
 
     # Logo
     logo_sprite = pygame.sprite.Sprite()
@@ -186,23 +31,22 @@ def debug_run():
     static_visual_components_group.draw(window)
 
     # Buttons
-    practice_button = Button(Rect(50, 330, 250, 70), 'Practice flight')
-    multiplayer_button = Button(Rect(50, 405, 250, 70), 'Multiplayer')
-    quit_button = Button(Rect(50, 480, 250, 70), 'Quit')
+    practice_button = Button(Rect(275, 250, 250, 70), 'Practice flight')
+    multiplayer_button = Button(Rect(275, 325, 250, 70), 'Multiplayer')
+    settings_button = Button(Rect(275, 400, 250, 70), 'Settings')
+    quit_button = Button(Rect(275, 475, 250, 70), 'Quit')
+    main_menu_group.add(practice_button)
+    main_menu_group.add(multiplayer_button)
+    main_menu_group.add(settings_button)
+    main_menu_group.add(quit_button)
 
-    practice_button.rect.center = (400, 250)
-    multiplayer_button.rect.center = (400, 330)
-    quit_button.rect.center = (400, 410)
-
-    active_mode = 'menu'
+    active_mode = 'main_menu'
     practice_game = None
 
     # Music
     pygame.mixer.init()
     music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
     music_player.play()
-    # pygame.mixer.music.load('sfx/cavern_rain.ogg')
-    # pygame.mixer.music.play(-1)
 
     # Background action
     background_action = menu_background_action.BackgroundAction()
@@ -210,11 +54,38 @@ def debug_run():
     darken_surface = pygame.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]))
     darken_surface.set_alpha(128)
 
+    # Settings menu
+    LabelImageText(group=settings_group, image_text='settings', position=(250, 30))
+    LabelImageText(group=settings_group, image_text='music', position=(100, 130))
+    music_checkbox = Checkbox(group=settings_group, checked=True, position=(350, 130))
+    LabelImageText(group=settings_group, image_text='volume', position=(140, 170))
+    music_volume_slider = Slider(group=settings_group, position=(350, 180))
+    LabelImageText(group=settings_group, image_text='sounds', position=(100, 210))
+    sounds_checkbox = Checkbox(group=settings_group, checked=True, position=(350, 210))
+    LabelImageText(group=settings_group, image_text='volume', position=(140, 250))
+    sound_volume_slider = Slider(group=settings_group, position=(350, 260), value=0.35)
+    #LabelImageText(group=settings_group, image_text='quality', position=(100, 330))
+    LabelImageText(group=settings_group, image_text='effects', position=(100, 350))
+    LabelImageText(group=settings_group, image_text='off', position=(290, 310))
+    LabelImageText(group=settings_group, image_text='low', position=(380, 310))
+    LabelImageText(group=settings_group, image_text='med', position=(470, 310))
+    LabelImageText(group=settings_group, image_text='high', position=(570, 310))
+    effects_checkbox_group = CheckboxGroup()
+    effects_off_checkbox = Checkbox(group=settings_group, checked=False, position=(310, 355),
+                                    checkbox_group=effects_checkbox_group)
+    effects_low_checkbox = Checkbox(group=settings_group, checked=False, position=(400, 355),
+                                    checkbox_group=effects_checkbox_group)
+    effects_med_checkbox = Checkbox(group=settings_group, checked=False, position=(490, 355),
+                                    checkbox_group=effects_checkbox_group)
+    effects_high_checkbox = Checkbox(group=settings_group, checked=True, position=(590, 355),
+                                     checkbox_group=effects_checkbox_group)
+    settings_back_button = Button(Rect(275, 475, 250, 70), 'Back')
+
     running = True
     while running:
 
         for event in pygame.event.get():
-            if active_mode == 'menu':
+            if active_mode == 'main_menu':
                 if 'click' in practice_button.handleEvent(event):
                     #print('practice button clicked')
                     active_mode = 'practice'
@@ -234,15 +105,20 @@ def debug_run():
                     # music_player.stop()
                 if 'click' in multiplayer_button.handleEvent(event):
                     print('multiplayer button clicked')
+                if 'click' in settings_button.handleEvent(event):
+                    active_mode = 'settings_menu'
                 if 'click' in quit_button.handleEvent(event):
                     running = False
+            if active_mode == 'settings_menu':
+                if 'click' in settings_back_button.handleEvent(event):
+                    active_mode = 'main_menu'
             if active_mode == 'practice':
                 if event.type == KEYUP:
                     if event.key == K_ESCAPE:
                         practice_game.destroy()
                         #groups.empty_groups()
                         del practice_game
-                        active_mode = 'menu'
+                        active_mode = 'main_menu'
                         window.fill(BLACK)
                         background_action = menu_background_action.BackgroundAction()
                         static_visual_components_group.draw(window)
@@ -254,7 +130,7 @@ def debug_run():
             if event.type == music.MUSIC_FINISHED:
                 music_player.next()
 
-        if active_mode == 'menu':
+        if active_mode == 'main_menu':
             window.fill(0)
 
             menu_background_action.background_group.update()
@@ -264,13 +140,26 @@ def debug_run():
             window.blit(darken_surface, (0, 0))
 
             static_visual_components_group.draw(window)
-            practice_button.draw(window)
-            multiplayer_button.draw(window)
-            quit_button.draw(window)
+            main_menu_group.draw(window)
             music_player_group.draw(window)
 
             pygame.display.update()
-            clock.tick(30)
+            clock.tick(GRAPHICS_FPS)
+        elif active_mode == 'settings_menu':
+            window.fill(0)
+
+            menu_background_action.background_group.update()
+            music_player_group.update()
+
+            menu_background_action.background_group.draw(window)
+            window.blit(darken_surface, (0, 0))
+
+            settings_group.draw(window)
+            settings_back_button.draw(window)
+            music_player_group.draw(window)
+
+            pygame.display.update()
+            clock.tick(GRAPHICS_FPS)
         elif active_mode == 'practice':
             practice_game.update()
 
