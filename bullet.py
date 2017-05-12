@@ -5,6 +5,7 @@ import game_object
 import groups
 import effect
 from colors import *
+from assets import assets, assets_rot
 
 
 class BulletSprite(game_object.GameObject):
@@ -100,17 +101,17 @@ class DumbFire(BulletSprite):
 
     def collide_with_wall(self):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-        effect.Explosion(image_file='gfx/explosion_50.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
+        effect.Explosion(image=assets['gfx/explosion_50.png'], pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
         self.kill()
 
     def collide_with_player(self):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-        effect.Explosion(image_file='gfx/explosion_50.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
+        effect.Explosion(image=assets['gfx/explosion_50.png'], pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
 
     def collide_with_ball(self):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-        effect.Explosion(image_file='gfx/explosion_50.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
+        effect.Explosion(image=assets['gfx/explosion_50.png'], pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
 

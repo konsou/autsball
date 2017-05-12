@@ -62,11 +62,13 @@ class TetherSprite(EffectSprite):
 
 
 class Explosion(EffectSprite):
-    # ASSETTIEN KÄYTTÖÖNOTTO TÄHÄN ASTI #
     """ Räjähdys, joka työntää pelaajia ja palloa pois keskipisteestä """
-    def __init__(self, image=assets['gfx/explosion_100.png'], group=groups.EffectGroup, pos=None,
+    def __init__(self, image=None, group=groups.EffectGroup, pos=None,
                  explosion_radius=100, explosion_force=20, frames_visible=10,
                  player_group=groups.PlayerGroup, ball_group=groups.BallGroup):
+        # Tämä piti tehdä näin koska jos laittoi tuohon initin kutsujuttuihin niin heitti assetsista KeyErroria
+        if image is None:
+            image = assets['gfx/explosion_100.png']
         EffectSprite.__init__(self, image=image, group=group, start_position=pos)
         self.explosion_radius = explosion_radius
         self.explosion_radius_squared = explosion_radius ** 2
@@ -92,6 +94,8 @@ class Explosion(EffectSprite):
         Käy läpi ryhmän objektit ja tekee seuraavaa:
             -jos etäisyys on alle explosion_radius:
                 -työntää objektia poispäin räjähdyksen keskipisteestä explosion_forcen verran
+                
+        TODO: räjähdysvoiman pieneneminen mitä kauempana keskustasta objekti on?
         """
         for current_object in group:
             if self.distance_squared(current_object) < self.explosion_radius_squared:
@@ -110,13 +114,13 @@ class SmokeEffect(EffectSprite):
         smoke_image_files = []
         if len(image_files) > 0:
             for file_name in image_files:
-                smoke_image_files.append(pygame.image.load(file_name).convert_alpha())
+                smoke_image_files.append(assets[file_name])
         else:
-            smoke_image_files.append(pygame.image.load('gfx/smoke_32_0.png').convert_alpha())
-            smoke_image_files.append(pygame.image.load('gfx/smoke_32_1.png').convert_alpha())
-            smoke_image_files.append(pygame.image.load('gfx/smoke_32_2.png').convert_alpha())
-            smoke_image_files.append(pygame.image.load('gfx/smoke_32_3.png').convert_alpha())
-            smoke_image_files.append(pygame.image.load('gfx/smoke_32_4.png').convert_alpha())
+            smoke_image_files.append(assets['gfx/smoke_32_0.png'])
+            smoke_image_files.append(assets['gfx/smoke_32_1.png'])
+            smoke_image_files.append(assets['gfx/smoke_32_2.png'])
+            smoke_image_files.append(assets['gfx/smoke_32_3.png'])
+            smoke_image_files.append(assets['gfx/smoke_32_4.png'])
 
         return smoke_image_files
 
