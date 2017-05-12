@@ -10,7 +10,7 @@ from constants import *
 
 pygame.font.init()
 
-
+#tpoista tama teksti
 class Button(object):
     def __init__(self, rect=Rect(10, 10, 150, 50), text='Button', bgcolor=YELLOWISH, textcolor=BLACK, font_size=30):
         self._rect = rect
