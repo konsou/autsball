@@ -70,14 +70,14 @@ class Network(object):
             return recv_dict
 
     #Client lähettää viestin
-    def client_send(self, message):
+    def client_send(self, address):
 
-        try:
-            data, address = self._socket.recvfrom(1024)
-        except socket.timeout:
-            pass
-        else:
-            print('send response to', address)
+         # try:
+         #     data, address = self._socket.recvfrom(1024)
+         # except socket.timeout:
+         #     pass
+         # else:
+         #    print('send response to', address)
             self._socket.sendto(message, address)
 
     def destroy(self):

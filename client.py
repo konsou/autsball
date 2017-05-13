@@ -18,7 +18,7 @@ player_data_packet = json.dumps(player_data)
 
 while True:
     server_data = network_object.client_listen()
-   # data_dict2 = network_object.client_send(player_name)
+    data_dict2 = network_object.client_send(player_name)
     if server_data is not None:
         print(server_data['p1_y'])
         #self.players[0].x = server_data['p0_x']
