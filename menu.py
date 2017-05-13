@@ -194,6 +194,13 @@ def debug_run():
     multiplayer_button.rect.center = (400, 330)
     quit_button.rect.center = (400, 410)
 
+    #Lobby
+    lobby_window = Button(Rect(150, 200, 500, 250), 'Lobby')
+    back_from_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
+    #    player_name_field = Input_box()
+    screen = pygame.display.set_mode((800,600))
+
+
     active_mode = 'menu'
     practice_game = None
 
@@ -233,7 +240,8 @@ def debug_run():
                     practice_game.start()
                     # music_player.stop()
                 if 'click' in multiplayer_button.handleEvent(event):
-                    print('multiplayer button clicked')
+                    active_mode = 'lobby'
+                    window.fill(BLACK)
                 if 'click' in quit_button.handleEvent(event):
                     running = False
             if active_mode == 'practice':
@@ -254,6 +262,18 @@ def debug_run():
             if event.type == music.MUSIC_FINISHED:
                 music_player.next()
 
+            if active_mode == 'lobby':
+                if 'click' in back_from_lobby_button.handleEvent(event):
+                    active_mode = 'menu'
+                    window.fill(BLACK)
+
+                if 'click' in multiplayer_button.handleEvent(event):
+                    active_mode = 'lobby'
+                    name = raw_input('nimi')
+                    #window.fill(BLACK)
+                if 'click' in quit_button.handleEvent(event):
+                    running = False
+
         if active_mode == 'menu':
             window.fill(0)
 
@@ -271,6 +291,23 @@ def debug_run():
 
             pygame.display.update()
             clock.tick(30)
+
+        elif active_mode == 'lobby':
+            window.fill(0)
+
+            menu_background_action.background_group.update()
+            music_player_group.update()
+
+            menu_background_action.background_group.draw(window)
+            window.blit(darken_surface, (0, 0))
+
+            static_visual_components_group.draw(window)
+            lobby_window.draw(window)
+            back_from_lobby_button.draw(window)
+
+            pygame.display.update()
+            clock.tick(30)
+
         elif active_mode == 'practice':
             practice_game.update()
 
