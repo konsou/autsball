@@ -11,6 +11,7 @@ network_object.bind_to_server('')
 #pelaajan nimeä ei varmaankaan tarvitse lähetttää joka kerta, id riittää
 player_name = 'Tursa'
 player_id = 1
+server_address = ('127.0.0.1', 12345)
 
 #pelaajan tiedot pakettiin
 player_data = {'name': player_name, 'id': player_id}
@@ -18,7 +19,7 @@ player_data_packet = json.dumps(player_data)
 
 while True:
     server_data = network_object.client_listen()
-    data_dict2 = network_object.client_send(player_name)
+    data_dict2 = network_object.client_send(player_name, server_address )
     if server_data is not None:
         print(server_data['p1_y'])
         #self.players[0].x = server_data['p0_x']
