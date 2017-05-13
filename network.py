@@ -22,12 +22,14 @@ class Network(object):
         ttl = struct.pack('b', 1)
         self._socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
 
-    # sends message for all clients
+#Server
+
+    # Lähetetään viesti kaikille clienteille
     def server_send_message(self, message):
         print('sending {!r}'.format(message))
         self._socket.sendto(message, self._server_multicast_group)
 
-    # server listens client messages
+    # server kuuntelee client viestiä
     def server_listen(self):
         try:
             data, client = self._socket.recvfrom(16)
@@ -37,7 +39,9 @@ class Network(object):
         else:
             print('received {!r} from {}'.format(data, client))
 
-    # bind to server address
+#Client
+
+    # bindaus serveriin
     def bind_to_server(self, server_ip):
         self._server_address = (server_ip, self._port)
         self._socket.bind(self._server_address)
@@ -60,10 +64,21 @@ class Network(object):
             print('received {} bytes from {}'.format(len(data),address))
             recv_dict = json.loads(data)
 
-            print('send response to', address)
-            self._socket.sendto(b'jep', address)
+            #print('send response to', address)
+            #self._socket.sendto(b'jep', address)
 
             return recv_dict
+
+    #Client lähettää viestin
+    def client_send(self, message):
+
+        try:
+            data, address = self._socket.recvfrom(1024)
+        except socket.timeout:
+            pass
+        else:
+            print('send response to', address)
+            self._socket.sendto(message, address)
 
     def destroy(self):
         self._socket.close()

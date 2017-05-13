@@ -4,19 +4,17 @@ import network
 import json
 
 network_object = network.Network()
-test_dict = {'p1': (0, 0), 'p2': (100, 100)}
-dict_json = json.dumps(test_dict)
+player_coordinates = {'p0_x': 0,'p0_y': 0, 'p1_x': 100, 'p1_y': 100, 'p2_x': 100, 'p2_y': 100}
+packet_to_clients = json.dumps(player_coordinates)
 
 try:
-    #message = b'olettekos kuulolla?'
+    #paketti lähetetään kaikille clienteille
+    network_object.server_send_message(packet_to_clients)
 
-    #network_object.server_send_message(message)
-    network_object.server_send_message(dict_json)
-
-    # Listen for responses
+    # Kuunnellaan clientteja
     while True:
-        #print('waiting for answers')
         network_object.server_listen()
+        #data_dict = network_object.server_listen()
 
 finally:
     print('closing socket')
