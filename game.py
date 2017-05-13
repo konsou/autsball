@@ -121,6 +121,7 @@ class AUTSBallGame:
                     if event.type == music.MUSIC_FINISHED:
                         self.music_player.next()
 
+#Tähän silmukka, jossa käydään clientiltä tulleet komennot pelaajittain läpi
                 pressed_keys = pygame.key.get_pressed()
                 if pressed_keys[K_UP]:
                     self.players[self.local_player_id].accelerate()
