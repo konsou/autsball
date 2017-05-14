@@ -34,7 +34,7 @@ class Network(object):
         try:
             data, client = self._socket.recvfrom(16)
         except socket.timeout:
-            #print('socket timed out')
+            print('socket timed out')
             pass
         else:
             print('received {!r} from {}'.format(data, client))
@@ -64,21 +64,12 @@ class Network(object):
             print('received {} bytes from {}'.format(len(data),address))
             recv_dict = json.loads(data)
 
-            #print('send response to', address)
-            #self._socket.sendto(b'jep', address)
-
             return recv_dict
 
     #Client lähettää viestin
-    def client_send(self, address):
-
-         # try:
-         #     data, address = self._socket.recvfrom(1024)
-         # except socket.timeout:
-         #     pass
-         # else:
-         #    print('send response to', address)
-            self._socket.sendto(message, address)
+    def client_send(self, message, address):
+        print ('sending {!r}'.format(message))
+        self._socket.sendto(message, address)
 
     def destroy(self):
         self._socket.close()
