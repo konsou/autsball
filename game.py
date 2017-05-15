@@ -249,7 +249,7 @@ if __name__ == '__main__':
     pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
     pygame.init()
     # pygame.mixer.init()
-    window = pygame.display.set_mode(WINDOW_SIZE, pygame.HWSURFACE | pygame.DOUBLEBUF)
+    window = pygame.display.set_mode(WINDOW_SIZE)#, pygame.HWSURFACE | pygame.DOUBLEBUF)
     pygame.display.set_caption("AUTSball")
 
     load_assets(window)
