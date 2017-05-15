@@ -26,18 +26,26 @@ class Network(object):
 
     # Lähetetään viesti kaikille clienteille
     def server_send_message(self, message):
-        print('sending {!r}'.format(message))
+        #print('sending {!r}'.format(message))
         self._socket.sendto(message, self._server_multicast_group)
 
     # server kuuntelee client viestiä
+    # palauttaa vastaanotetun datan ja clientin osoitteen
     def server_listen(self):
         try:
-            data, client = self._socket.recvfrom(16)
+            data, client = self._socket.recvfrom(1024)
         except socket.timeout:
-            print('socket timed out')
-            pass
+            #print('socket timed out')
+            #pass
+            return None
         else:
-            print('received {!r} from {}'.format(data, client))
+            #print('received {!r} from {}'.format(data, client))
+            try:
+                recv_dict = json.loads(data)
+            except ValueError:
+                recv_dict = data
+
+            return recv_dict, client
 
 #Client
 
@@ -55,20 +63,24 @@ class Network(object):
             mreq)
 
     # client listens for server messages
+    # Palauttaa datan ja osoitteen josta tuli (server)
     def client_listen(self):
         try:
             data, address = self._socket.recvfrom(1024)
         except socket.timeout:
-            pass
+            return None
         else:
-            print('received {} bytes from {}'.format(len(data),address))
-            recv_dict = json.loads(data)
+            print('received {} from {}'.format(data, address))
+            try:
+                recv_dict = json.loads(data)
+            except ValueError:
+                recv_dict = data
 
-            return recv_dict
+            return recv_dict, address
 
     #Client lähettää viestin
     def client_send(self, message, address):
-        print ('sending {!r}'.format(message))
+        #print ('sending {!r}'.format(message))
         self._socket.sendto(message, address)
 
     def destroy(self):
