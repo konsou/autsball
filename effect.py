@@ -4,7 +4,6 @@ import game_object
 import groups
 import pygame
 import vector
-from colors import *
 from assets import assets, assets_rot
 
 
@@ -13,7 +12,7 @@ class EffectSprite(game_object.GameObject):
     def __init__(self, parent=None, image=None, image_file=None, group=groups.EffectGroup,
                  attached_player=None, attached_ball=None,
                  effect_type=None, visible=1, start_position=None):
-        game_object.GameObject.__init__(self, group=group, image=image, image_file=image_file, start_position=start_position)
+        game_object.GameObject.__init__(self, group=group, image_file=image_file, start_position=start_position)
         self.attached_player = attached_player
         self.attached_ball = attached_ball
         self.effect_type = effect_type
@@ -42,7 +41,7 @@ class EffectSprite(game_object.GameObject):
 
 class TetherSprite(EffectSprite):
     def __init__(self, group=groups.EffectGroup, attached_player=None, attached_ball=None, parent=None):
-        EffectSprite.__init__(self, image=assets['gfx/tractor_beam.png'], group=group,
+        EffectSprite.__init__(self, image_file='gfx/tractor_beam.png', group=group,
                               attached_player=attached_player, attached_ball=attached_ball, parent=parent)
         self.effect_type = 'tether'
 
@@ -63,13 +62,13 @@ class TetherSprite(EffectSprite):
 
 class Explosion(EffectSprite):
     """ Räjähdys, joka työntää pelaajia ja palloa pois keskipisteestä """
-    def __init__(self, image=None, group=groups.EffectGroup, pos=None,
+    def __init__(self, image_file=None, group=groups.EffectGroup, pos=None,
                  explosion_radius=100, explosion_force=20, frames_visible=10,
                  player_group=groups.PlayerGroup, ball_group=groups.BallGroup):
         # Tämä piti tehdä näin koska jos laittoi tuohon initin kutsujuttuihin niin heitti assetsista KeyErroria
-        if image is None:
-            image = assets['gfx/explosion_100.png']
-        EffectSprite.__init__(self, image=image, group=group, start_position=pos)
+        if image_file is None:
+            image_file = 'gfx/explosion_100.png'
+        EffectSprite.__init__(self, image_file=image_file, group=group, start_position=pos)
         self.explosion_radius = explosion_radius
         self.explosion_radius_squared = explosion_radius ** 2
         self.explosion_force = explosion_force
@@ -111,23 +110,27 @@ class SmokeEffect(EffectSprite):
 
     @staticmethod
     def preload_images(image_files=None):
+        """ 
+        Ei oikeastaan enää preloadaa mitään vaan rakentaa vaan filelistan. Jätetty toistaiseksi paikoilleen.
+        TODO: poista kokonaan, assetit esiladataan muualla
+        """
         smoke_image_files = []
         if len(image_files) > 0:
             for file_name in image_files:
-                smoke_image_files.append(assets[file_name])
+                smoke_image_files.append(file_name)
         else:
-            smoke_image_files.append(assets['gfx/smoke_32_0.png'])
-            smoke_image_files.append(assets['gfx/smoke_32_1.png'])
-            smoke_image_files.append(assets['gfx/smoke_32_2.png'])
-            smoke_image_files.append(assets['gfx/smoke_32_3.png'])
-            smoke_image_files.append(assets['gfx/smoke_32_4.png'])
+            smoke_image_files.append('gfx/smoke_32_0.png')
+            smoke_image_files.append('gfx/smoke_32_1.png')
+            smoke_image_files.append('gfx/smoke_32_2.png')
+            smoke_image_files.append('gfx/smoke_32_3.png')
+            smoke_image_files.append('gfx/smoke_32_4.png')
 
         return smoke_image_files
 
     def __init__(self, start_position, parent=None, attached_player=None, effect_type='smoke', viewscreen_rect=None,
                  image_files=None):
 
-        EffectSprite.__init__(self, image=image_files, image_file=None,
+        EffectSprite.__init__(self, image_file=image_files,
                               group=groups.EffectGroup, parent=parent, effect_type=effect_type,
                               attached_player=attached_player)
         self.parent = parent

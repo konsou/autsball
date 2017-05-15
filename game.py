@@ -26,6 +26,9 @@ class AUTSBallGame:
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
 
         # Pygamen inittejä
+        # HUOM! Inittien järjestys tärkeä!
+        # 1) mixerin pre-init
+        # 2) pygamen init
         pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
         pygame.init()
         pygame.mixer.init()
@@ -239,8 +242,13 @@ class AUTSBallGame:
 
 
 if __name__ == '__main__':
+    # HUOM! Inittien järjestys tärkeä!
+    # 1) mixerin pre-init
+    # 2) pygamen init
+
+    pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
     pygame.init()
-    pygame.mixer.init()
+    # pygame.mixer.init()
     window = pygame.display.set_mode(WINDOW_SIZE, pygame.HWSURFACE | pygame.DOUBLEBUF)
     pygame.display.set_caption("AUTSball")
 

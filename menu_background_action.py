@@ -26,17 +26,17 @@ background_group = pygame.sprite.GroupSingle()
 class DemoPlayer(player.PlayerSprite):
     def __init__(self, team=None, level=None, parent=None, pos=None):
         if team == 'red':
-            image = pygame.image.load('gfx/ship1_red_20px.png').convert_alpha()
+            image_file = 'gfx/ship1_red_20px.png'
         else:
-            image = pygame.image.load('gfx/ship1_green_20px.png').convert_alpha()
+            image_file = 'gfx/ship1_green_20px.png'
 
         # Lisätään PlayerGroup-ryhmään
         game_object.GameObject.__init__(self, group=groups.PlayerGroup, level=level, parent=parent,
-                                        image=image)
+                                        image_file=image_file)
 
         # Graffat
-        self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
-        self.thrust_gfx = effect.EffectSprite(attached_player=self, image=self.motor_flame_image,
+        self.motor_flame_image_file = 'gfx/motor_flame_10.png'
+        self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=self.motor_flame_image_file,
                                                 effect_type='motorflame', visible=0)
         self.viewscreen_rect = (0, 0, 800, 600)
 
@@ -79,7 +79,7 @@ class DemoPlayer(player.PlayerSprite):
 
         self.goal_green_pos = 50, 300
         self.goal_red_pos = 750, 300
-        self.goal = 0,0
+        self.goal = 0, 0
 
         self.motor_sound_playing = 0
         self.motor_sound = None
@@ -100,6 +100,10 @@ class DemoPlayer(player.PlayerSprite):
 
         new_heading = 270 - math.degrees(game_object.get_angle_in_radians(self.goal, (self.x, self.y)))
         self.heading = new_heading
+        while self.heading > 359:
+            self.heading -= 360
+        while self.heading < 0:
+            self.heading += 360
         self.rot_self_image_keep_size(self.heading)
 
         # heading_difference = game_object.get_angle_difference(self.heading, new_heading, degrees=1)

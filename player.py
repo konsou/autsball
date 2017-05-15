@@ -12,7 +12,7 @@ from assets import assets, assets_rot
 
 
 class PlayerSprite(game_object.GameObject):
-    def __init__(self, player_id=None, team=None, level=None, parent=None, ship_name=None,
+    def __init__(self, player_id=None, team=None, level=None, parent=None, ship_name='V-Wing',
                  group=groups.PlayerGroup, spawn_point=None):
         self.owning_player_id = player_id
         self.team = team
@@ -24,20 +24,20 @@ class PlayerSprite(game_object.GameObject):
 
         # Kuva
         if team == 'red':
-            image = assets[current_ship.find('images/team_red_image').text]
+            image_file = current_ship.find('images/team_red_image').text
         else:
-            image = assets[current_ship.find('images/team_green_image').text]
+            image_file = current_ship.find('images/team_green_image').text
 
         # Lisätään ryhmään
         game_object.GameObject.__init__(self, group=group, level=level, parent=parent,
-                                        image=image)
+                                        image_file=image_file)
 
         # Thrust-gfx
-        thrust_image = []
+        thrust_image_file = []
         for value in current_ship.findall('images/motor_flame_image'):
-            thrust_image.append(assets[value.text])
+            thrust_image_file.append(value.text)
 
-        self.thrust_gfx = effect.EffectSprite(attached_player=self, image=thrust_image,
+        self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=thrust_image_file,
                                               visible=0, parent=parent)
         self.rect.center = self.parent.screen_center_point
         if self.owning_player_id == parent.local_player_id:
@@ -47,9 +47,9 @@ class PlayerSprite(game_object.GameObject):
 
         self._smoke_interval = 30  # Smoken spawn tiheys millisekunteina
         self._smoke_counter = 0
-        self.smoke_effect_images = []
+        self.smoke_effect_image_files = []
         for value in current_ship.findall('images/rear_smoke_image'):
-            self.smoke_effect_images.append(assets[value.text])
+            self.smoke_effect_image_files.append(value.text)
         # self.smoke_effect_images = effect.SmokeEffect.preload_images(smoke_image_file)  # ladataan kuvat etukäteen
 
         # Sound effex
@@ -146,7 +146,7 @@ class PlayerSprite(game_object.GameObject):
                                        parent=self.parent,
                                        attached_player=self,
                                        viewscreen_rect=self.viewscreen_rect,
-                                       image_files=self.smoke_effect_images)
+                                       image_files=self.smoke_effect_image_files)
                     self._smoke_counter = 0
 
     def stop_acceleration(self):
@@ -161,13 +161,13 @@ class PlayerSprite(game_object.GameObject):
         if self.heading < 0:
             self.heading += 360
         # TODO: laske rotaatiot latausvaiheessa valmiiksi
-        self.rot_self_image_keep_size(int(self.heading))
+        self.rot_self_image_keep_size(self.heading)
 
     def rotate_left(self):
         self.heading += self.handling
-        if self.heading > 360:
+        if self.heading > 359:
             self.heading -= 360
-        self.rot_self_image_keep_size(int(self.heading))
+        self.rot_self_image_keep_size(self.heading)
 
     def shoot(self):
         # Ammutaan perusammus

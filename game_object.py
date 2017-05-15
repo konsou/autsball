@@ -5,6 +5,7 @@ import math
 import copy
 import types
 from colors import *
+from assets import assets, assets_rot
 
 
 class GameObject(pygame.sprite.Sprite):
@@ -20,14 +21,14 @@ class GameObject(pygame.sprite.Sprite):
         start_position: objektin aloituspositio
         frames_per_image: jos kuva halutaan animoida niin tässä voi määritellä animointinopeuden
     """
-    def __init__(self, level=None, parent=None, group=None, image_file=None, image=None, start_position=None,
+    def __init__(self, level=None, parent=None, group=None, image_file=None, start_position=None,
                  frames_per_image=5):
         # Pygame-Spriten init, lisäys ryhmään
         pygame.sprite.Sprite.__init__(self, group)
         
         # Kuvan lataus - tämä laskee myös rectin, sizen ja radiuksen
         # Hoitaa myös animointikuvien latauksen
-        self.load_image(image=image, image_file=image_file, frames_per_image=frames_per_image)
+        self.load_image(image_file=image_file, frames_per_image=frames_per_image)
 
         # parent on itse peliobjekti
         self.parent = parent
@@ -70,44 +71,55 @@ class GameObject(pygame.sprite.Sprite):
         # Tämä päivitetään myöhemmin, initoidaan kuitenkin ettei PyCharm herjaa
         self.viewscreen_rect = None
 
-    def load_image(self, image=None, image_file=None, frames_per_image=5):
-        """ Lataa kuvan/kuvat spritelle. Asettaa rect, radius, size."""
+    def load_image(self, image_file=None, frames_per_image=5):
+        """ 
+        Lataa kuvan/kuvat spritelle. Asettaa rect, radius, size.
+        Onko size tarpeeton ja redundantti?
+        HUOM! Assettien esilatauksen myötä ei tue enää kuvaobjektien syöttämistä suoraan vaan AINA pitää olla
+        tiedostonimi!
+        """
 
         # Ensin katsotaan onko image_file muuta kuin yksittäinen stringi.
         # Jos on muuta niin oletetaan sen olevan lista/tuple/dict joka sitältää tiedostonimiä
         # ja ladataan sieltä kuvat animaatiota varten.
         if image_file is not None and type(image_file) not in types.StringTypes:
             self._animation_images = []
+            self._animation_image_filenames = []
             for current_image in image_file:
-                self._animation_images.append(pygame.image.load(current_image).convert_alpha())
+                self._animation_images.append(assets[current_image])
+                self._animation_image_filenames.append(current_image)
             self.image = self._animation_images[0]
+            self.image_filename = self._animation_image_filenames[0]
 
             self.animation_frames_per_image = frames_per_image
             self._animation_frame_counter = 0
             self._animation_current_image_counter = 0
             self._animation_enabled = 1
         # Animaatio valmiiksi ladatuista kuvista
-        elif type(image) is types.ListType:
-            self._animation_images = image
-            self.image = self._animation_images[0]
-            self.animation_frames_per_image = frames_per_image
-            self._animation_frame_counter = 0
-            self._animation_current_image_counter = 0
-            self._animation_enabled = 1
+        # Emme enää tue
+        # elif type(image) is types.ListType:
+        #     self._animation_images = image
+        #     self.image = self._animation_images[0]
+        #     self.animation_frames_per_image = frames_per_image
+        #     self._animation_frame_counter = 0
+        #     self._animation_current_image_counter = 0
+        #     self._animation_enabled = 1
         # Jos animaatio ei enabloitu niin jatketaan normaalisti
         else:
             # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
-            if image is not None:
-                self.image = image
+            # Emme enää tue
+            # if image is not None:
+            #     self.image = image
             # Jos on annettu kuvatiedosto niin luetaan se
-            elif image_file is not None:
-                self.image = pygame.image.load(image_file).convert_alpha()
+            self.image = assets[image_file]
+            self.image_filename = image_file
             self._animation_enabled = 0
 
         # Tämä tarvitaan rotaatioita varten
         self.original_image = self.image
         # Size on tämmöinen yhden luvun approksimaatio objektin koosta - neliöllä sivun pituus, ympyrällä halkaisija
         # Suorakulmiolla sivujen pituuksien keskiarvo
+        # Tarpeeton? Taidetaan käyttää vain bulletin maastoon tekemän reiän koon laskennassa, radius kelpaisi yhtä hyvin
         self.size = (self.image.get_width() + self.image.get_height()) // 2
         # Radiusta tarvii collision detectionissa
         self.rect = self.image.get_rect()
@@ -187,14 +199,9 @@ class GameObject(pygame.sprite.Sprite):
         self.rect.size = self.image.get_rect().size  # pidä positio samana, muuten siirtyy hetkeksi yläkulmaan
 
     def rot_self_image_keep_size(self, angle):
-        """rotate an image while keeping its center and size"""
-        # Tämä copypastettu jostain netistä. Loppujen lopuksi en ole varma onko tarpeen vai ei.
-        orig_rect = self.rect
-        rot_image = pygame.transform.rotate(self.original_image, angle)
-        rot_rect = orig_rect.copy()
-        rot_rect.center = rot_image.get_rect().center
-        rot_image = rot_image.subsurface(rot_rect).copy()
-        self.image = rot_image
+        """ Muuttaa kuvaksi oikean esiladatun ja -rotatoidun kuvan """
+        angle = int(angle)  # tällä sallitaan floatit handlingiin
+        self.image = assets_rot[self.image_filename][angle]
 
     def check_out_of_bounds(self):
         """ Pitää objektin pelialueen sisällä """

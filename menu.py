@@ -180,7 +180,12 @@ def debug_run():
     music_player_group = pygame.sprite.Group()
 
     # Music
-    pygame.mixer.init()
+    # HUOM! Inittien järjestys tärkeä!
+    # 1) mixerin pre-init
+    # 2) pygamen init
+    pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
+    pygame.init()
+    # pygame.mixer.init()
     music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
     music_player.play()
 

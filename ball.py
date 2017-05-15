@@ -12,7 +12,7 @@ from assets import assets, assets_rot
 class BallSprite(game_object.GameObject):
     """ Pallo. Osaa liittää itsensä pelaajaan ja poistaa liitoksen. """
     def __init__(self, level=None, parent=None, group=groups.BallGroup):
-        game_object.GameObject.__init__(self, group=group, image=assets['gfx/ball_50_red.png'], level=level, parent=parent)
+        game_object.GameObject.__init__(self, group=group, image_file='gfx/ball_50_red.png', level=level, parent=parent)
 
         # Otetaan start_position levelin tiedoista
         self.start_position = self.level.ball_spawns[0]
