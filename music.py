@@ -87,6 +87,18 @@ class MusicPlayer(pygame.sprite.Sprite):
         self.playlist_pointer = 0
         pygame.mixer.music.set_endevent(MUSIC_FINISHED)
 
+        # Musiikin voimakkuus 0.0-1.0
+        self._volume = pygame.mixer.music.get_volume()
+
+    def _get_volume(self):
+        return self._volume
+
+    def _set_volume(self, volume):
+        self._volume = volume
+        pygame.mixer.music.set_volume(self._volume)
+
+    volume = property(_get_volume, _set_volume)
+
     def play(self):
         """ 
         Soittaa playlist[]:issä olevan playlist_pointer:in määrittämän tähän ruutuun validin biisin. 

@@ -14,9 +14,9 @@ class Button(object):
         self._textcolor = textcolor
         self._font = pygame.font.Font(None, font_size)
 
-        self.buttonDown = False
-        self.mouseOverButton = False
-        self.lastMouseDownOverButton = False
+        self._buttonDown = False
+        self._mouseOverButton = False
+        self._lastMouseDownOverButton = False
         self._visible = True
 
         self.surfaceNormal = pygame.Surface(self._rect.size)
@@ -32,14 +32,14 @@ class Button(object):
         retVal = []
 
         hasExited = False
-        if not self.mouseOverButton and self._rect.collidepoint(eventObj.pos):
+        if not self._mouseOverButton and self._rect.collidepoint(eventObj.pos):
             # mouse entered the button
-            self.mouseOverButton = True
+            self._mouseOverButton = True
             self.mouseEnter(eventObj)
             retVal.append('enter')
-        elif self.mouseOverButton and not self._rect.collidepoint(eventObj.pos):
+        elif self._mouseOverButton and not self._rect.collidepoint(eventObj.pos):
             # mouse exited the button
-            self.mouseOverButton = False
+            self._mouseOverButton = False
             hasExited = True
 
         if self._rect.collidepoint(eventObj.pos):
@@ -48,28 +48,28 @@ class Button(object):
                 self.mouseMove(eventObj)
                 retVal.append('move')
             elif eventObj.type == MOUSEBUTTONDOWN:
-                self.buttonDown = True
-                self.lastMouseDownOverButton = True
+                self._buttonDown = True
+                self._lastMouseDownOverButton = True
                 self.mouseDown(eventObj)
                 retVal.append('down')
         else:
             if eventObj.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN):
                 # Mouse up/down event happened off the button, no mouseClick()
-                self.lastMouseDownOverButton = False
+                self._lastMouseDownOverButton = False
 
         doMouseClick = False
         if eventObj.type == MOUSEBUTTONUP:
-            if self.lastMouseDownOverButton:
+            if self._lastMouseDownOverButton:
                 doMouseClick = True
-            self.lastMouseDownOverButton = False
+            self._lastMouseDownOverButton = False
 
-            if self.buttonDown:
-                self.buttonDown = False
+            if self._buttonDown:
+                self._buttonDown = False
                 self.mouseUp(eventObj)
                 retVal.append('up')
 
             if doMouseClick:
-                self.buttonDown = False
+                self._buttonDown = False
                 self.mouseClick(eventObj)
                 retVal.append('click')
 
@@ -81,9 +81,9 @@ class Button(object):
 
     def draw(self, surfaceObj):
         if self._visible:
-            if self.buttonDown:
+            if self._buttonDown:
                 surfaceObj.blit(self.surfaceDown, self._rect)
-            elif self.mouseOverButton:
+            elif self._mouseOverButton:
                 surfaceObj.blit(self.surfaceHighlight, self._rect)
             else:
                 surfaceObj.blit(self.surfaceNormal, self._rect)
@@ -164,6 +164,10 @@ class Button(object):
 
 class ButtonGroup(object):
 
+    """
+    Button-ryhmä koodin selkeyttämiseksi, piirtää kaikki ryhmän buttonit yhdelle draw-kutsulla
+    """
+
     def __init__(self):
         self.buttons = []
 
@@ -201,6 +205,12 @@ class Checkbox(pygame.sprite.Sprite):
             self.image = self._unchecked_image
         self.rect = self.image.get_rect()
         self.rect.topleft = position
+
+        self._buttonDown = False
+        self._mouseOverButton = False
+        self._lastMouseDownOverButton = False
+        self._visible = True
+
         self._checkbox_group = checkbox_group
         if self._checkbox_group is not None:
             self._checkbox_group.add(self)
@@ -225,10 +235,94 @@ class Checkbox(pygame.sprite.Sprite):
     def _set_checked(self, state):
         self.change_state(state)
 
+    def draw(self, surfaceObj):
+        if self._visible:
+            if self._checked:
+                surfaceObj.blit(self._checked_image, self.rect)
+            else:
+                surfaceObj.blit(self._unchecked_image, self.rect)
+
+    def handleEvent(self, eventObj):
+        if eventObj.type not in (MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN) or not self._visible:
+            return []
+
+        retVal = []
+
+        hasExited = False
+        if not self._mouseOverButton and self.rect.collidepoint(eventObj.pos):
+            # mouse entered the button
+            self._mouseOverButton = True
+            self.mouseEnter(eventObj)
+            retVal.append('enter')
+        elif self._mouseOverButton and not self.rect.collidepoint(eventObj.pos):
+            # mouse exited the button
+            self._mouseOverButton = False
+            hasExited = True
+
+        if self.rect.collidepoint(eventObj.pos):
+            # mouse event happened over the button
+            if eventObj.type == MOUSEMOTION:
+                self.mouseMove(eventObj)
+                retVal.append('move')
+            elif eventObj.type == MOUSEBUTTONDOWN:
+                self._buttonDown = True
+                self._lastMouseDownOverButton = True
+                self.mouseDown(eventObj)
+                retVal.append('down')
+        else:
+            if eventObj.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN):
+                # Mouse up/down event happened off the button, no mouseClick()
+                self._lastMouseDownOverButton = False
+
+        doMouseClick = False
+        if eventObj.type == MOUSEBUTTONUP:
+            if self._lastMouseDownOverButton:
+                doMouseClick = True
+            self._lastMouseDownOverButton = False
+
+            if self._buttonDown:
+                self._buttonDown = False
+                self.mouseUp(eventObj)
+                retVal.append('up')
+
+            if doMouseClick:
+                self._buttonDown = False
+                self.mouseClick(eventObj)
+                retVal.append('click')
+                self.change_state()
+
+        if hasExited:
+            self.mouseExit(eventObj)
+            retVal.append('exit')
+
+        return retVal
+
+    def mouseClick(self, event):
+        pass
+
+    def mouseEnter(self, event):
+        pass
+
+    def mouseMove(self, event):
+        pass
+
+    def mouseExit(self, event):
+        pass
+
+    def mouseDown(self, event):
+        pass
+
+    def mouseUp(self, event):
+        pass
+
     checked = property(_get_checked, _set_checked)
 
 
 class CheckboxGroup(object):
+
+    """
+    Ryhmä checkboxeja, jossa on aina yksi ja vain yksi box checkattuna
+    """
 
     def __init__(self):
         self.checkboxes = []
@@ -246,6 +340,8 @@ class CheckboxGroup(object):
                 checkbox.change_state(state=False, group_update=True)
             else:
                 self.checked_index = i
+                # Varmistetaan että groupissa ainakin yksi checkbox on koko ajan checkattuna
+                checked_checkbox.change_state(state=True, group_update=True)
             i += 1
 
     def set_checked_index(self, index):
@@ -253,6 +349,10 @@ class CheckboxGroup(object):
 
 
 class Slider(pygame.sprite.Sprite):
+
+    """
+    Slider, jonka arvo vaihtelee välillä 0.0-1.0
+    """
 
     def __init__(self, group=None, position=(0, 0), value=1.0):
         pygame.sprite.Sprite.__init__(self, group)
@@ -265,14 +365,48 @@ class Slider(pygame.sprite.Sprite):
         self._knob_max = self.rect.width - self._knob_image_rect.width
         self._value = value
         self._set_value(self._value)
+        self._buttonDown = False
+        self._mouseOverButton = False
 
     def _set_value(self, value):
         self._value = value
         knob_position = int(self._knob_max * value)
-        self.image = self._rail_image
+        self.image = self._rail_image.copy()
         self.image.blit(self._knob_image, (knob_position, 0))
 
     def _get_value(self):
         return self._value
+
+    def _move(self, position):
+        value = position[0] - self.rect.left
+        if value < 0:
+            value = 0
+        elif value > self._knob_max:
+            value = self._knob_max
+
+        value = value / float(self._knob_max)
+        self._set_value(value)
+
+    def handleEvent(self, eventObj):
+        if eventObj.type not in (MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN):
+            return []
+
+        retVal = []
+
+        if self.rect.collidepoint(eventObj.pos) or self._buttonDown:
+            if eventObj.type == MOUSEMOTION and self._buttonDown:
+                # muutetaan sliderin arvoa hiiren nappi pohjassa (drag)
+                self._move(eventObj.pos)
+                retVal.append('drag')
+            elif eventObj.type == MOUSEBUTTONDOWN:
+                self._buttonDown = True
+                retVal.append('down')
+
+        if eventObj.type == MOUSEBUTTONUP:
+            if self._buttonDown:
+                self._buttonDown = False
+                retVal.append('up')
+
+        return retVal
 
     value = property(_get_value, _set_value)

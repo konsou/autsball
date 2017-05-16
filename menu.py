@@ -59,11 +59,11 @@ def debug_run():
     LabelImageText(group=settings_group, image_text='music', position=(100, 130))
     music_checkbox = Checkbox(group=settings_group, checked=True, position=(350, 130))
     LabelImageText(group=settings_group, image_text='volume', position=(140, 170))
-    music_volume_slider = Slider(group=settings_group, position=(350, 180))
+    music_volume_slider = Slider(group=settings_group, position=(350, 180), value=music_player.volume)
     LabelImageText(group=settings_group, image_text='sounds', position=(100, 210))
     sounds_checkbox = Checkbox(group=settings_group, checked=True, position=(350, 210))
     LabelImageText(group=settings_group, image_text='volume', position=(140, 250))
-    sound_volume_slider = Slider(group=settings_group, position=(350, 260), value=0.35)
+    sound_volume_slider = Slider(group=settings_group, position=(350, 260), value=1.0)
     #LabelImageText(group=settings_group, image_text='quality', position=(100, 330))
     LabelImageText(group=settings_group, image_text='effects', position=(100, 350))
     LabelImageText(group=settings_group, image_text='off', position=(290, 310))
@@ -112,6 +112,37 @@ def debug_run():
             if active_mode == 'settings_menu':
                 if 'click' in settings_back_button.handleEvent(event):
                     active_mode = 'main_menu'
+                if 'click' in music_checkbox.handleEvent(event):
+                    # TODO: talleta arvo johonkin pysyvästi, että vaikuttaa pelin puolellakin ja uudelleen käynnistyksen jälkeen
+                    if music_checkbox.checked:
+                        music_player.play()
+                    else:
+                        music_player.stop()
+                if 'drag' in music_volume_slider.handleEvent(event):
+                    # TODO: talleta voimakkuusarvo johonkin
+                    music_player.volume = music_volume_slider.value
+
+                if 'click' in sounds_checkbox.handleEvent(event):
+                    # TODO: disable/enable sound effects
+                    pass
+                if 'drag' in sound_volume_slider.handleEvent(event):
+                    # TODO: talleta voimakkuusarvo johonkin
+                    # TODO: muuta kaikkien sound effectien voimakkuus
+                    pass
+
+                if 'click' in effects_off_checkbox.handleEvent(event):
+                    # TODO: muuta grafiikka-asetus vastaavaksi
+                    pass
+                if 'click' in effects_low_checkbox.handleEvent(event):
+                    # TODO: muuta grafiikka-asetus vastaavaksi
+                    pass
+                if 'click' in effects_med_checkbox.handleEvent(event):
+                    # TODO: muuta grafiikka-asetus vastaavaksi
+                    pass
+                if 'click' in effects_high_checkbox.handleEvent(event):
+                    # TODO: muuta grafiikka-asetus vastaavaksi
+                    pass
+
             if active_mode == 'practice':
                 if event.type == KEYUP:
                     if event.key == K_ESCAPE:
