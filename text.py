@@ -5,6 +5,7 @@ import string
 import random
 import xml.etree.ElementTree as ET
 from colors import *
+from assets import assets
 
 num_images = {}
 last_scores = [0, 0]
@@ -14,7 +15,7 @@ last_score_images = [None, None]
 def init_scores():
     global last_score_images
     for i in range(0, 10):
-        num_images[i] = pygame.image.load('gfx/num_%d.png' % i).convert_alpha()
+        num_images[i] = assets['gfx/num_%d.png' % i]
     last_score_images = [num_images[0], num_images[0]]
 
 
@@ -39,6 +40,7 @@ def show_score(win, pos, score, team):
         win.blit(score_image, pos)
     else:
         win.blit(last_score_images[team], pos)
+
 
 class DisappearingText(pygame.sprite.Sprite):
     """ Näyttää ruudulla tekstin x framen ajan """

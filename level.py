@@ -4,7 +4,7 @@ import groups
 import text
 from colors import *
 from constants import *
-import xml.etree.ElementTree as ET
+from assets import assets, assets_rot, load_assets
 
 
 class Level(pygame.sprite.Sprite):
@@ -22,17 +22,22 @@ class Level(pygame.sprite.Sprite):
         self.name = level_name
 
         # Level-kuva
-        self.image = pygame.image.load(current_level.find('images/level-image').text).convert()
+        # self.image = pygame.image.load(current_level.find('images/level-image').text).convert()
+        self.image = assets[current_level.find('images/level-image').text]
+        # Määritetään alpha pois (asset loaderi ottaa kaikkeen alphan vakiona päälle) että voi laittaa colorkeyn
+        self.image.set_alpha(None)
         self.image.set_colorkey(colorkey)
 
         # Background - jos levelin tiedoista ei löydy niin ladataan mustaa pintaa tilalle
         try:
-            background_image = pygame.image.load(current_level.find('images/background').text).convert()
+            background_image = assets[current_level.find('images/background').text]
+            background_image.set_alpha(None)
         except AttributeError:
             background_image = pygame.Surface((50, 50))
             # background_image = pygame.image.load('gfx/cave_background.png').convert()
         try:
-            self.off_level_image = pygame.image.load(current_level.find('images/off-level').text).convert()
+            self.off_level_image = assets[current_level.find('images/off-level').text]
+            self.off_level_image.set_alpha(None)
         except AttributeError:
             self.off_level_image = pygame.Surface((50, 50))
             # self.off_level_image = pygame.image.load('gfx/cave_indestructible_rock.png').convert()

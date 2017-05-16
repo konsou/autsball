@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 import pygame
-import game
 import random
 import tinytag
 import groups
+from assets import assets
 
 
 """
@@ -11,7 +11,7 @@ Pitää sisällään seuraavaa:
 
 class MusicPlayer(pygame.sprite.Sprite): taustamusiikin soittajaclass, osaa näyttää infoblurbin biisistä
 class MusicFile(object): lukee tiedoston tagit ja tallettaa tiedon siitä, missä ruuduissa biisiä saa soittaa
-MUSIC_FINISHED -pygame-eventti. Tämä nousee kun biisi on soitettu loppuun. Silloin pitää kutsua MusicPlayer.animate_next_frame()
+MUSIC_FINISHED -pygame-eventti. Tämä nousee kun biisi on soitettu loppuun. Silloin pitää kutsua MusicPlayer.next()
 
 Katso luokkien ja metodien docstringeistä lisää.
 """
@@ -66,20 +66,14 @@ class MusicPlayer(pygame.sprite.Sprite):
 
         # Fadeout - counter alkaa counter_startista ja vähentää siitä
         # Muuttaa alfa-arvoa jos counter on välillä 0...255
-        self.fadeout_counter = 0
-        self.fadeout_counter_start = 1000
-        self.fadeout_decrement = 5
+        self._fadeout_counter = 0
+        self._fadeout_counter_start = 1000
+        self._fadeout_decrement = 5
 
         self.playlist = []
         ############################################################
         # HUOM HUOM! Toistaiseksi biisit pitää lisätä käsin tähän! #
         ############################################################
-        # self.playlist.append(MusicFile(filename='sfx/short_1.ogg', artist='PeraSpede',
-        #                                title='Short Music', allowed_screens=('menu', 'game')))
-        # self.playlist.append(MusicFile(filename='sfx/short_2.ogg', artist='PeraSpede',
-        #                                title='Short Music 2', allowed_screens=('menu',)))
-        # self.playlist.append(MusicFile(filename='sfx/short_3.ogg', artist='PeraSpede',
-        #                               title='Short Music 3', allowed_screens=('menu', 'game')))
         self.playlist.append(MusicFile(filename='sfx/mouse_meets_robot.ogg', allowed_screens='game'))
         self.playlist.append(MusicFile(filename='sfx/cavern_rain.ogg', allowed_screens='menu'))
         if shuffle:
@@ -114,13 +108,13 @@ class MusicPlayer(pygame.sprite.Sprite):
 
     def update(self):
         """ Tämä laskee infoblurbin fadeoutin """
-        if self.fadeout_counter > 0:
-            self.fadeout_counter -= self.fadeout_decrement
-            # Jos fadeout_counter on välillä 0..255 niin asetetaan alpha siitä
-            if 255 >= self.fadeout_counter >= 0:
-                self.image.set_alpha(self.fadeout_counter)
+        if self._fadeout_counter > 0:
+            self._fadeout_counter -= self._fadeout_decrement
+            # Jos _fadeout_counter on välillä 0..255 niin asetetaan alpha siitä
+            if 255 >= self._fadeout_counter >= 0:
+                self.image.set_alpha(self._fadeout_counter)
             # Kuva tyhjäksi kun ollaan päästy nollaan
-            if self.fadeout_counter <= 0:
+            if self._fadeout_counter <= 0:
                 self.image = pygame.Surface((0, 0))
                 self.rect = self.image.get_rect()
 
@@ -161,7 +155,7 @@ class MusicPlayer(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self._calculate_rect_position()
 
-        self.fadeout_counter = self.fadeout_counter_start
+        self._fadeout_counter = self._fadeout_counter_start
 
     def _calculate_rect_position(self):
         if self.pos == 'topleft':

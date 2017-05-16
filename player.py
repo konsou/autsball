@@ -7,10 +7,12 @@ import bullet
 import groups
 import text
 from colors import *
+from pygame.locals import *
+from assets import assets, assets_rot
 
 
 class PlayerSprite(game_object.GameObject):
-    def __init__(self, player_id=None, team=None, level=None, parent=None, ship_name=None,
+    def __init__(self, player_id=None, team=None, level=None, parent=None, ship_name='V-Wing',
                  group=groups.PlayerGroup, spawn_point=None):
         self.owning_player_id = player_id
         self.team = team
@@ -22,21 +24,21 @@ class PlayerSprite(game_object.GameObject):
 
         # Kuva
         if team == 'red':
-            image = pygame.image.load(current_ship.find('images/team_red_image').text).convert_alpha()
+            image_file = current_ship.find('images/team_red_image').text
         else:
-            image = pygame.image.load(current_ship.find('images/team_green_image').text).convert_alpha()
+            image_file = current_ship.find('images/team_green_image').text
 
         # Lisätään ryhmään
         game_object.GameObject.__init__(self, group=group, level=level, parent=parent,
-                                        image=image)
+                                        image_file=image_file)
 
         # Thrust-gfx
-        image_file = []
+        thrust_image_file = []
         for value in current_ship.findall('images/motor_flame_image'):
-            image_file.append(value.text)
-        # print thrust_gfx_file
-        self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=image_file,
-                                       effect_type='motorflame', visible=0, parent=parent)
+            thrust_image_file.append(value.text)
+
+        self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=thrust_image_file,
+                                              visible=0, parent=parent)
         self.rect.center = self.parent.screen_center_point
         if self.owning_player_id == parent.local_player_id:
             self.is_centered_on_screen = 1
@@ -45,19 +47,19 @@ class PlayerSprite(game_object.GameObject):
 
         self._smoke_interval = 30  # Smoken spawn tiheys millisekunteina
         self._smoke_counter = 0
-        smoke_image_file = []
+        self.smoke_effect_image_files = []
         for value in current_ship.findall('images/rear_smoke_image'):
-            smoke_image_file.append(value.text)
-        self.smoke_effect_images = effect.SmokeEffect.preload_images(smoke_image_file)  # ladataan kuvat etukäteen
+            self.smoke_effect_image_files.append(value.text)
+        # self.smoke_effect_images = effect.SmokeEffect.preload_images(smoke_image_file)  # ladataan kuvat etukäteen
 
         # Sound effex
-        self.motor_sound = pygame.mixer.Sound(file=current_ship.find('sounds/motor_sound').text)
+        self.motor_sound = assets[current_ship.find('sounds/motor_sound').text]
         self.motor_sound_playing = 0
-        self.bullet_sound = pygame.mixer.Sound(file=current_ship.find('sounds/bullet_sound').text)
-        self.ball_shoot_sound = pygame.mixer.Sound(file=current_ship.find('sounds/ball_shoot_sound').text)
-        self.ball_capture_sound = pygame.mixer.Sound(file=current_ship.find('sounds/ball_capture_sound').text)
-        self.wall_collide_sound = pygame.mixer.Sound(file=current_ship.find('sounds/wall_collide_sound').text)
-        self.bullet_collide_sound = pygame.mixer.Sound(file=current_ship.find('sounds/bullet_collide_sound').text)
+        self.bullet_sound = assets[current_ship.find('sounds/bullet_sound').text]
+        self.ball_shoot_sound = assets[current_ship.find('sounds/ball_shoot_sound').text]
+        self.ball_capture_sound = assets[current_ship.find('sounds/ball_capture_sound').text]
+        self.wall_collide_sound = assets[current_ship.find('sounds/wall_collide_sound').text]
+        self.bullet_collide_sound = assets[current_ship.find('sounds/bullet_collide_sound').text]
 
         # Koordinaatit
         if not spawn_point:
@@ -75,15 +77,15 @@ class PlayerSprite(game_object.GameObject):
         self.attached_ball = None
 
         # Shipin ominaisuudet
-        self.handling = int(current_ship.find('handling').text)  # kuinka monta astetta kääntyy per frame
+        self.handling = float(current_ship.find('handling').text)  # kuinka monta astetta kääntyy per frame
         self.max_thrust = float(current_ship.find('max_thrust').text)  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
         self.max_speed = int(current_ship.find('max_speed').text)
         self.mass = float(current_ship.find('mass').text)
         self._max_acceleration = self.max_thrust / self.mass
-        self._cooldown_basic_shot = int(current_ship.find('cooldown_basic_shot').text) # framea
+        self._cooldown_basic_shot = int(current_ship.find('cooldown_basic_shot').text)  # framea
         self._cooldown_special = int(current_ship.find('cooldown_special').text)
         self._cooldown_after_ball_shot = int(current_ship.find('cooldown_after_ball_shot').text) # cooldown sen jälkeen kun pallo on ammuttu
-        self._cooldown_counter = 0 # cooldown-counter1
+        self._cooldown_counter = 0  # cooldown-counter1
         self._cooldown_counter_special = 0
         self._recovery_time = float(current_ship.find('recovery_time').text)  # sekunteja jopa!
         self._recovery_started_at = 0
@@ -133,9 +135,8 @@ class PlayerSprite(game_object.GameObject):
             self.thrust = self.max_thrust
             self.thrust_gfx.visible = 1
             if not self.motor_sound_playing:
-                if self.motor_sound is not None:
-                    self.force_play_sound(self.motor_sound, -1)
-                    self.motor_sound_playing = 1
+                self.force_play_sound(self.motor_sound, -1)
+                self.motor_sound_playing = 1
         else:
             if type(self).__name__ is not 'DemoPlayer':
                 self._smoke_counter += self.parent.clock.get_time()
@@ -145,7 +146,7 @@ class PlayerSprite(game_object.GameObject):
                                        parent=self.parent,
                                        attached_player=self,
                                        viewscreen_rect=self.viewscreen_rect,
-                                       image_files=self.smoke_effect_images)
+                                       image_files=self.smoke_effect_image_files)
                     self._smoke_counter = 0
 
     def stop_acceleration(self):
@@ -164,7 +165,7 @@ class PlayerSprite(game_object.GameObject):
 
     def rotate_left(self):
         self.heading += self.handling
-        if self.heading > 360:
+        if self.heading > 359:
             self.heading -= 360
         self.rot_self_image_keep_size(self.heading)
 
@@ -198,7 +199,7 @@ class PlayerSprite(game_object.GameObject):
             self.force_play_sound(self.bullet_sound)
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.DumbFire(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
+            bullet.Dirtball(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
                          speed=10 + self.move_vector.get_speed())
             self._cooldown_counter_special = self._cooldown_special
 
