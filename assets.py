@@ -4,6 +4,7 @@ import os
 import time
 from constants import *
 from pygame.locals import *
+from colors import *
 
 """ 
 Assettien esilataaja. Vakioasetuksilla esilataa kaikki gfx- ja sfx-kansioissa olevat png- ja wav-tiedostot.
@@ -57,11 +58,11 @@ def load_assets(window):
                 number_of_files += 1
                 files_size_total += file_size
     if DEBUG_TEXT: print "Total number of files:", number_of_files
-    if DEBUG_TEXT: print "Total size of files:", files_size_total // 1048576, "MB"
+    if DEBUG_TEXT: print "Total size of files:", round(files_size_total / 1048576.0, 2), "MB"
 
-    files_size_total = 0
+    files_size_current = 0
     files_size_total_inc_rot = 0
-    number_of_files = 0
+    # number_of_files = 0
     number_of_rotations = 0
 
     for current_directory in INCLUDED_FOLDERS:
@@ -77,9 +78,11 @@ def load_assets(window):
                 if DEBUG_TEXT: print "Loading %r... (size: %r kB)" % (filepath, round(file_size / 1024.0, 2))
                 # Tässä itse kuvan lataus. Vakiona aina convert_alpha().
                 assets[asset_key] = pygame.image.load(filepath).convert_alpha()
-                files_size_total += file_size
+                # files_size_total += file_size
+                files_size_current += file_size
                 files_size_total_inc_rot += file_size
-                number_of_files += 1
+                _draw_loading_bar(window, files_size_current, files_size_total)
+                # number_of_files += 1
                 width = assets[asset_key].get_width()
                 height = assets[asset_key].get_height()
                 if DEBUG_TEXT: print "Loaded %r" % filepath
@@ -105,9 +108,11 @@ def load_assets(window):
                 if DEBUG_TEXT: print "Loading %r... (size: %r kB)" % (filepath, round(file_size / 1024.0, 2))
                 # Tässä itse lataus
                 assets[asset_key] = pygame.mixer.Sound(file=filepath)
-                files_size_total += file_size
+                # files_size_total += file_size
+                files_size_current += file_size
                 files_size_total_inc_rot += file_size
-                number_of_files += 1
+                _draw_loading_bar(window, files_size_current, files_size_total)
+                # number_of_files += 1
                 if DEBUG_TEXT: print "Loaded %r" % filepath
                 # Äänitiedostoja emme rotatoi :)
             else:
@@ -139,6 +144,27 @@ def rot_image(original_image, angle):
     rot_rect.center = rot_image.get_rect().center
     rot_image = rot_image.subsurface(rot_rect).copy()
     return rot_image
+
+
+def _draw_loading_bar(window, current, total, bar_width=400, bar_height=30, pos=(200, 335), color=BLACK):
+    """
+    Piirtää ruudulle latauspalkin.
+    window - pygamen ruutuobjekti
+    current - ladattavan jutun nykyinen arvo
+    total - ladattavan jutun täysi arvo
+    bar_width - latauspalkin leveys kun lataus on valmis
+    bar_height - latauspalkin korkeus 
+    pos - positio
+    color - väri  
+    """
+    current = float(current)  # vaatii tämän ettei tee integer divisionia
+    width = int(current / total * bar_width)  # lasketaan loading barin leveys
+    height = bar_height
+    loading_bar_surface = pygame.Surface((width, height))
+    loading_bar_surface.fill(color)
+    blitrect = window.blit(loading_bar_surface, pos)
+    pygame.display.update(blitrect)  # päivitetään vain se osa ruudusta mitä tarvii
+
 
 if __name__ == '__main__':
     DEBUG_TEXT = 1
