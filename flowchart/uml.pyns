@@ -1,10 +1,10 @@
 # PynSource Version 1.1
 {'type':'meta', 'info1':'Lorem ipsum dolor sit amet, consectetur adipiscing elit is latin.'}
 {'type':'umlshape', 'id':'BallSprite', 'x':386, 'y':1003, 'width':298, 'height':365, 'attrs':'start_position|x|attached_player|attached_player_max_distance|attached_player_max_distance_squared|tether|mass|max_speed|is_ball|wall_collide_sound|bullet_collide_sound|viewscreen_rect|y', 'meths':'__init__|update|collide_tether|shoot|attach_to_player|detach'}
-{'type':'umlshape', 'id':'Dirtball', 'x':819, 'y':1480, 'width':162, 'height':141, 'attrs':'mass', 'meths':'__init__|collide_with_wall|collide_with_player|collide_with_ball'}
+{'type':'umlshape', 'id':'Dirtball', 'x':819, 'y':1480, 'width':162, 'height':141, 'attrs':'mass', 'meths':'__init__|collided_with_wall|collide_with_player|collide_with_ball'}
 {'type':'umlshape', 'id':'BasicShot', 'x':731, 'y':1374, 'width':109, 'height':93, 'attrs':'mass', 'meths':'__init__'}
-{'type':'umlshape', 'id':'DumbFire', 'x':629, 'y':1484, 'width':162, 'height':173, 'attrs':'mass|explosion_force|explosion_radius', 'meths':'__init__|collide_with_wall|collide_with_player|collide_with_ball'}
-{'type':'umlshape', 'id':'BulletSprite', 'x':720, 'y':1002, 'width':170, 'height':317, 'attrs':'rect|max_speed|mass|is_bullet|group|wall_collide_sound|viewscreen_rect|x|y', 'meths':'__init__|update|check_out_of_bounds|get_non_alpha_pixels|collide_with_wall|collide_with_player|collide_with_ball'}
+{'type':'umlshape', 'id':'DumbFire', 'x':629, 'y':1484, 'width':162, 'height':173, 'attrs':'mass|explosion_force|explosion_radius', 'meths':'__init__|collided_with_wall|collide_with_player|collide_with_ball'}
+{'type':'umlshape', 'id':'BulletSprite', 'x':720, 'y':1002, 'width':170, 'height':317, 'attrs':'rect|max_speed|mass|is_bullet|group|wall_collide_sound|viewscreen_rect|x|y', 'meths':'__init__|update|check_out_of_bounds|get_non_alpha_pixels|collided_with_wall|collide_with_player|collide_with_ball'}
 {'type':'umlshape', 'id':'Explosion', 'x':1254, 'y':1191, 'width':202, 'height':189, 'attrs':'explosion_radius|explosion_radius_squared|explosion_force|_lifetime_counter|viewscreen_rect', 'meths':'__init__|update|apply_explosion'}
 {'type':'umlshape', 'id':'TetherSprite', 'x':1074, 'y':1192, 'width':142, 'height':157, 'attrs':'effect_type|viewscreen_rect|image|rect', 'meths':'__init__|update'}
 {'type':'umlshape', 'id':'EffectSprite', 'x':1074, 'y':940, 'width':142, 'height':221, 'attrs':'attached_player|attached_ball|effect_type|visible|gravity_affects|viewscreen_rect|rect', 'meths':'__init__|update|destroy'}

@@ -38,14 +38,6 @@ class BallSprite(game_object.GameObject):
         """ Päivittää palloa. Vaatii viewscreen_rect:in että osaa laskea näyttämisen oikein. """
         self.viewscreen_rect = viewscreen_rect
 
-        # Jos törmää pelaajaan niin liitetään siihen
-        # Vain jos ei jo ole liitettynä!
-        if self.attached_player is None:
-            collide_list = pygame.sprite.spritecollide(self, player_group, dokill=False, collided=pygame.sprite.collide_circle)
-            if len(collide_list) > 0:
-                self.attach_to_player(collide_list[0])
-                self.tether = effect.TetherSprite(attached_ball=self, attached_player=collide_list[0])
-
         # Jos on liitetty pelaajaan ja jos on liian kaukana niin vetävät toisiaan puoleensa
         # Suht hyvä, voi viilata jos saa vielä paremmaksi
         # Lisätty weightien vaikutus
@@ -70,36 +62,14 @@ class BallSprite(game_object.GameObject):
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
-        self.check_collision_with_bullets(bullet_group)
-
-    def collide_tether(self, other_object):
-        """ 
-        Eksperimentaalinen tetherin törmäysmetodi. Ei toimi niin kuin haluaisin.
-        Ideana tässä että tether-collide on oletettavasti ekvivalentti normaalille törmäykselle niin että
-        objektien paikat vaihdetaan
-        Ei tällä hetkellä käytössä
-        """
-        new_self = other_object
-        new_other = self
-        angle_to_other = game_object.get_angle_in_radians(new_other.rect.center, new_self.rect.center)
-        new_self.move_vector.set_direction(angle_to_other - math.pi)
-        new_other.move_vector.set_direction(angle_to_other)
-
-        speed1 = new_self.move_vector.get_speed()
-        speed2 = new_other.move_vector.get_speed()
-        mass1 = new_self.mass
-        mass2 = new_other.mass
-        speed1_new = (mass2 / mass1) * speed2
-        speed2_new = (mass1 / mass2) * speed1
-        self.move_vector.set_speed(speed2_new * -1)
-        other_object.move_vector.set_speed(speed1_new * -1)
+        self.check_collision_with_group(player_group)
+        self.check_collision_with_group(bullet_group)
 
     def shoot(self, direction=0, speed=0, x=None, y=None):
         """ 
         Ampuu itsensä määritettyyn suuntaan, määritetyllä nopeudella, alkaen määritetyistä koordinaateista.
         Tätä kutsuu PlayerSpriten shoot-metodi, joka hoitaa detachauksen ja antaa tarvittavat tiedot
         """
-
         self.tether.destroy()
 
         if x is not None and y is not None:
@@ -127,3 +97,19 @@ class BallSprite(game_object.GameObject):
             self.attached_player.detach()
             self.attached_player = None
             self.tether.destroy()
+
+    def collided_with(self, other_object):
+        # Jos törmäävä objekti on pelaaja ja palloa ei vielä ole liitetty pelaajaan niin liitetään
+        if other_object in groups.PlayerGroup:
+            if self.attached_player is None:
+                self.attach_to_player(other_object)
+                self.tether = effect.TetherSprite(attached_ball=self, attached_player=other_object)
+
+    def collided_with_goal(self, point_color):
+        """ Kun pallo menee maaliin niin tulee maali. Loogista. """
+        if point_color == RED:
+            self.parent.score('green')
+            self.reset()
+        elif point_color == GREEN:
+            self.parent.score('red')
+            self.reset()

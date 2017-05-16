@@ -92,7 +92,6 @@ class PlayerSprite(game_object.GameObject):
 
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
         self.viewscreen_rect = viewscreen_rect
-
         """ Tämä haluaa tietää player- ja bulletgroupit että ne voi tarvittaessa määrittää vapaasti """
         # Lisätään liikemäärään thrust-vektori
         # Tässä jopa ottaa jo massan huomioon!
@@ -103,8 +102,8 @@ class PlayerSprite(game_object.GameObject):
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
-        self.check_collision_with_players(player_group)
-        self.check_collision_with_bullets(bullet_group)
+        self.check_collision_with_group(player_group)
+        self.check_collision_with_group(bullet_group)
 
         # Lasketaan cooldownia
         if self._cooldown_counter > 0:
@@ -160,7 +159,6 @@ class PlayerSprite(game_object.GameObject):
         self.heading -= self.handling
         if self.heading < 0:
             self.heading += 360
-        # TODO: laske rotaatiot latausvaiheessa valmiiksi
         self.rot_self_image_keep_size(self.heading)
 
     def rotate_left(self):
@@ -199,7 +197,7 @@ class PlayerSprite(game_object.GameObject):
             self.force_play_sound(self.bullet_sound)
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.Dirtball(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
+            bullet.DumbFire(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
                          speed=10 + self.move_vector.get_speed())
             self._cooldown_counter_special = self._cooldown_special
 

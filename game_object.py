@@ -78,7 +78,6 @@ class GameObject(pygame.sprite.Sprite):
         HUOM! Assettien esilatauksen myötä ei tue enää kuvaobjektien syöttämistä suoraan vaan AINA pitää olla
         tiedostonimi!
         """
-
         # Ensin katsotaan onko image_file muuta kuin yksittäinen stringi.
         # Jos on muuta niin oletetaan sen olevan lista/tuple/dict joka sitältää tiedostonimiä
         # ja ladataan sieltä kuvat animaatiota varten.
@@ -95,21 +94,8 @@ class GameObject(pygame.sprite.Sprite):
             self._animation_frame_counter = 0
             self._animation_current_image_counter = 0
             self._animation_enabled = 1
-        # Animaatio valmiiksi ladatuista kuvista
-        # Emme enää tue
-        # elif type(image) is types.ListType:
-        #     self._animation_images = image
-        #     self.image = self._animation_images[0]
-        #     self.animation_frames_per_image = frames_per_image
-        #     self._animation_frame_counter = 0
-        #     self._animation_current_image_counter = 0
-        #     self._animation_enabled = 1
         # Jos animaatio ei enabloitu niin jatketaan normaalisti
         else:
-            # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
-            # Emme enää tue
-            # if image is not None:
-            #     self.image = image
             # Jos on annettu kuvatiedosto niin luetaan se
             self.image = assets[image_file]
             self.image_filename = image_file
@@ -222,36 +208,11 @@ class GameObject(pygame.sprite.Sprite):
         # Katotaan mikä väri on levelissä tässä pisteessä - skipataan alfa
         current_point = self.level.image.get_at((self.x, self.y))[:3]
 
-        # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys ja vauhti menee nollaan
+        # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys ja kutsutaan tärmäysmetodia
         if current_point not in (BLACK, RED, GREEN):
-            # Soitetaan seinääntörmäysääni seuraavin ehdoin:
-            #  -nopeus yli 3 (ettei ihan pienistä tule jatkuvaa pärinää)
-            #  -jos on liikuttu
-            #  -ääni on olemassa
-            if self.move_vector.get_speed() > 3:
-                if self.wall_collide_sound and self.x != self.x_previous and self.y != self.y_previous:
-                    # print("Playing thump")
-                    self.force_play_sound(self.wall_collide_sound)
-            if self.is_bullet:
-                self.collide_with_wall()
-            else:
-                # Vauhti loppuu kuin seinään
-                self.move_vector.set_speed(0)
-                # Estetään seinän sisään menemistä tällä - eli jos olisi seinän sisällä niin vaihdetaan
-                # koordinaateiksi edelliset lukemat (jolloin oletettavasti ei ollut seinän sisällä)
-                self.x = self.x_previous
-                self.y = self.y_previous
-
-        # Jos objekti on pallo niin katsotaan onko maalissa
-        if self.is_ball:
-            # Punainen maali - piste vihreälle
-            if current_point == RED:
-                self.parent.score('GREEN')
-                self.reset()
-            # Vihreä maali - piste punaiselle
-            elif current_point == GREEN:
-                self.parent.score('RED')
-                self.reset()
+            self.collided_with_wall()
+        elif current_point in (RED, GREEN):
+            self.collided_with_goal(current_point)
 
     def speculate_collision_with_wall(self):
         """ 
@@ -290,29 +251,42 @@ class GameObject(pygame.sprite.Sprite):
         else:
             return 0
 
-    def check_collision_with_bullets(self, BulletGroup):
-        """ Tarkastaa törmääkö objekti bulletteihin. Jos törmää niin laskee törmäyksen ja soittaa törmäysäänen. """
-        # dokill=True eli bullet tapetaan törmäyksessä
+    def check_collision_with_group(self, group):
+        """ Tarkastaa törmääkö objekti ryhmässä oleviin toisiin objekteihin. """
         # Käyttää tällä hetkellä pygamen collide_circle:ä eli laskee radius-attribuutin mukaan törmäykset
-        # TODO: törmäyksissä käyttöön bitmask?
-        collide_list = pygame.sprite.spritecollide(self, BulletGroup, dokill=True, collided=pygame.sprite.collide_circle)
-        if len(collide_list) > 0:
-            self.collide_circle(collide_list[0])
-            collide_list[0].collide_with_player()  # kutsutaan bulletin törmäysmetodia jos siellä on jotain mitä pitää tehdä
-            if self.bullet_collide_sound is not None:
-                self.force_play_sound(self.bullet_collide_sound)
-
-    def check_collision_with_players(self, playergroup):
-        """ Tarkastaa törmääkö objekti pelaajiin. Jos törmää niin laskee törmäyksen. """
-        # TODO: törmäysääni
-        # TODO: törmäyksissä käyttöön bitmask?
-        collide_list = pygame.sprite.spritecollide(self, playergroup, dokill=False,
-                                                   collided=pygame.sprite.collide_circle)
-        for colliding_player in collide_list:
+        # TODO: törmäyksissä käyttöön bitmask
+        collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=pygame.sprite.collide_circle)
+        for colliding_object in collide_list:
             # Emme halua törmätä itseemme
-            if colliding_player != self:
-                self.collide_circle(collide_list[0])
-        
+            if colliding_object != self:
+                # Lasketaan törmäyksen liikemäärät - paitsi jos kyseessä on itseen liitetty pallo
+                if colliding_object != self.attached_ball and colliding_object != self.attached_player:
+                    self.collide_circle(colliding_object)
+                # Kutsutaan molempien objektien collided_with-metodia mahdollisten kustomijuttujen triggeroimiseksi
+                self.collided_with(colliding_object)
+                colliding_object.collided_with(self)
+
+    def collided_with(self, other_object):
+        """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
+        pass
+
+    def collided_with_wall(self):
+        """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
+        # Soitetaan seinääntörmäysääni jos nopeus yli 3 ja on liikkunut viime kerrasta
+        if self.move_vector.get_speed() > 3 and self.x != self.x_previous and self.y != self.y_previous:
+            self.force_play_sound(self.wall_collide_sound)
+
+        # Vauhti loppuu kuin seinään
+        self.move_vector.set_speed(0)
+        # Estetään seinän sisään menemistä tällä - eli jos olisi seinän sisällä niin vaihdetaan
+        # koordinaateiksi edelliset lukemat (jolloin oletettavasti ei ollut seinän sisällä)
+        self.x = self.x_previous
+        self.y = self.y_previous
+
+    def collided_with_goal(self, point_color):
+        """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
+        pass
+
     def collide_circle(self, other_object):
         """ 
         Törmäyttää kaksi GameObjectia, jotka oletetaan ympyrän muotoisiksi.

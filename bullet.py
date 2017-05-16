@@ -56,30 +56,20 @@ class BulletSprite(game_object.GameObject):
                     pixels.append([x, y])
         return pixels
 
-    def collide_with_wall(self):
+    def collided_with_wall(self):
         """ 
         Tämä tapahtuu kun ammus törmää seinään 
-        HUOM! Tähän TULEE self.kill() koska ei hoidu pygamen törmäystarkistusten kautta!
         """
-        # Tuhoaa seinää törmätessä ja myös itsensä jos on bullet
+        # Tuhoaa seinää törmätessä ja myös itsensä
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
         self.kill()
 
-    def collide_with_player(self):
+    def collided_with(self, other_object):
         """ 
-        Tämä tapahtuu kun ammus törmää pelaajaan
-        Vakiona tyhjä - tarkoitus overrideta jos tulee erikoisefektejä uusissa ammustyypeissä
-        HUOM! Tähän EI tule self.kill() koska pygamen törmäystarkistus hoitaa sen
+        Tämä tapahtuu kun ammus törmää toiseen peliobjektiin. Vakiona vain tuhotaan ammus. Voi overrideta
+        kustomikäyttäytymisen mahdollistamiseksi.
         """
-        pass
-
-    def collide_with_ball(self):
-        """ 
-        Tämä tapahtuu kun ammus törmää pelaajaan
-        Vakiona tyhjä - tarkoitus overrideta jos tulee erikoisefektejä uusissa ammustyypeissä
-        HUOM! Tähän EI tule self.kill() koska pygamen törmäystarkistus hoitaa sen
-        """
-        pass
+        self.kill()
 
 
 class BasicShot(BulletSprite):
@@ -99,40 +89,32 @@ class DumbFire(BulletSprite):
         self.explosion_force = 10
         self.explosion_radius = 50
 
-    def collide_with_wall(self):
+    def collided_with_wall(self):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-        effect.Explosion(image=assets['gfx/explosion_50.png'], pos=(self.x, self.y), explosion_radius=self.explosion_radius,
+        effect.Explosion(image_file='gfx/explosion_50.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
         self.kill()
 
-    def collide_with_player(self):
+    def collided_with(self, other_object):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-        effect.Explosion(image=assets['gfx/explosion_50.png'], pos=(self.x, self.y), explosion_radius=self.explosion_radius,
+        effect.Explosion(image_file='gfx/explosion_50.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
-
-    def collide_with_ball(self):
-        pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-        effect.Explosion(image=assets['gfx/explosion_50.png'], pos=(self.x, self.y), explosion_radius=self.explosion_radius,
-                         explosion_force=self.explosion_force)
+        self.kill()
 
 
 class Dirtball(BulletSprite):
-    """ Iso ammus joka räjähtää törmätessä """
+    """ Iso ammus joka luo maastoa törmätessä """
     def __init__(self, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0, speed=10):
         BulletSprite.__init__(self, parent=parent, level=level, group=group, image_file='gfx/bullet_10.png',
                               pos=pos, direction=direction, speed=speed)
 
         self.mass = 0.2
 
-    def collide_with_wall(self):
+    def collided_with_wall(self):
         pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
         self.kill()
 
-    def collide_with_player(self):
+    def collided_with(self, other_object):
         pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
-
-    def collide_with_ball(self):
-        pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
-
-
+        self.kill()
 

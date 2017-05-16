@@ -215,11 +215,11 @@ class AUTSBallGame:
 
     def score(self, scoring_team):
         """ Tätä kutsutaan kun tulee maali """
-        if scoring_team == 'RED':
+        if scoring_team == 'red':
             self.score_red += 1
             goal_text_color = RED
             self.goal_red_sound.play()
-        elif scoring_team == 'GREEN':
+        elif scoring_team == 'green':
             self.score_green += 1
             goal_text_color = GREEN
             self.goal_green_sound.play()
