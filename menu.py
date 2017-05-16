@@ -3,6 +3,7 @@ import pygame
 import game
 import menu_background_action
 import music
+import effect
 import groups
 from pygame.locals import *
 from colors import *
@@ -75,9 +76,9 @@ def debug_run():
                                     checkbox_group=effects_checkbox_group)
     effects_low_checkbox = Checkbox(group=settings_group, checked=False, position=(400, 355),
                                     checkbox_group=effects_checkbox_group)
-    effects_med_checkbox = Checkbox(group=settings_group, checked=False, position=(490, 355),
+    effects_med_checkbox = Checkbox(group=settings_group, checked=True, position=(490, 355),
                                     checkbox_group=effects_checkbox_group)
-    effects_high_checkbox = Checkbox(group=settings_group, checked=True, position=(590, 355),
+    effects_high_checkbox = Checkbox(group=settings_group, checked=False, position=(590, 355),
                                      checkbox_group=effects_checkbox_group)
     settings_back_button = Button(Rect(275, 475, 250, 70), 'Back')
 
@@ -189,8 +190,12 @@ def debug_run():
             settings_back_button.draw(window)
             music_player_group.draw(window)
 
+            if effects_high_checkbox.checked:
+                effect.antialiasing(window)
+
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
+
         elif active_mode == 'practice':
             practice_game.update()
 

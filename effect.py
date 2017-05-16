@@ -4,7 +4,9 @@ import game_object
 import groups
 import pygame
 import vector
+import numpy
 from colors import *
+from constants import *
 
 
 class EffectSprite(game_object.GameObject):
@@ -147,3 +149,39 @@ class SmokeEffect(EffectSprite):
                 self.kill()
             elif self._animation_current_image_counter > 0:
                 self.first_image = False
+
+
+def antialiasing(window):
+    """ Tekee aivan mahtavan tehokasta antialiasointia! """
+    pixel_array = pygame.PixelArray(pygame.Surface(WINDOW_SIZE))
+    pygame.pixelcopy.surface_to_array(pixel_array, window)
+    try:
+        for column in range(WINDOW_SIZE[1]):
+            for row in range(WINDOW_SIZE[0]):
+                row_up = max(0, row - 1)
+                row_down = min(WINDOW_SIZE[0] - 1, row + 1)
+                column_left = max(0, column - 1)
+                column_right = min(WINDOW_SIZE[1] - 1, column + 1)
+                color_top = window.unmap_rgb(pixel_array[row_up][column])
+                color_left = window.unmap_rgb(pixel_array[row][column_left])
+                color_right = window.unmap_rgb(pixel_array[row][column_right])
+                color_bottom = window.unmap_rgb(pixel_array[row_down][column])
+                color_center = window.unmap_rgb(pixel_array[row][column])
+                red_values = list((color_top[0], color_left[0], color_center[0], color_right[0], color_bottom[0]))
+                green_values = list((color_top[1], color_left[1], color_center[1], color_right[1], color_bottom[1]))
+                blue_values = list((color_top[2], color_left[2], color_center[2], color_right[2], color_bottom[2]))
+                red_average = numpy.mean(red_values)
+                green_average = numpy.mean(green_values)
+                blue_average = numpy.mean(blue_values)
+                window.set_at((row, column), (red_average, green_average, blue_average))
+                #pygame.display.update(pygame.Rect(column, row, 1, 1))
+                pygame.event.pump()
+            if column % 50 == 0:
+                pygame.display.update((column, 0, 50, WINDOW_SIZE[1]))
+    except IndexError:
+        print "IndexError! row:", row, "column:", column
+        print "row_up", row_up
+        print "row_down", row_down
+        print "column_left", column_left
+        print "column_right", column_right
+        raise
