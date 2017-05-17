@@ -5,6 +5,7 @@ import menu_background_action
 import music
 import effect
 import groups
+from settings import Settings
 from pygame.locals import *
 from colors import *
 from constants import *
@@ -17,6 +18,11 @@ def debug_run():
     clock = pygame.time.Clock()
 
     window.fill((0, 0, 0))
+
+    # Ladataan settingsit
+    # TODO: Ei varmaankaan paras paikka säilyttää settings-arvoja, siirrä jonnekin globaalimpaan paikkaan
+    settings_object = Settings()
+    settings_object.load()
 
     static_visual_components_group = pygame.sprite.Group()
     music_player_group = pygame.sprite.Group()
@@ -47,7 +53,9 @@ def debug_run():
     # Music
     pygame.mixer.init()
     music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
-    music_player.play()
+    music_player.volume = settings_object.data['music_volume']
+    if settings_object.data['music_on']:
+        music_player.play()
 
     # Background action
     background_action = menu_background_action.BackgroundAction()
@@ -58,13 +66,13 @@ def debug_run():
     # Settings menu
     LabelImageText(group=settings_group, image_text='settings', position=(250, 30))
     LabelImageText(group=settings_group, image_text='music', position=(100, 130))
-    music_checkbox = Checkbox(group=settings_group, checked=True, position=(350, 130))
+    music_checkbox = Checkbox(group=settings_group, checked=settings_object.data['music_on'], position=(350, 130))
     LabelImageText(group=settings_group, image_text='volume', position=(140, 170))
     music_volume_slider = Slider(group=settings_group, position=(350, 180), value=music_player.volume)
     LabelImageText(group=settings_group, image_text='sounds', position=(100, 210))
-    sounds_checkbox = Checkbox(group=settings_group, checked=True, position=(350, 210))
+    sounds_checkbox = Checkbox(group=settings_group, checked=settings_object.data['sounds_on'], position=(350, 210))
     LabelImageText(group=settings_group, image_text='volume', position=(140, 250))
-    sound_volume_slider = Slider(group=settings_group, position=(350, 260), value=1.0)
+    sound_volume_slider = Slider(group=settings_group, position=(350, 260), value=settings_object.data['sound_volume'])
     #LabelImageText(group=settings_group, image_text='quality', position=(100, 330))
     LabelImageText(group=settings_group, image_text='effects', position=(100, 350))
     LabelImageText(group=settings_group, image_text='off', position=(290, 310))
@@ -80,6 +88,7 @@ def debug_run():
                                     checkbox_group=effects_checkbox_group)
     effects_high_checkbox = Checkbox(group=settings_group, checked=False, position=(590, 355),
                                      checkbox_group=effects_checkbox_group)
+    effects_checkbox_group.set_checked_index(settings_object.data['graphic_quality'])
     settings_back_button = Button(Rect(275, 475, 250, 70), 'Back')
 
     running = True
@@ -114,35 +123,60 @@ def debug_run():
                 if 'click' in settings_back_button.handleEvent(event):
                     active_mode = 'main_menu'
                 if 'click' in music_checkbox.handleEvent(event):
-                    # TODO: talleta arvo johonkin pysyvästi, että vaikuttaa pelin puolellakin ja uudelleen käynnistyksen jälkeen
                     if music_checkbox.checked:
                         music_player.play()
                     else:
                         music_player.stop()
-                if 'drag' in music_volume_slider.handleEvent(event):
-                    # TODO: talleta voimakkuusarvo johonkin
-                    music_player.volume = music_volume_slider.value
+                    # Tallennetaan arvo settings-tiedostoon
+                    settings_object.data['music_on'] = music_checkbox.checked
+                    settings_object.save()
+                for event_string in music_volume_slider.handleEvent(event):
+                    if event_string is 'drag':
+                        music_player.volume = music_volume_slider.value
+                    if event_string is 'up':
+                        # Tallennetaan arvo settings-tiedostoon
+                        settings_object.data['music_volume'] = music_volume_slider.value
+                        settings_object.save()
 
                 if 'click' in sounds_checkbox.handleEvent(event):
                     # TODO: disable/enable sound effects
-                    pass
-                if 'drag' in sound_volume_slider.handleEvent(event):
-                    # TODO: talleta voimakkuusarvo johonkin
-                    # TODO: muuta kaikkien sound effectien voimakkuus
-                    pass
 
+                    # Tallennetaan arvo settings-tiedostoon
+                    settings_object.data['sounds_on'] = sounds_checkbox.checked
+                    settings_object.save()
+                for event_string in sound_volume_slider.handleEvent(event):
+                    if event_string is 'drag':
+                        # TODO: talleta voimakkuusarvo johonkin
+                        # TODO: muuta kaikkien sound effectien voimakkuus
+                        pass
+                    if event_string is 'up':
+                        # Tallennetaan arvo settings-tiedostoon
+                        settings_object.data['sound_volume'] = sound_volume_slider.value
+                        settings_object.save()
                 if 'click' in effects_off_checkbox.handleEvent(event):
                     # TODO: muuta grafiikka-asetus vastaavaksi
-                    pass
+
+                    # Tallennetaan arvo settings-tiedostoon
+                    settings_object.data['graphic_quality'] = 0
+                    settings_object.save()
                 if 'click' in effects_low_checkbox.handleEvent(event):
                     # TODO: muuta grafiikka-asetus vastaavaksi
-                    pass
+
+                    # Tallennetaan arvo settings-tiedostoon
+                    settings_object.data['graphic_quality'] = 1
+                    settings_object.save()
                 if 'click' in effects_med_checkbox.handleEvent(event):
                     # TODO: muuta grafiikka-asetus vastaavaksi
-                    pass
+
+                    # Tallennetaan arvo settings-tiedostoon
+                    settings_object.data['graphic_quality'] = 2
+                    settings_object.save()
                 if 'click' in effects_high_checkbox.handleEvent(event):
                     # TODO: muuta grafiikka-asetus vastaavaksi
-                    pass
+
+                    # Tallennetaan arvo settings-tiedostoon
+                    settings_object.data['graphic_quality'] = 3
+                    settings_object.save()
 
             if active_mode == 'practice':
                 if event.type == KEYUP:
@@ -155,8 +189,9 @@ def debug_run():
                         background_action = menu_background_action.BackgroundAction()
                         static_visual_components_group.draw(window)
                         #music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
-                        music_player.play()
-                        music_player.set_screen('menu')
+                        if settings_object.data['music_on']:
+                            music_player.play()
+                            music_player.set_screen('menu')
             if event.type == pygame.QUIT:
                 running = False
             if event.type == music.MUSIC_FINISHED:
