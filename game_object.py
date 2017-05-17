@@ -259,16 +259,15 @@ class GameObject(pygame.sprite.Sprite):
         for colliding_object in collide_list:
             # Emme halua törmätä itseemme
             if colliding_object != self:
-                # Lasketaan törmäyksen liikemäärät - paitsi jos kyseessä on itseen liitetty pallo
-                if colliding_object != self.attached_ball and colliding_object != self.attached_player:
-                    self.collide_circle(colliding_object)
                 # Kutsutaan molempien objektien collided_with-metodia mahdollisten kustomijuttujen triggeroimiseksi
                 self.collided_with(colliding_object)
                 colliding_object.collided_with(self)
 
     def collided_with(self, other_object):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
-        pass
+        # Lasketaan törmäyksen liikemäärät - paitsi jos kyseessä on itseen liitetty pallo
+        if other_object != self.attached_ball and other_object != self.attached_player:
+            self.collide_circle(other_object)
 
     def collided_with_wall(self):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
@@ -289,8 +288,9 @@ class GameObject(pygame.sprite.Sprite):
 
     def collide_circle(self, other_object):
         """ 
-        Törmäyttää kaksi GameObjectia, jotka oletetaan ympyrän muotoisiksi.
-        Laskee suunnat ja liikemäärät uusiksi.
+        Törmäyttää itsensä toiseen GameObjectiin.
+        Oletetaan molemmat ympyrän muotoisiksi.
+        --> Laskee VAIN SELF:IN suunnat ja liikemäärät uusiksi. <-- TODO TÄMÄ
         Jopa ottaa massat huomioon!
         Vähän luulen että tässä on vielä viilaamisen varaa, ei tunnu aivan oikealta kaikissa tilanteissa...
         """
