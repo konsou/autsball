@@ -210,6 +210,11 @@ def debug_run():
             main_menu_group.draw(window)
             music_player_group.draw(window)
 
+            if settings_object.data['graphic_quality'] == 3:
+                effect.antialiasing(window, samples=4)
+            elif settings_object.data['graphic_quality'] == 2:
+                effect.antialiasing(window, samples=2)
+
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
         elif active_mode == 'settings_menu':
@@ -225,8 +230,10 @@ def debug_run():
             settings_back_button.draw(window)
             music_player_group.draw(window)
 
-            if effects_high_checkbox.checked:
-                effect.antialiasing(window)
+            if settings_object.data['graphic_quality'] == 3:
+                effect.antialiasing(window, samples=4)
+            elif settings_object.data['graphic_quality'] == 2:
+                effect.antialiasing(window, samples=2)
 
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
