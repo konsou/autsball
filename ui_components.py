@@ -7,7 +7,8 @@ pygame.font.init()
 
 
 class Button(object):
-    def __init__(self, rect=Rect(10, 10, 150, 50), text='Button', bgcolor=YELLOWISH, textcolor=BLACK, font_size=30):
+    def __init__(self, rect=Rect(10, 10, 150, 50), text='Button', bgcolor=YELLOWISH, textcolor=BLACK, font_size=30,
+                 surface_images=None):
         self._rect = rect
         self._text = text
         self._bgcolor = bgcolor
@@ -19,9 +20,16 @@ class Button(object):
         self._lastMouseDownOverButton = False
         self._visible = True
 
-        self.surfaceNormal = pygame.Surface(self._rect.size)
-        self.surfaceDown = pygame.Surface(self._rect.size)
-        self.surfaceHighlight = pygame.Surface(self._rect.size)
+        if surface_images is None:
+            self.surfaceNormal = pygame.Surface(self._rect.size)
+            self.surfaceDown = pygame.Surface(self._rect.size)
+            self.surfaceHighlight = pygame.Surface(self._rect.size)
+            self.has_text = True
+        else:
+            self.surfaceNormal = pygame.image.load(surface_images[0])
+            self.surfaceDown = pygame.image.load(surface_images[1])
+            self.surfaceHighlight = pygame.image.load(surface_images[2])
+            self.has_text = False
 
         self.update()
 
@@ -92,16 +100,17 @@ class Button(object):
         width = self._rect.width
         height = self._rect.height
 
-        self.surfaceNormal.fill(self._bgcolor)
-        self.surfaceDown.fill(WHITE)
-        self.surfaceHighlight.fill(GREEN)
+        if self.has_text:
+            self.surfaceNormal.fill(self._bgcolor)
+            self.surfaceDown.fill(WHITE)
+            self.surfaceHighlight.fill(GREEN)
 
-        text_surface = self._font.render(self._text, True, self._textcolor)
-        text_rect = text_surface.get_rect()
-        text_rect.center = (int(width / 2), int(height / 2))
-        self.surfaceNormal.blit(text_surface, text_rect)
-        self.surfaceDown.blit(text_surface, text_rect)
-        self.surfaceHighlight.blit(text_surface, text_rect)
+            text_surface = self._font.render(self._text, True, self._textcolor)
+            text_rect = text_surface.get_rect()
+            text_rect.center = (int(width / 2), int(height / 2))
+            self.surfaceNormal.blit(text_surface, text_rect)
+            self.surfaceDown.blit(text_surface, text_rect)
+            self.surfaceHighlight.blit(text_surface, text_rect)
 
     def mouseClick(self, event):
         pass
@@ -334,15 +343,13 @@ class CheckboxGroup(object):
             self.checked_index = len(self.checkboxes)-1
 
     def update_checkboxes(self, checked_checkbox):
-        i = 0
-        for checkbox in self.checkboxes:
+        for i, checkbox in enumerate(self.checkboxes):
             if checkbox is not checked_checkbox:
                 checkbox.change_state(state=False, group_update=True)
             else:
                 self.checked_index = i
                 # Varmistetaan että groupissa ainakin yksi checkbox on koko ajan checkattuna
                 checked_checkbox.change_state(state=True, group_update=True)
-            i += 1
 
     def set_checked_index(self, index):
         self.checkboxes[index].checked = True
