@@ -3,9 +3,11 @@ import pygame
 import game
 import menu_background_action
 import music
+import effect
 import groups
-from colors import *
+from settings import Settings
 from pygame.locals import *
+from colors import *
 from constants import *
 from assets import assets, assets_rot, load_assets
 from ui_components import Button, ButtonGroup, LabelImageText, Checkbox, CheckboxGroup, Slider
@@ -225,6 +227,11 @@ def debug_run():
             main_menu_group.draw(window)
             music_player_group.draw(window)
 
+            if settings_object.data['graphic_quality'] == 3:
+                effect.antialiasing(window, samples=4)
+            elif settings_object.data['graphic_quality'] == 2:
+                effect.antialiasing(window, samples=2)
+
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
         elif active_mode == Modes.SettingsMenu:
@@ -240,6 +247,11 @@ def debug_run():
             settings_group.draw(window)
             settings_back_button.draw(window)
             music_player_group.draw(window)
+
+            if settings_object.data['graphic_quality'] == 3:
+                effect.antialiasing(window, samples=4)
+            elif settings_object.data['graphic_quality'] == 2:
+                effect.antialiasing(window, samples=2)
 
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
