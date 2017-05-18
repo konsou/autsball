@@ -40,7 +40,6 @@ def load_assets(window):
     if DEBUG_TEXT: start_time = time.time()
 
     # Latauskuva koska latauksissa voi kestää jonkin aikaa
-    # TODO: hieno loading bar
     loading_image = pygame.image.load('gfx/loading.png').convert()
     window.blit(loading_image, loading_image.get_rect())
     pygame.display.flip()
