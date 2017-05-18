@@ -164,12 +164,16 @@ class SmokeEffect(EffectSprite):
                 self.first_image = False
 
 
-def antialiasing(window, samples=2):
+def antialiasing(window, graphic_quality):
     """ 
     Antialiasointi on juuri sitä mitä tämä peli tarvitsee! 
     samples saa olla 0, 2 tai 4, muita arvoja ei tueta
     
     """
+    if graphic_quality == 2: samples = 2
+    elif graphic_quality == 3: samples = 4
+    else: samples = 0
+
     if samples >= 2:
         surf1 = window.copy()
         surf1.scroll(dx=1)
