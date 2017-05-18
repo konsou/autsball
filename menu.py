@@ -79,7 +79,7 @@ def debug_run():
     darken_surface.set_alpha(128)
 
     # Settings menu
-    settings_background = pygame.image.load('gfx/UI_settings_background.png').convert_alpha()
+    settings_background = assets['gfx/UI_settings_background.png']
     LabelImageText(group=settings_group, image_text='settings', position=(250, 40))
     LabelImageText(group=settings_group, image_text='music', position=(100, 160))
     music_checkbox = Checkbox(group=settings_group, checked=Settings.data['music_on'], position=(350, 160))

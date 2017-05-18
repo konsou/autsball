@@ -2,6 +2,7 @@
 import pygame
 from pygame.locals import *
 from colors import *
+from assets import assets
 
 pygame.font.init()
 
@@ -26,9 +27,9 @@ class Button(object):
             self.surfaceHighlight = pygame.Surface(self._rect.size)
             self.has_text = True
         else:
-            self.surfaceNormal = pygame.image.load(surface_images[0])
-            self.surfaceDown = pygame.image.load(surface_images[1])
-            self.surfaceHighlight = pygame.image.load(surface_images[2])
+            self.surfaceNormal = assets[surface_images[0]]
+            self.surfaceDown = assets[surface_images[1]]
+            self.surfaceHighlight = assets[surface_images[2]]
             self.has_text = False
 
         self.update()
@@ -193,7 +194,7 @@ class LabelImageText(pygame.sprite.Sprite):
     def __init__(self, group=None, image_text=None, position=(0, 0)):
         pygame.sprite.Sprite.__init__(self, group)
         try:
-            self.image = pygame.image.load('gfx/UI_text_%s.png' % image_text).convert_alpha()
+            self.image = assets['gfx/UI_text_%s.png' % image_text]
         except pygame.error:
             # Jos kuvaa ei löydy, käytä rendattua fonttia?
             self.image = pygame.Surface()
@@ -205,8 +206,8 @@ class Checkbox(pygame.sprite.Sprite):
 
     def __init__(self, group=None, checked=True, position=(0, 0), checkbox_group=None):
         pygame.sprite.Sprite.__init__(self, group)
-        self._unchecked_image = pygame.image.load('gfx/UI_checkbox_base.png').convert_alpha()
-        self._checked_image = pygame.image.load('gfx/UI_checkbox_checked.png').convert_alpha()
+        self._unchecked_image = assets['gfx/UI_checkbox_base.png']
+        self._checked_image = assets['gfx/UI_checkbox_checked.png']
         self._checked = checked
         if self._checked:
             self.image = self._checked_image
@@ -363,8 +364,8 @@ class Slider(pygame.sprite.Sprite):
 
     def __init__(self, group=None, position=(0, 0), value=1.0):
         pygame.sprite.Sprite.__init__(self, group)
-        self._rail_image = pygame.image.load('gfx/UI_slide_base.png').convert_alpha()
-        self._knob_image = pygame.image.load('gfx/UI_slide_knob.png').convert_alpha()
+        self._rail_image = assets['gfx/UI_slide_base.png']
+        self._knob_image = assets['gfx/UI_slide_knob.png']
         self.image = self._rail_image
         self.rect = self.image.get_rect()
         self.rect.topleft = position
