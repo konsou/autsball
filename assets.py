@@ -15,9 +15,11 @@ Esirotatoi kaikki kuvat, joiden koko on alle ROT_IMAGE_MAX_FILESIZE ja joita ei 
 # Tämä dict sisältää esiladatut kuvat ja äänet. Key = filename
 # esim. assets['gfx/ball.png']
 assets = {}
+assets_mask = {}
 # Tämä dict sisältää esirotatoidut kuvat. Keyt = filename ja rotaatiokulma asteina
 # esim. assets_rot['gfx/ball.png'][45]
 assets_rot = {}
+assets_rot_mask = {}
 
 DEBUG_TEXT = 0
 
@@ -78,6 +80,8 @@ def load_assets(window):
                 if DEBUG_TEXT: print "Loading %r... (size: %r kB)" % (filepath, round(file_size / 1024.0, 2))
                 # Tässä itse kuvan lataus. Vakiona aina convert_alpha().
                 assets[asset_key] = pygame.image.load(filepath).convert_alpha()
+                # Bitmaskiin lataus
+                assets_mask[asset_key] = pygame.mask.from_surface(assets[asset_key])
                 # files_size_total += file_size
                 files_size_current += file_size
                 files_size_total_inc_rot += file_size
@@ -98,7 +102,9 @@ def load_assets(window):
                     for angle in range(360):
                         if angle == 0:
                             assets_rot[asset_key] = {}
+                            assets_rot_mask[asset_key] = {}
                         assets_rot[asset_key][angle] = rot_image(assets[asset_key], angle)
+                        assets_rot_mask[asset_key][angle] = pygame.mask.from_surface(assets_rot[asset_key][angle])
                         number_of_rotations += 1
                         files_size_total_inc_rot += file_size
                     if DEBUG_TEXT: print "Rotations calculated"

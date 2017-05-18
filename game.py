@@ -55,6 +55,8 @@ class AUTSBallGame:
 
         self.ball = ball.BallSprite(level=self.current_level, parent=self)
 
+        self.checked_collisions = set()
+
         self.viewscreen_rect = None
         self.background_view_rect = None
 
@@ -146,6 +148,7 @@ class AUTSBallGame:
                                              self.screen_size_y)
 
                 # Spritejen päivitykset tässä
+                self.checked_collisions = set()
                 groups.BulletGroup.update(self.viewscreen_rect)
                 groups.BallGroup.update(self.viewscreen_rect)
                 groups.PlayerGroup.update(self.viewscreen_rect)
@@ -157,7 +160,7 @@ class AUTSBallGame:
                     self.update_graphics()
 
                 # Pelilogiikan FPS target 60, eli graffoilla siis 30
-                self.clock.tick(60)
+                self.clock.tick(PHYSICS_FPS)
 
         if self.quit_game:
             self.exit()
@@ -167,13 +170,6 @@ class AUTSBallGame:
 
         # Ruutu tyhjäksi
         self.win.fill((0, 0, 0))
-        # Piirretään taustakuva jos on
-        #if self.current_level.background_image:
-            #self.win.blit(self.current_level.background_image, self.background_view_rect)
-            #image_width, image_height = self.current_level.background_image.get_size()
-            #for y in range(0, self.screen_size_y, image_height):
-            #    for x in range(0, self.screen_size_x, image_width):
-            #        self.win.blit(self.current_level.background_image, (x, y))
 
         # Piirretään levelin ulkopuolinen tuhoutumaton alue
         off_level_rect = pygame.Rect(self.background_view_rect[0]-WINDOW_SIZE[0]//2,
@@ -255,9 +251,10 @@ if __name__ == '__main__':
     load_assets(window)
 
     game = AUTSBallGame()
-    game.add_player(0, team='red', ship_name='Fatship')
-    game.add_player(1, team='green')
-    game.add_player(2, team='red')
+    game.add_player(0, team='red', ship_name='Teafighter')
+    game.add_player(1, team='green', ship_name='Muumi')
+    game.add_player(2, team='red', ship_name='Rocket')
+    game.add_player(3, team='green')
     game.start()
 
     while game.is_running:
