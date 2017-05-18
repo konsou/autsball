@@ -4,8 +4,6 @@ import game
 import menu_background_action
 import music
 import effect
-import groups
-from settings import Settings
 from pygame.locals import *
 from colors import *
 from constants import *

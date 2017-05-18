@@ -8,7 +8,6 @@ import level
 import player
 import ball
 import text
-import settings
 import effect
 from pygame.locals import *
 from colors import *
@@ -20,10 +19,6 @@ class AUTSBallGame:
     def __init__(self):
         self.is_running = False
         self.local_player_id = 0
-
-        self.settings_object = settings.Settings()
-        self.settings_object.load()
-
 
         # Vakioita
         # self.gravity = 0.1
@@ -217,10 +212,7 @@ class AUTSBallGame:
                                (self.screen_size_x // 2 + vx, self.screen_size_y // 2 + vy), 5)
 
         # Antialiasing!
-        if self.settings_object.data['graphic_quality'] == 3:
-            effect.antialiasing(self.win, samples=4)
-        elif self.settings_object.data['graphic_quality'] == 2:
-            effect.antialiasing(self.win, samples=2)
+        effect.antialiasing(window, graphic_quality=Settings.data['graphic_quality'])
         # Displayn update
         pygame.display.flip()
 
