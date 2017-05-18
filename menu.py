@@ -35,10 +35,18 @@ def debug_run():
     static_visual_components_group.draw(window)
 
     # Buttons
-    practice_button = Button(Rect(275, 250, 250, 70), 'Practice flight')
-    multiplayer_button = Button(Rect(275, 325, 250, 70), 'Multiplayer')
-    settings_button = Button(Rect(275, 400, 250, 70), 'Settings')
-    quit_button = Button(Rect(275, 475, 250, 70), 'Quit')
+    practice_button = Button(Rect(275, 250, 200, 50), surface_images=['gfx/UI_practice_button_normal.png',
+                                                                      'gfx/UI_practice_button_down.png',
+                                                                      'gfx/UI_practice_button_highlight.png'])
+    multiplayer_button = Button(Rect(275, 310, 270, 50), surface_images=['gfx/UI_multiplayer_button_normal.png',
+                                                                         'gfx/UI_multiplayer_button_down.png',
+                                                                         'gfx/UI_multiplayer_button_highlight.png'])
+    settings_button = Button(Rect(275, 370, 195, 50), surface_images=['gfx/UI_settings_button_normal.png',
+                                                                      'gfx/UI_settings_button_down.png',
+                                                                      'gfx/UI_settings_button_highlight.png'])
+    quit_button = Button(Rect(275, 430, 135, 50), surface_images=['gfx/UI_quit_button_normal.png',
+                                                                  'gfx/UI_quit_button_down.png',
+                                                                  'gfx/UI_quit_button_highlight.png'])
     main_menu_group.add(practice_button)
     main_menu_group.add(multiplayer_button)
     main_menu_group.add(settings_button)
@@ -87,8 +95,8 @@ def debug_run():
                                      checkbox_group=effects_checkbox_group)
     effects_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
     settings_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
-                                                                                'gfx/UI_back_button_down.png',
-                                                                                'gfx/UI_back_button_highlight.png'])
+                                                                               'gfx/UI_back_button_down.png',
+                                                                               'gfx/UI_back_button_highlight.png'])
 
     running = True
     while running:
