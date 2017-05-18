@@ -212,7 +212,7 @@ class AUTSBallGame:
                                (self.screen_size_x // 2 + vx, self.screen_size_y // 2 + vy), 5)
 
         # Antialiasing!
-        effect.antialiasing(window, graphic_quality=Settings.data['graphic_quality'])
+        effect.antialiasing(self.win, graphic_quality=Settings.data['graphic_quality'])
         # Displayn update
         pygame.display.flip()
 
