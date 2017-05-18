@@ -8,6 +8,7 @@ import level
 import player
 import ball
 import text
+import effect
 from pygame.locals import *
 from colors import *
 from constants import *
@@ -157,7 +158,7 @@ class AUTSBallGame:
                     self.update_graphics()
 
                 # Pelilogiikan FPS target 60, eli graffoilla siis 30
-                self.clock.tick(60)
+                self.clock.tick(PHYSICS_FPS)
 
         if self.quit_game:
             self.exit()
@@ -210,6 +211,8 @@ class AUTSBallGame:
             pygame.draw.circle(self.win, (0, 0, 255),
                                (self.screen_size_x // 2 + vx, self.screen_size_y // 2 + vy), 5)
 
+        # Antialiasing!
+        effect.antialiasing(window, graphic_quality=Settings.data['graphic_quality'])
         # Displayn update
         pygame.display.flip()
 

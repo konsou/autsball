@@ -5,6 +5,9 @@ import groups
 import pygame
 import vector
 from assets import assets, assets_rot
+import numpy
+from colors import *
+from constants import *
 
 
 class EffectSprite(game_object.GameObject):
@@ -159,3 +162,28 @@ class SmokeEffect(EffectSprite):
                 self.kill()
             elif self._animation_current_image_counter > 0:
                 self.first_image = False
+
+
+def antialiasing(window, graphic_quality):
+    """ 
+    Antialiasointi on juuri sitä mitä tämä peli tarvitsee! 
+    samples saa olla 0, 2 tai 4, muita arvoja ei tueta
+    
+    """
+    if graphic_quality == 2: samples = 2
+    elif graphic_quality == 3: samples = 4
+    else: samples = 0
+
+    if samples >= 2:
+        surf1 = window.copy()
+        surf1.scroll(dx=1)
+        surf2 = window.copy()
+        surf2.scroll(dy=1)
+        if samples == 4:
+            surf3 = window.copy()
+            surf3.scroll(dx=-1)
+            surf4 = window.copy()
+            surf4.scroll(dy=-1)
+            pygame.transform.average_surfaces((window, surf1, surf2, surf3, surf4), window)
+        else:
+            pygame.transform.average_surfaces((window, surf1, surf2), window)
