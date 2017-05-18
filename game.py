@@ -11,6 +11,7 @@ import text
 from pygame.locals import *
 from colors import *
 from constants import *
+from assets import assets, assets_rot, load_assets
 
 
 class AUTSBallGame:
@@ -25,6 +26,9 @@ class AUTSBallGame:
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
 
         # Pygamen inittejä
+        # HUOM! Inittien järjestys tärkeä!
+        # 1) mixerin pre-init
+        # 2) pygamen init
         pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
         pygame.init()
         pygame.mixer.init()
@@ -37,18 +41,11 @@ class AUTSBallGame:
                                               pos='bottomleft', group=groups.TextGroup, shuffle=0)
 
         # SFX
-        self.goal_green_sound = pygame.mixer.Sound(file='sfx/goal_green.wav')
-        self.goal_red_sound = pygame.mixer.Sound(file='sfx/goal_red.wav')
+        self.goal_green_sound = assets['sfx/goal_green.wav']
+        self.goal_red_sound = assets['sfx/goal_red.wav']
 
-        # Latauskuva koska levelin latauksessa voi kestää jonkin aikaa
-        self.loading_image = pygame.image.load('gfx/loading.png').convert_alpha()
-        self.win.blit(self.loading_image, self.loading_image.get_rect())
-        pygame.display.flip()
-
-        # TODO: tähän assettien esilataus
-        # Instansioidaan leveli, tämä lataa myös level-kuvan joka voi olla iiisooo
-        # self.current_level = level.Level(background_image_file='gfx/cave_background.png')
-        self.current_level = level.Level(level_name='Test Level')
+        # Instansioidaan leveli
+        self.current_level = level.Level(level_name='Vertical Challenge')
         self.gravity = self.current_level.gravity
 
         # Instansioidaan pelaaja ja pallo
@@ -73,7 +70,6 @@ class AUTSBallGame:
     def start(self):
         if not self.is_running:
             self.is_running = True
-
             self.music_player.play()
 
     def destroy(self):
@@ -246,11 +242,23 @@ class AUTSBallGame:
 
 
 if __name__ == '__main__':
+    # HUOM! Inittien järjestys tärkeä!
+    # 1) mixerin pre-init
+    # 2) pygamen init
+
+    pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
+    pygame.init()
+    # pygame.mixer.init()
+    window = pygame.display.set_mode(WINDOW_SIZE)#, pygame.HWSURFACE | pygame.DOUBLEBUF)
+    pygame.display.set_caption("AUTSball")
+
+    load_assets(window)
+
     game = AUTSBallGame()
     game.add_player(0, team='red', ship_name='Fatship')
     game.add_player(1, team='green')
     game.add_player(2, team='red')
     game.start()
 
-    while True:
+    while game.is_running:
         game.update()

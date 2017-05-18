@@ -4,14 +4,15 @@ import game_object
 import groups
 import pygame
 import vector
-from colors import *
+from assets import assets, assets_rot
 
 
 class EffectSprite(game_object.GameObject):
     """ Yleinen efektisprite """
-    def __init__(self, image=None, image_file=None, group=groups.EffectGroup, attached_player=None, attached_ball=None,
-                 effect_type=None, visible=1, parent=None, start_position=None):
-        game_object.GameObject.__init__(self, group=group, image=image, image_file=image_file, start_position=start_position)
+    def __init__(self, parent=None, image=None, image_file=None, group=groups.EffectGroup,
+                 attached_player=None, attached_ball=None,
+                 effect_type=None, visible=1, start_position=None):
+        game_object.GameObject.__init__(self, group=group, image_file=image_file, start_position=start_position)
         self.attached_player = attached_player
         self.attached_ball = attached_ball
         self.effect_type = effect_type
@@ -40,7 +41,7 @@ class EffectSprite(game_object.GameObject):
 
 class TetherSprite(EffectSprite):
     def __init__(self, group=groups.EffectGroup, attached_player=None, attached_ball=None, parent=None):
-        EffectSprite.__init__(self, image=pygame.image.load('gfx/tractor_beam.png').convert_alpha(), group=group,
+        EffectSprite.__init__(self, image_file='gfx/tractor_beam.png', group=group,
                               attached_player=attached_player, attached_ball=attached_ball, parent=parent)
         self.effect_type = 'tether'
 
@@ -50,18 +51,23 @@ class TetherSprite(EffectSprite):
         ball_player_angle = game_object.get_angle_in_radians((self.attached_player.x, self.attached_player.y),
                                                              (self.attached_ball.x, self.attached_ball.y))
         ball_player_angle = 270 - math.degrees(ball_player_angle)
+        # Käännetään ja zoomataan tetherin graffaa sopivasti
         self.image = pygame.transform.rotozoom(self.original_image, ball_player_angle,
                                                ball_player_distance / self.attached_ball.attached_player_max_distance)
         self.rect = self.image.get_rect()
+        # rect.center laitetaan pallon ja pelaajan puoliväliin
         self.rect.center = ((self.attached_player.rect.center[0] + self.attached_ball.rect.center[0]) // 2,
                             (self.attached_player.rect.center[1] + self.attached_ball.rect.center[1]) // 2)
 
 
 class Explosion(EffectSprite):
     """ Räjähdys, joka työntää pelaajia ja palloa pois keskipisteestä """
-    def __init__(self, image_file='gfx/explosion_100.png', group=groups.EffectGroup, pos=None,
+    def __init__(self, image_file=None, group=groups.EffectGroup, pos=None,
                  explosion_radius=100, explosion_force=20, frames_visible=10,
                  player_group=groups.PlayerGroup, ball_group=groups.BallGroup):
+        # Tämä piti tehdä näin koska jos laittoi tuohon initin kutsujuttuihin niin heitti assetsista KeyErroria
+        if image_file is None:
+            image_file = 'gfx/explosion_100.png'
         EffectSprite.__init__(self, image_file=image_file, group=group, start_position=pos)
         self.explosion_radius = explosion_radius
         self.explosion_radius_squared = explosion_radius ** 2
@@ -87,6 +93,8 @@ class Explosion(EffectSprite):
         Käy läpi ryhmän objektit ja tekee seuraavaa:
             -jos etäisyys on alle explosion_radius:
                 -työntää objektia poispäin räjähdyksen keskipisteestä explosion_forcen verran
+                
+        TODO: räjähdysvoiman pieneneminen mitä kauempana keskustasta objekti on?
         """
         for current_object in group:
             if self.distance_squared(current_object) < self.explosion_radius_squared:
@@ -102,23 +110,27 @@ class SmokeEffect(EffectSprite):
 
     @staticmethod
     def preload_images(image_files=None):
+        """ 
+        Ei oikeastaan enää preloadaa mitään vaan rakentaa vaan filelistan. Jätetty toistaiseksi paikoilleen.
+        TODO: poista kokonaan, assetit esiladataan muualla
+        """
         smoke_image_files = []
         if len(image_files) > 0:
             for file_name in image_files:
-                smoke_image_files.append(pygame.image.load(file_name).convert_alpha())
+                smoke_image_files.append(file_name)
         else:
-            smoke_image_files.append(pygame.image.load('gfx/smoke_32_0.png').convert_alpha())
-            smoke_image_files.append(pygame.image.load('gfx/smoke_32_1.png').convert_alpha())
-            smoke_image_files.append(pygame.image.load('gfx/smoke_32_2.png').convert_alpha())
-            smoke_image_files.append(pygame.image.load('gfx/smoke_32_3.png').convert_alpha())
-            smoke_image_files.append(pygame.image.load('gfx/smoke_32_4.png').convert_alpha())
+            smoke_image_files.append('gfx/smoke_32_0.png')
+            smoke_image_files.append('gfx/smoke_32_1.png')
+            smoke_image_files.append('gfx/smoke_32_2.png')
+            smoke_image_files.append('gfx/smoke_32_3.png')
+            smoke_image_files.append('gfx/smoke_32_4.png')
 
         return smoke_image_files
 
     def __init__(self, start_position, parent=None, attached_player=None, effect_type='smoke', viewscreen_rect=None,
                  image_files=None):
 
-        EffectSprite.__init__(self, image=image_files, image_file=None,
+        EffectSprite.__init__(self, image_file=image_files,
                               group=groups.EffectGroup, parent=parent, effect_type=effect_type,
                               attached_player=attached_player)
         self.parent = parent

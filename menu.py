@@ -4,9 +4,10 @@ import game
 import menu_background_action
 import music
 import groups
-from pygame.locals import *
 from colors import *
+from pygame.locals import *
 from constants import *
+from assets import assets, assets_rot, load_assets
 from ui_components import Button, ButtonGroup, LabelImageText, Checkbox, CheckboxGroup, Slider
 
 
@@ -21,14 +22,30 @@ def debug_run():
     # TODO: Siirrä asetusten lataus assettien latauksen kanssa samaan?
     Settings.load()
 
+    # Groupit
     static_visual_components_group = pygame.sprite.Group()
     music_player_group = pygame.sprite.Group()
     main_menu_group = ButtonGroup()
     settings_group = pygame.sprite.Group()
 
+    # Music
+    # HUOM! Inittien järjestys tärkeä!
+    # 1) mixerin pre-init
+    # 2) pygamen init
+    pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
+    pygame.init()
+    # pygame.mixer.init()
+    music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
+    music_player.volume = Settings.data['music_volume']
+    if Settings.data['music_on']:
+        music_player.play()
+
+    # Assettien esilataus
+    load_assets(window)
+
     # Logo
     logo_sprite = pygame.sprite.Sprite()
-    logo_sprite.image = pygame.image.load('gfx/AUTSBall_logo.png').convert_alpha()
+    logo_sprite.image = assets['gfx/AUTSBall_Logo.png']
     logo_sprite.rect = logo_sprite.image.get_rect()
     logo_sprite.rect.center = (400, 110)
     static_visual_components_group.add(logo_sprite)
@@ -54,13 +71,6 @@ def debug_run():
 
     active_mode = Modes.MainMenu
     practice_game = None
-
-    # Music
-    pygame.mixer.init()
-    music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
-    music_player.volume = Settings.data['music_volume']
-    if Settings.data['music_on']:
-        music_player.play()
 
     # Background action
     background_action = menu_background_action.BackgroundAction()
@@ -112,7 +122,7 @@ def debug_run():
                     music_player.stop()
 
                     practice_game = game.AUTSBallGame()
-                    practice_game.add_player(0, team='red', ship_name='Rocket')
+                    practice_game.add_player(0, team='red', ship_name='Teafighter')
                     practice_game.add_player(1, team='green')
                     practice_game.add_player(2, team='red')
                     practice_game.add_player(3, team='green')
