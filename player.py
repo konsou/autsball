@@ -195,10 +195,11 @@ class PlayerSprite(game_object.GameObject):
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
         if self._cooldown_counter_special == 0:
             self.force_play_sound(self.bullet_sound)
-            bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
-            bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.DumbFire(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
-                         speed=10 + self.move_vector.get_speed())
+            # TODO: laske dx, dy ammuksen initissä
+            bullet_x = int(20 * math.sin(math.radians(self.heading)) * -1 + self.x)
+            bullet_y = int(20 * math.cos(math.radians(self.heading)) * -1 + self.y)
+            bullet.Switcher(shooting_player=self, level=self.level, parent=self.parent, pos=(bullet_x, bullet_y),
+                            direction=self.heading, speed=10 + self.move_vector.get_speed())
             self._cooldown_counter_special = self._cooldown_special
 
     def recover(self):
