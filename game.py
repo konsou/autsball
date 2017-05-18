@@ -254,7 +254,7 @@ if __name__ == '__main__':
     game.add_player(0, team='red', ship_name='Teafighter')
     game.add_player(1, team='green', ship_name='Muumi')
     game.add_player(2, team='red', ship_name='Rocket')
-    game.add_player(3, team='green')
+    game.add_player(3, team='green', ship_name='Fatship')
     game.start()
 
     while game.is_running:
