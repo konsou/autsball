@@ -257,7 +257,7 @@ class GameObject(pygame.sprite.Sprite):
 
     def check_collision_with_group(self, group):
         """ Tarkastaa törmääkö objekti ryhmässä oleviin toisiin objekteihin. """
-        # Käyttää tällä hetkellä pygamen collide_circle:ä eli laskee radius-attribuutin mukaan törmäykset
+        # Käyttää tällä hetkellä pygamen apply_collision_to_move_vector:ä eli laskee radius-attribuutin mukaan törmäykset
         # TODO: törmäyksissä käyttöön bitmask
         collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=pygame.sprite.collide_mask)
         for colliding_object in collide_list:
@@ -272,12 +272,9 @@ class GameObject(pygame.sprite.Sprite):
 
     def collided_with(self, other_object):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
-        # Lasketaan törmäyksen liikemäärät - paitsi jos kyseessä on itseen liitetty pallo
-        print "collision", self
-        # TODO: ei oikein toimi kunnolla
-        if other_object != self.attached_ball and other_object != self.attached_player:
-            self.collide_circle(other_object)
-            # self.x, self.y = self.x_previous, self.y_previous
+        # Lasketaan törmäyksen liikemäärät
+        # TODO: ei oikein toimi kunnolla - tulee monia perättäisiä törmäyksiä
+        self.apply_collision_to_move_vector(other_object)
 
     def collided_with_wall(self):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
@@ -296,11 +293,11 @@ class GameObject(pygame.sprite.Sprite):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
         pass
 
-    def collide_circle(self, other_object):
+    def apply_collision_to_move_vector(self, other_object):
         """ 
         Törmäyttää itsensä toiseen GameObjectiin.
         Oletetaan molemmat ympyrän muotoisiksi.
-        --> Laskee VAIN SELF:IN suunnat ja liikemäärät uusiksi. <-- TODO TÄMÄ
+        --> Laskee VAIN SELF:IN suunnat ja liikemäärät uusiksi. <--
         Jopa ottaa massat huomioon!
         Vähän luulen että tässä on vielä viilaamisen varaa, ei tunnu aivan oikealta kaikissa tilanteissa...
         """

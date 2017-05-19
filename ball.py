@@ -99,11 +99,22 @@ class BallSprite(game_object.GameObject):
             self.tether.destroy()
 
     def collided_with(self, other_object):
+        """
+        Jos other_object on pelaaja ja palloa ei vielä ole liitetty pelaajaan niin tehdään liitos
+        Emme törmäile pelaajaan, joka on liitettynä
+        """
+        apply_collision = 1
         # Jos törmäävä objekti on pelaaja ja palloa ei vielä ole liitetty pelaajaan niin liitetään
         if other_object in groups.PlayerGroup:
             if self.attached_player is None:
                 self.attach_to_player(other_object)
                 self.tether = effect.TetherSprite(attached_ball=self, attached_player=other_object)
+
+            if other_object == self.attached_player:
+                apply_collision = 0
+
+        if apply_collision:
+            self.apply_collision_to_move_vector(other_object)
 
     def is_in_goal(self, point_color):
         """ Kun pallo menee maaliin niin tulee maali. Loogista. """

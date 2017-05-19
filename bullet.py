@@ -31,11 +31,14 @@ class BulletSprite(game_object.GameObject):
     def update(self, viewscreen_rect):
         self.viewscreen_rect = viewscreen_rect
         self.update_movement()
+        self.animate()
         self.check_out_of_bounds()
-        # print("Speed:", self.move_vector.get_speed())
-        # Tehdään nämä vain jos on olemassa
+        # Out of bounds -check voi tappaa bulletin joten tehdään nämä vain jos ollaan vielä bulletgroupissa:
         if self in self.group:
+            # Vakiona bullet voi törmätä seinään, pelaajaan ja palloon
             self.check_collision_with_wall_and_goal()
+            self.check_collision_with_group(groups.PlayerGroup)
+            self.check_collision_with_group(groups.BallGroup)
             if self in self.group:
                 if self.speculate_collision_with_wall() == 1:
                     # Vähennetään nopeutta jos spekulointi havaitsee törmäyksen
@@ -122,19 +125,28 @@ class Dirtball(BulletSprite):
 
 class Switcher(BulletSprite):
     """ Vaihtaa paikkaa toisen objektin kanssa """
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0, speed=10):
-        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group, image_file='gfx/ball.png',
-                              pos=pos, direction=direction, speed=speed)
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0,
+                 speed=10):
+        image_file = ['gfx/switcher1.png', 'gfx/switcher2.png']
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=image_file, pos=pos, direction=direction, speed=speed)
 
-        self.mass = 0.2
+        self.mass = 0
 
     def collided_with_wall(self):
+        """ Mitään ei tapahdu seinätörmäyksessä """
         self.kill()
 
     def collided_with(self, other_object):
+        """ 
+        Vaihtaa ampujan paikkaa törmäävän objektin kanssa
+        TODO: jostan syystä jos osuu palloon niin attachaa aina, korjaa? 
+        """
         temp_x, temp_y = self.shooting_player.x, self.shooting_player.y
         self.shooting_player.x, self.shooting_player.y = other_object.x, other_object.y
         other_object.x, other_object.y = temp_x, temp_y
+        self.update_rect()
+        other_object.update_rect()
         self.kill()
 
 

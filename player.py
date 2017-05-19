@@ -102,8 +102,9 @@ class PlayerSprite(game_object.GameObject):
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
-        self.check_collision_with_group(player_group)
-        self.check_collision_with_group(bullet_group)
+        self.check_collision_with_group(groups.BallGroup)
+        self.check_collision_with_group(groups.PlayerGroup)
+        self.check_collision_with_group(groups.BulletGroup)
 
         # Lasketaan cooldownia
         if self._cooldown_counter > 0:
@@ -119,6 +120,19 @@ class PlayerSprite(game_object.GameObject):
             if (pygame.time.get_ticks() - self._recovery_started_at) // 1000 > self._recovery_time - 1:
                 self.reset()
                 self._recovery_started_at = 0
+
+    def collided_with(self, other_object):
+        """  
+        Emme törmää palloon jos se on attachattu 
+        Pallo-objekti hoitaa attachauksen pelaajaan, se ei ole tässä
+        """
+        apply_collision = 1
+        if other_object in groups.BallGroup:
+            if other_object == self.attached_ball:
+                apply_collision = 0
+
+        if apply_collision:
+            self.apply_collision_to_move_vector(other_object)
 
     def attach_ball(self, ball):
         if self.attached_ball is None:

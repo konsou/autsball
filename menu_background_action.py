@@ -194,10 +194,13 @@ class BackgroundAction(pygame.sprite.Sprite):
 
         self.ball_pos = (self.ball.x, self.ball.y)
 
+        self.checked_collisions = set()
+
         self.score_green = 0
         self.score_red = 0
 
     def update(self):
+        self.checked_collisions = set()
         self.ball_pos = (self.ball.x, self.ball.y)
 
         groups.BulletGroup.update(self.viewscreen_rect)
@@ -224,10 +227,10 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.ship5.detach()
         self.ship6.detach()
         """ Tätä kutsutaan kun tulee maali """
-        if scoring_team == 'RED':
+        if scoring_team == 'red':
             self.score_red += 1
             goal_text_color = RED
-        elif scoring_team == 'GREEN':
+        elif scoring_team == 'green':
             self.score_green += 1
             goal_text_color = GREEN
         text.DisappearingText(pos=(400,525), text="GOAL!!!", frames_visible=60,

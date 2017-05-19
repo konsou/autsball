@@ -109,7 +109,7 @@ class CollidingBall(game_object.GameObject):
             for colliding_sprite in collide_list:
                 if colliding_sprite != self:
                     # print(colliding_sprite)
-                    self.collide_circle(collide_list[0])
+                    self.apply_collision_to_move_vector(collide_list[0])
 
     def check_out_of_bounds(self):
         """ Pitää objektin pelialueen sisällä, palauttaa 1 jos on ulkopuolella """
