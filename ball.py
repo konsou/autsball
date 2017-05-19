@@ -105,7 +105,7 @@ class BallSprite(game_object.GameObject):
                 self.attach_to_player(other_object)
                 self.tether = effect.TetherSprite(attached_ball=self, attached_player=other_object)
 
-    def collided_with_goal(self, point_color):
+    def is_in_goal(self, point_color):
         """ Kun pallo menee maaliin niin tulee maali. Loogista. """
         if point_color == RED:
             self.parent.score('green')

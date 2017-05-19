@@ -5,7 +5,7 @@ import math
 import copy
 import types
 from colors import *
-from assets import assets, assets_rot
+from assets import assets, assets_rot, assets_mask, assets_rot_mask
 
 
 class GameObject(pygame.sprite.Sprite):
@@ -101,6 +101,9 @@ class GameObject(pygame.sprite.Sprite):
             self.image_filename = image_file
             self._animation_enabled = 0
 
+        # bitmask collision detectionia varten
+        self.mask = assets_mask[self.image_filename]
+
         # Tämä tarvitaan rotaatioita varten
         self.original_image = self.image
         # Size on tämmöinen yhden luvun approksimaatio objektin koosta - neliöllä sivun pituus, ympyrällä halkaisija
@@ -188,6 +191,7 @@ class GameObject(pygame.sprite.Sprite):
         """ Muuttaa kuvaksi oikean esiladatun ja -rotatoidun kuvan """
         angle = int(angle)  # tällä sallitaan floatit handlingiin
         self.image = assets_rot[self.image_filename][angle]
+        self.mask = assets_rot_mask[self.image_filename][angle]
 
     def check_out_of_bounds(self):
         """ Pitää objektin pelialueen sisällä """
@@ -212,7 +216,7 @@ class GameObject(pygame.sprite.Sprite):
         if current_point not in (BLACK, RED, GREEN):
             self.collided_with_wall()
         elif current_point in (RED, GREEN):
-            self.collided_with_goal(current_point)
+            self.is_in_goal(current_point)
 
     def speculate_collision_with_wall(self):
         """ 
@@ -255,19 +259,25 @@ class GameObject(pygame.sprite.Sprite):
         """ Tarkastaa törmääkö objekti ryhmässä oleviin toisiin objekteihin. """
         # Käyttää tällä hetkellä pygamen collide_circle:ä eli laskee radius-attribuutin mukaan törmäykset
         # TODO: törmäyksissä käyttöön bitmask
-        collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=pygame.sprite.collide_circle)
+        collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=pygame.sprite.collide_mask)
         for colliding_object in collide_list:
             # Emme halua törmätä itseemme
-            if colliding_object != self:
-                # Kutsutaan molempien objektien collided_with-metodia mahdollisten kustomijuttujen triggeroimiseksi
+            # Skippaamme myös jo käsitellyt kollisiot
+            if colliding_object != self and (self, colliding_object) not in self.parent.checked_collisions:
+                # Kutsutaan objektin collided_with-metodia, se hoitaa törmäyskäyttäytymisen
                 self.collided_with(colliding_object)
-                colliding_object.collided_with(self)
+                # Lisätään käsitelty törmäys settiin ettei sitä toisteta tässä framessa enää
+                self.parent.checked_collisions.add((self, colliding_object))
+                # colliding_object.collided_with(self)
 
     def collided_with(self, other_object):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
         # Lasketaan törmäyksen liikemäärät - paitsi jos kyseessä on itseen liitetty pallo
+        print "collision", self
+        # TODO: ei oikein toimi kunnolla
         if other_object != self.attached_ball and other_object != self.attached_player:
             self.collide_circle(other_object)
+            # self.x, self.y = self.x_previous, self.y_previous
 
     def collided_with_wall(self):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
@@ -282,7 +292,7 @@ class GameObject(pygame.sprite.Sprite):
         self.x = self.x_previous
         self.y = self.y_previous
 
-    def collided_with_goal(self, point_color):
+    def is_in_goal(self, point_color):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
         pass
 
@@ -296,16 +306,16 @@ class GameObject(pygame.sprite.Sprite):
         """
         angle_to_other = get_angle_in_radians(other_object.rect.center, self.rect.center)
         self.move_vector.set_direction(angle_to_other - math.pi)
-        other_object.move_vector.set_direction(angle_to_other)
+        # other_object.move_vector.set_direction(angle_to_other)
 
-        speed1 = self.move_vector.get_speed()
+        # speed1 = self.move_vector.get_speed()
         speed2 = other_object.move_vector.get_speed()
         mass1 = self.mass
         mass2 = other_object.mass
         speed1_new = (mass2 / mass1) * speed2
-        speed2_new = (mass1 / mass2) * speed1
+        # speed2_new = (mass1 / mass2) * speed1
         self.move_vector.set_speed(speed1_new)
-        other_object.move_vector.set_speed(speed2_new)
+        # other_object.move_vector.set_speed(speed2_new)
 
     def distance_squared(self, other_object):
         """ Laskee etäisyyden neliön toiseen GameObjectiin. Näin vältetään neliöjuuren laskeminen joka on kallista. """
