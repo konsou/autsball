@@ -34,6 +34,9 @@ class BallSprite(game_object.GameObject):
         self.wall_collide_sound = assets['sfx/thump4.wav']
         self.bullet_collide_sound = assets['sfx/metal_thud_3.wav']
 
+    def __repr__(self):
+        return "<BALL>"
+
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
         """ Päivittää palloa. Vaatii viewscreen_rect:in että osaa laskea näyttämisen oikein. """
         self.viewscreen_rect = viewscreen_rect

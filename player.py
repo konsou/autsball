@@ -90,6 +90,9 @@ class PlayerSprite(game_object.GameObject):
         self._recovery_time = float(current_ship.find('recovery_time').text)  # sekunteja jopa!
         self._recovery_started_at = 0
 
+    def __repr__(self):
+        return "<SHIP {} {}>".format(self.owning_player_id, self.name)
+
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
         self.viewscreen_rect = viewscreen_rect
         """ Tämä haluaa tietää player- ja bulletgroupit että ne voi tarvittaessa määrittää vapaasti """

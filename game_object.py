@@ -71,6 +71,9 @@ class GameObject(pygame.sprite.Sprite):
         # Tämä päivitetään myöhemmin, initoidaan kuitenkin ettei PyCharm herjaa
         self.viewscreen_rect = None
 
+    def __repr__(self):
+        return "<GAME OBJECT>"
+
     def load_image(self, image_file=None, frames_per_image=5):
         """ 
         Lataa kuvan/kuvat spritelle. Asettaa rect, radius, size.
@@ -177,6 +180,7 @@ class GameObject(pygame.sprite.Sprite):
 
     def animate_next_frame(self):
         """ Muuttaa image:ksi ja original_image:ksi seuraavan kuvan animaatiossa """
+        # TODO: tämän olisi hyvä vaikuttaa myös maskiin siltä varalta jos eri frameissa on eri koko
         self._animation_current_image_counter += 1
         try:
             self.image = self._animation_images[self._animation_current_image_counter]
@@ -207,53 +211,43 @@ class GameObject(pygame.sprite.Sprite):
         elif self.y != y_before:
             self.move_vector.set_vy(0)
 
-    def check_collision_with_wall_and_goal(self):
-        """ Tarkastaa törmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
+    def check_collision_with_wall_and_goal(self, speculate=0):
+        """ 
+        Tarkastaa törmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa 
+        Palauttaa 1 jös tärmäsi seinään, muuten 0
+        Jos speculate on 1 niin laskee seinätörmäyksen ikään kuin oltaisiin jo seuraavassa framessa
+        """
+        wall_collision = 0
+
+        if speculate:
+            # Nykyiset arvot talteen
+            orig_x, orig_y = self.x, self.y
+            orig_x_previous, orig_y_previous = self.x_previous, self.y_previous
+            orig_move_vector = copy.copy(self.move_vector)
+
+            # Päivitetään liikettä ikään kuin oltaisiin jo seuraavassa framessa
+            self.update_movement()
+            self.check_out_of_bounds()
+
         # Katotaan mikä väri on levelissä tässä pisteessä - skipataan alfa
         current_point = self.level.image.get_at((self.x, self.y))[:3]
 
         # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys ja kutsutaan tärmäysmetodia
         if current_point not in (BLACK, RED, GREEN):
-            self.collided_with_wall()
+            if not speculate:
+                self.collided_with_wall()
+            wall_collision = 1
         elif current_point in (RED, GREEN):
-            self.is_in_goal(current_point)
+            if not speculate:
+                self.is_in_goal(current_point)
 
-    def speculate_collision_with_wall(self):
-        """ 
-        Spekuloi mahdollista törmäystä walliin
-        
-        Palauttaa 1 jos törmäisi
-        Palauttaa 0 jos ei törmäisi
-        
-        TODO: turhaa koodin duplikointia, keksi tapa parantaa? 
-        """
-        move_vector_copy = copy.copy(self.move_vector)
+        if speculate:
+            # Palautetaan alkuperäiset arvot
+            self.x, self.y = orig_x, orig_y
+            self.x_previous, self.y_previous = orig_x_previous, orig_y_previous
+            self.move_vector = orig_move_vector
 
-        # Gravityn vaikutus
-        if self.gravity_affects:
-            move_vector_copy.add_to_vy(self.parent.gravity)
-
-        # Max speed rajoittaa
-        move_vector_copy.set_speed(min(move_vector_copy.get_speed(), self.max_speed))
-
-        # Muutetaan koordinaatteja liikemäärän mukaan
-        x = int(move_vector_copy.get_vx() + self.x)
-        y = int(move_vector_copy.get_vy() + self.y)
-
-        # Out of bounds-check
-        x = max(0, x)
-        x = min(self.level.size_x - 1, x)
-        y = max(0, y)
-        y = min(self.level.size_y - 1, y)
-
-        # Katotaan mikä väri on levelissä tässä pisteessä - skipataan alfa
-        current_point = self.level.image.get_at((x, y))[:3]
-        # print("Current point (copy):", current_point)
-        if current_point not in (BLACK, RED, GREEN):
-            #print("Speculative collision detected")
-            return 1
-        else:
-            return 0
+        return wall_collision
 
     def check_collision_with_group(self, group):
         """ Tarkastaa törmääkö objekti ryhmässä oleviin toisiin objekteihin. """
@@ -312,6 +306,8 @@ class GameObject(pygame.sprite.Sprite):
         speed1_new = (mass2 / mass1) * speed2
         # speed2_new = (mass1 / mass2) * speed1
         self.move_vector.set_speed(speed1_new)
+        # Yritetään estää toisen sisään menemistä
+        self.x, self.y = self.x_previous, self.y_previous
         # other_object.move_vector.set_speed(speed2_new)
 
     def distance_squared(self, other_object):

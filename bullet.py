@@ -40,7 +40,7 @@ class BulletSprite(game_object.GameObject):
             self.check_collision_with_group(groups.PlayerGroup)
             self.check_collision_with_group(groups.BallGroup)
             if self in self.group:
-                if self.speculate_collision_with_wall() == 1:
+                if self.check_collision_with_wall_and_goal(speculate=1) == 1:
                     # Vähennetään nopeutta jos spekulointi havaitsee törmäyksen
                     self.move_vector.set_speed(min(self.move_vector.get_speed(), 3))
                 self.update_rect()
