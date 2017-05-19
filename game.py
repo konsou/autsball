@@ -20,7 +20,6 @@ class AUTSBallGame:
         self.local_player_id = 0
 
         # Vakioita
-        # self.gravity = 0.1
         self.screen_size_x = WINDOW_SIZE[0]
         self.screen_size_y = WINDOW_SIZE[1]
         self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
@@ -31,8 +30,8 @@ class AUTSBallGame:
         # 2) pygamen init
         pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
         pygame.init()
-        pygame.mixer.init()
-        self.win = pygame.display.set_mode((self.screen_size_x, self.screen_size_y), pygame.HWSURFACE | pygame.DOUBLEBUF)
+        # pygame.mixer.init()
+        self.window = pygame.display.set_mode((self.screen_size_x, self.screen_size_y)) #, pygame.HWSURFACE | pygame.DOUBLEBUF)
         pygame.display.set_caption("AUTSball")
         self.clock = pygame.time.Clock()
 
@@ -55,6 +54,7 @@ class AUTSBallGame:
 
         self.ball = ball.BallSprite(level=self.current_level, parent=self)
 
+        # En ole varma onko tästä enää hyötyä
         self.checked_collisions = set()
 
         self.viewscreen_rect = None
@@ -169,32 +169,32 @@ class AUTSBallGame:
         """ Grafiikoiden päivitysmetodi """
 
         # Ruutu tyhjäksi
-        self.win.fill((0, 0, 0))
+        self.window.fill((0, 0, 0))
 
         # Piirretään levelin ulkopuolinen tuhoutumaton alue
         off_level_rect = pygame.Rect(self.background_view_rect[0]-WINDOW_SIZE[0]//2,
                                      self.background_view_rect[1]-WINDOW_SIZE[1]//2,
                                      self.background_view_rect[2],
                                      self.background_view_rect[3])
-        self.win.blit(self.current_level.off_level_surface, off_level_rect)
+        self.window.blit(self.current_level.off_level_surface, off_level_rect)
 
         # Piirretään levelistä vain viewscreenin kokoinen alue, pelaaja keskellä
-        self.win.blit(self.current_level.image, self.background_view_rect)
+        self.window.blit(self.current_level.image, self.background_view_rect)
 
         # Bullettien, pelaajan, pallon piirrot
-        groups.BulletGroup.draw(self.win)
-        groups.BallGroup.draw(self.win)
-        groups.PlayerGroup.draw(self.win)
-        groups.EffectGroup.draw(self.win)
-        groups.TextGroup.draw(self.win)
+        groups.BulletGroup.draw(self.window)
+        groups.BallGroup.draw(self.window)
+        groups.PlayerGroup.draw(self.window)
+        groups.EffectGroup.draw(self.window)
+        groups.TextGroup.draw(self.window)
 
         # HUD
         # self.show_text((10, 10), "Speed: " + str(math.hypot(self.player[0].vx, self.player[0].vy)))
-        text.show_text(self.win, (10, 70), "FPS: " + str(self.clock.get_fps()))
-        #text.show_text(self.win, (10, 10), str(self.score_green), color=GREEN, font_size=40)
-        #text.show_text(self.win, (750, 10), str(self.score_red), color=RED, font_size=40)
-        text.show_score(self.win, (50, 10), self.score_green, team=0)
-        text.show_score(self.win, (700, 10), self.score_red, team=1)
+        text.show_text(self.window, (10, 70), "FPS: " + str(self.clock.get_fps()))
+        #text.show_text(self.window, (10, 10), str(self.score_green), color=GREEN, font_size=40)
+        #text.show_text(self.window, (750, 10), str(self.score_red), color=RED, font_size=40)
+        text.show_score(self.window, (50, 10), self.score_green, team=0)
+        text.show_score(self.window, (700, 10), self.score_red, team=1)
 
         # Näytetään pallonsuuntamarkkeri
         # TODO: muuta pallon sijaan nuoli joka osoittaa oikeaan suuntaan
@@ -203,7 +203,7 @@ class AUTSBallGame:
             ball_angle = self.get_ball_angle_in_radians(self.ball)
             vx = int(100 * math.cos(ball_angle))
             vy = int(100 * math.sin(ball_angle))
-            pygame.draw.circle(self.win, (0, 0, 255),
+            pygame.draw.circle(self.window, (0, 0, 255),
                                (self.screen_size_x // 2 + vx, self.screen_size_y // 2 + vy), 5)
 
         # Displayn update
@@ -244,7 +244,6 @@ if __name__ == '__main__':
 
     pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
     pygame.init()
-    # pygame.mixer.init()
     window = pygame.display.set_mode(WINDOW_SIZE)#, pygame.HWSURFACE | pygame.DOUBLEBUF)
     pygame.display.set_caption("AUTSball")
 
