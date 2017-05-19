@@ -5,7 +5,7 @@
         <images>
             <team_red_image>gfx/ship1_red_20px.png</team_red_image>
             <team_green_image>gfx/ship1_green_20px.png</team_green_image>
-            <!-- TODO: motor flamen offsetin määritys -->
+            <motor_flame_offset>12</motor_flame_offset>
             <!-- Idea tässä: jos samalla tagilla useita kuvia niin niistä tehdään animaatio -->
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
@@ -41,7 +41,7 @@
         <images>
             <team_red_image>gfx/fatship_red_32.png</team_red_image>
             <team_green_image>gfx/fatship_green_32.png</team_green_image>
-            <!-- TODO: motor flamen offsetin määritys -->
+            <motor_flame_offset>15</motor_flame_offset>
             <!-- Idea tässä: jos samalla tagilla useita kuvia niin niistä tehdään animaatio -->
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
@@ -77,7 +77,7 @@
         <images>
             <team_red_image>gfx/ship_rocket_red_84.png</team_red_image>
             <team_green_image>gfx/ship_rocket_green_84.png</team_green_image>
-            <!-- TODO: motor flamen offsetin määritys -->
+            <motor_flame_offset>50</motor_flame_offset>
             <!-- Idea tässä: jos samalla tagilla useita kuvia niin niistä tehdään animaatio -->
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
@@ -112,11 +112,11 @@
         <images>
             <team_red_image>gfx/ship_muumi_32.png</team_red_image>
             <team_green_image>gfx/ship_muumi_32.png</team_green_image>
-            <!-- TODO: motor flamen offsetin määritys -->
+            <motor_flame_offset>18</motor_flame_offset>
             <!-- Idea tässä: jos samalla tagilla useita kuvia niin niistä tehdään animaatio -->
-            <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
-            <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
-            <motor_flame_image>gfx/motor_flame_10c.png</motor_flame_image>
+            <motor_flame_image>gfx/motorflame_twin_16_1.png</motor_flame_image>
+            <motor_flame_image>gfx/motorflame_twin_16_2.png</motor_flame_image>
+            <motor_flame_image>gfx/motorflame_twin_16_3.png</motor_flame_image>
             <rear_smoke_image>gfx/rainbow_star_smoke_32_0.png</rear_smoke_image>
             <rear_smoke_image>gfx/rainbow_star_smoke_32_1.png</rear_smoke_image>
             <rear_smoke_image>gfx/rainbow_star_smoke_32_2.png</rear_smoke_image>
@@ -148,7 +148,7 @@
         <images>
             <team_red_image>gfx/ship_teafighter_red_32.png</team_red_image>
             <team_green_image>gfx/ship_teafighter_green_32.png</team_green_image>
-            <!-- TODO: motor flamen offsetin määritys -->
+            <motor_flame_offset>20</motor_flame_offset>
             <!-- Idea tässä: jos samalla tagilla useita kuvia niin niistä tehdään animaatio -->
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>

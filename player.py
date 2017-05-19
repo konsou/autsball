@@ -33,12 +33,13 @@ class PlayerSprite(game_object.GameObject):
                                         image_file=image_file)
 
         # Thrust-gfx
+        motor_flame_offset = int(current_ship.find('images/motor_flame_offset').text)
         thrust_image_file = []
         for value in current_ship.findall('images/motor_flame_image'):
             thrust_image_file.append(value.text)
 
         self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=thrust_image_file,
-                                              visible=0, parent=parent)
+                                              visible=0, parent=parent, offset=motor_flame_offset)
         self.rect.center = self.parent.screen_center_point
         if self.owning_player_id == parent.local_player_id:
             self.is_centered_on_screen = 1
