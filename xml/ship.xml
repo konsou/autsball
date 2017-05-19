@@ -10,6 +10,7 @@
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10c.png</motor_flame_image>
+            <rear_smoke_offset>20</rear_smoke_offset>
             <rear_smoke_image>gfx/smoke_32_0.png</rear_smoke_image>
             <rear_smoke_image>gfx/smoke_32_1.png</rear_smoke_image>
             <rear_smoke_image>gfx/smoke_32_2.png</rear_smoke_image>
@@ -46,6 +47,7 @@
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10c.png</motor_flame_image>
+            <rear_smoke_offset>20</rear_smoke_offset>
             <rear_smoke_image>gfx/smoke_32_0.png</rear_smoke_image>
             <rear_smoke_image>gfx/smoke_32_1.png</rear_smoke_image>
             <rear_smoke_image>gfx/smoke_32_2.png</rear_smoke_image>
@@ -82,6 +84,7 @@
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10c.png</motor_flame_image>
+            <rear_smoke_offset>20</rear_smoke_offset>
             <rear_smoke_image>gfx/slime1.png</rear_smoke_image>
             <rear_smoke_image>gfx/slime2.png</rear_smoke_image>
             <rear_smoke_image>gfx/slime3.png</rear_smoke_image>
@@ -117,6 +120,7 @@
             <motor_flame_image>gfx/motorflame_twin_16_1.png</motor_flame_image>
             <motor_flame_image>gfx/motorflame_twin_16_2.png</motor_flame_image>
             <motor_flame_image>gfx/motorflame_twin_16_3.png</motor_flame_image>
+            <rear_smoke_offset>20</rear_smoke_offset>
             <rear_smoke_image>gfx/rainbow_star_smoke_32_0.png</rear_smoke_image>
             <rear_smoke_image>gfx/rainbow_star_smoke_32_1.png</rear_smoke_image>
             <rear_smoke_image>gfx/rainbow_star_smoke_32_2.png</rear_smoke_image>
@@ -153,6 +157,7 @@
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10c.png</motor_flame_image>
+            <rear_smoke_offset>20</rear_smoke_offset>
             <rear_smoke_image>gfx/rainbow_star_smoke_32_0.png</rear_smoke_image>
             <rear_smoke_image>gfx/rainbow_star_smoke_32_1.png</rear_smoke_image>
             <rear_smoke_image>gfx/rainbow_star_smoke_32_2.png</rear_smoke_image>

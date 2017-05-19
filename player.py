@@ -38,7 +38,7 @@ class PlayerSprite(game_object.GameObject):
         for value in current_ship.findall('images/motor_flame_image'):
             thrust_image_file.append(value.text)
 
-        self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=thrust_image_file,
+        self.thrust_gfx = effect.MotorFlame(attached_player=self, image_file=thrust_image_file,
                                               visible=0, parent=parent, offset=motor_flame_offset)
         self.rect.center = self.parent.screen_center_point
         if self.owning_player_id == parent.local_player_id:
@@ -51,7 +51,7 @@ class PlayerSprite(game_object.GameObject):
         self.smoke_effect_image_files = []
         for value in current_ship.findall('images/rear_smoke_image'):
             self.smoke_effect_image_files.append(value.text)
-        # self.smoke_effect_images = effect.SmokeEffect.preload_images(smoke_image_file)  # ladataan kuvat etukäteen
+        self.smoke_effect_offset = int(current_ship.find('images/rear_smoke_offset').text)
 
         # Sound effex
         self.motor_sound = assets[current_ship.find('sounds/motor_sound').text]
@@ -163,7 +163,8 @@ class PlayerSprite(game_object.GameObject):
                                        parent=self.parent,
                                        attached_player=self,
                                        viewscreen_rect=self.viewscreen_rect,
-                                       image_files=self.smoke_effect_image_files)
+                                       image_files=self.smoke_effect_image_files,
+                                       offset=self.smoke_effect_offset)
                     self._smoke_counter = 0
 
     def stop_acceleration(self):

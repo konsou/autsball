@@ -9,8 +9,7 @@ from assets import assets, assets_rot
 
 class EffectSprite(game_object.GameObject):
     """ Yleinen efektisprite """
-    # TODO: Eriytä motor flame omaksi classikseen
-    def __init__(self, parent=None, image=None, image_file=None, group=groups.EffectGroup,
+    def __init__(self, parent=None, image_file=None, group=groups.EffectGroup,
                  attached_player=None, attached_ball=None,
                  effect_type=None, visible=1, start_position=None, offset=12):
         game_object.GameObject.__init__(self, group=group, image_file=image_file, start_position=start_position)
@@ -39,6 +38,15 @@ class EffectSprite(game_object.GameObject):
         self.attached_player = None
         self.attached_ball = None
         self.kill()
+
+
+class MotorFlame(EffectSprite):
+    def __init__(self, parent=None, image_file=None, group=groups.EffectGroup,
+                 attached_player=None, attached_ball=None,
+                 effect_type='motorflame', visible=1, start_position=None, offset=12):
+        EffectSprite.__init__(self, parent=parent, image_file=image_file, group=group,
+                              attached_player=attached_player, effect_type=effect_type, visible=visible,
+                              start_position=start_position, offset=offset)
 
 
 class TetherSprite(EffectSprite):
@@ -109,32 +117,11 @@ class Explosion(EffectSprite):
 
 
 class SmokeEffect(EffectSprite):
-
-    @staticmethod
-    def preload_images(image_files=None):
-        """ 
-        Ei oikeastaan enää preloadaa mitään vaan rakentaa vaan filelistan. Jätetty toistaiseksi paikoilleen.
-        TODO: poista kokonaan, assetit esiladataan muualla
-        """
-        smoke_image_files = []
-        if len(image_files) > 0:
-            for file_name in image_files:
-                smoke_image_files.append(file_name)
-        else:
-            smoke_image_files.append('gfx/smoke_32_0.png')
-            smoke_image_files.append('gfx/smoke_32_1.png')
-            smoke_image_files.append('gfx/smoke_32_2.png')
-            smoke_image_files.append('gfx/smoke_32_3.png')
-            smoke_image_files.append('gfx/smoke_32_4.png')
-
-        return smoke_image_files
-
     def __init__(self, start_position, parent=None, attached_player=None, effect_type='smoke', viewscreen_rect=None,
-                 image_files=None):
-
+                 image_files=None, offset=10):
         EffectSprite.__init__(self, image_file=image_files,
                               group=groups.EffectGroup, parent=parent, effect_type=effect_type,
-                              attached_player=attached_player)
+                              attached_player=attached_player, offset=offset)
         self.parent = parent
         self.viewscreen_rect = viewscreen_rect
         if self.parent is not None and type(parent).__name__ is not 'BackgroundAction':
@@ -145,8 +132,8 @@ class SmokeEffect(EffectSprite):
 
             # spawnaa oikeaan paikkaan (ei pelaajan sisään)
             player_dir_radians = math.radians(self.attached_player.heading)
-            dx = int(20 * math.sin(player_dir_radians))
-            dy = int(20 * math.cos(player_dir_radians))
+            dx = int(self.offset * math.sin(player_dir_radians))
+            dy = int(self.offset * math.cos(player_dir_radians))
             self.x, self.y = self.x + dx, self.y + dy
             self.rot_self_image_keep_size(self.attached_player.heading)  # en tiedä onko tästä iloa savun kanssa
         else:
