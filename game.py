@@ -191,7 +191,7 @@ class AUTSBallGame:
         text.show_score(self.window, (700, 10), self.score_red, team=1)
 
         # Antialiasing!
-        effect.antialiasing(self.win, graphic_quality=Settings.data['graphic_quality'])
+        effect.antialiasing(self.window, graphic_quality=Settings.data['graphic_quality'])
         # Displayn update
         pygame.display.flip()
 
