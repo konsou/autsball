@@ -205,7 +205,7 @@ class AUTSBallGame:
             self.score_green += 1
             goal_text_color = GREEN
             self.goal_green_sound.play()
-        text.DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=120,
+        text.DisappearingText(clock=self.clock, pos=self.screen_center_point, text="GOAL!!!", ms_visible=2000,
                          color=goal_text_color, font_size=120, flashes=1)
 
     def exit(self):
@@ -223,6 +223,8 @@ if __name__ == '__main__':
     pygame.init()
     window = pygame.display.set_mode(WINDOW_SIZE)#, pygame.HWSURFACE | pygame.DOUBLEBUF)
     pygame.display.set_caption("AUTSball")
+
+    Settings.load()
 
     load_assets(window)
 

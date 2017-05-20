@@ -226,6 +226,6 @@ class PlayerSprite(game_object.GameObject):
     def recover(self):
         """ Aloittaa recovery-laskennan """
         self._recovery_started_at = pygame.time.get_ticks()
-        text.DisappearingText(pos=self.parent.screen_center_point, text="RECOVERING...", frames_visible=240, flashes=1,
-                         font_size=80, color=RED)
+        text.DisappearingText(clock=self.parent.clock, pos=self.parent.screen_center_point, text="RECOVERING...",
+                              ms_visible=self._recovery_time * 1000, flashes=1, font_size=80, color=RED)
 

@@ -167,6 +167,8 @@ class BackgroundAction(pygame.sprite.Sprite):
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, background_group)
 
+        self.clock = pygame.time.Clock()
+
         # Vakioita
         self.gravity = 0.1
         self.screen_size_x = WINDOW_SIZE[0]
@@ -200,6 +202,8 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.score_red = 0
 
     def update(self):
+        self.clock.tick()
+
         self.checked_collisions = set()
         self.ball_pos = (self.ball.x, self.ball.y)
 
@@ -233,7 +237,7 @@ class BackgroundAction(pygame.sprite.Sprite):
         elif scoring_team == 'green':
             self.score_green += 1
             goal_text_color = GREEN
-        text.DisappearingText(pos=(400,525), text="GOAL!!!", frames_visible=60,
+        text.DisappearingText(clock=self.clock, pos=(400,525), text="GOAL!!!", ms_visible=2000,
                                   color=goal_text_color, font_size=120, flashes=1)
 
     def kill_me(self):
