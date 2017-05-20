@@ -1,8 +1,7 @@
 # -*- coding: utf8 -*-
 import pygame
-import math
-import sys
 import music
+import sound
 import groups
 import level
 import player
@@ -12,7 +11,7 @@ import effect
 from pygame.locals import *
 from colors import *
 from constants import *
-from assets import assets, assets_rot, load_assets
+from assets import assets, load_assets
 
 
 class AUTSBallGame:
@@ -20,24 +19,18 @@ class AUTSBallGame:
         self.is_running = False
         self.local_player_id = 0
 
-        # Vakioita
-        self.screen_size_x = WINDOW_SIZE[0]
-        self.screen_size_y = WINDOW_SIZE[1]
-        self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
-
         # Pygamen inittejä
         # HUOM! Inittien järjestys tärkeä!
         # 1) mixerin pre-init
         # 2) pygamen init
         pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
         pygame.init()
-        # pygame.mixer.init()
-        self.window = pygame.display.set_mode((self.screen_size_x, self.screen_size_y)) #, pygame.HWSURFACE | pygame.DOUBLEBUF)
+        self.window = pygame.display.set_mode(WINDOW_SIZE)
         pygame.display.set_caption("AUTSball")
         self.clock = pygame.time.Clock()
 
         # Taustamusiikki
-        self.music_player = music.MusicPlayer(screen='game', window_size=(self.screen_size_x, self.screen_size_y),
+        self.music_player = music.MusicPlayer(screen='game', window_size=WINDOW_SIZE,
                                               pos='bottomleft', group=groups.TextGroup, shuffle=0)
 
         # SFX
@@ -166,7 +159,7 @@ class AUTSBallGame:
         """ Grafiikoiden päivitysmetodi """
 
         # Ruutu tyhjäksi
-        self.window.fill((0, 0, 0))
+        self.window.fill(BLACK)
 
         # Piirretään levelin ulkopuolinen tuhoutumaton alue
         off_level_rect = pygame.Rect(self.background_view_rect[0]-WINDOW_SIZE[0]//2,
@@ -192,6 +185,7 @@ class AUTSBallGame:
 
         # Antialiasing!
         effect.antialiasing(self.window, graphic_quality=Settings.data['graphic_quality'])
+
         # Displayn update
         pygame.display.flip()
 
@@ -200,12 +194,12 @@ class AUTSBallGame:
         if scoring_team == 'red':
             self.score_red += 1
             goal_text_color = RED
-            self.goal_red_sound.play()
+            sound.force_play_sound(self.goal_red_sound)
         elif scoring_team == 'green':
             self.score_green += 1
             goal_text_color = GREEN
-            self.goal_green_sound.play()
-        text.DisappearingText(clock=self.clock, pos=self.screen_center_point, text="GOAL!!!", ms_visible=2000,
+            sound.force_play_sound(self.goal_green_sound)
+        text.DisappearingText(clock=self.clock, pos=SCREEN_CENTER_POINT, text="GOAL!!!", ms_visible=2000,
                          color=goal_text_color, font_size=120, flashes=1)
 
     def exit(self):

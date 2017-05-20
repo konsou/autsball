@@ -4,6 +4,7 @@ import vector
 import math
 import copy
 import types
+import sound
 from colors import *
 from assets import assets, assets_rot, assets_mask, assets_rot_mask
 
@@ -271,7 +272,7 @@ class GameObject(pygame.sprite.Sprite):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
         # Soitetaan seinääntörmäysääni jos nopeus yli 3 ja on liikkunut viime kerrasta
         if self.move_vector.get_speed() > 3 and self.x != self.x_previous and self.y != self.y_previous:
-            self.force_play_sound(self.wall_collide_sound)
+            sound.force_play_sound(self.wall_collide_sound)
 
         # Vauhti loppuu kuin seinään
         self.move_vector.set_speed(0)
@@ -314,15 +315,6 @@ class GameObject(pygame.sprite.Sprite):
     def distance(self, other_object):
         """ Laskee etäisyyden toiseen GameObjectiin. Käyttää neliöjuurta eli oletettavasti hitaampi kuin yllä. """
         return math.hypot(self.x - other_object.x, self.y - other_object.y)
-
-    def force_play_sound(self, sound, duration=0):
-        """ 
-        Soitetaan määritetty ääni jos se on olemassa, pakotetaan sille kanava auki
-        Kanavan auki pakottamisessa on se idea että jos on hirveesti ääniä jo soimassa niin uudet äänet soi silti
-        TODO: siirrä järkevämpään paikkaan
-        """
-        if sound is not None:
-            pygame.mixer.find_channel(True).play(sound, duration)
 
 
 def get_angle_difference(angle1, angle2, degrees=0):

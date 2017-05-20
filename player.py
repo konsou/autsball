@@ -6,7 +6,9 @@ import effect
 import bullet
 import groups
 import text
+import sound
 from colors import *
+from constants import *
 from pygame.locals import *
 from assets import assets, assets_rot
 
@@ -40,7 +42,7 @@ class PlayerSprite(game_object.GameObject):
 
         self.thrust_gfx = effect.MotorFlame(attached_player=self, image_file=thrust_image_file,
                                               visible=0, parent=parent, offset=motor_flame_offset)
-        self.rect.center = self.parent.screen_center_point
+        self.rect.center = SCREEN_CENTER_POINT
         if self.owning_player_id == parent.local_player_id:
             self.is_centered_on_screen = 1
             # Pallonsuuntamarkkeri
@@ -143,7 +145,7 @@ class PlayerSprite(game_object.GameObject):
     def attach_ball(self, ball):
         if self.attached_ball is None:
             self.attached_ball = ball
-            self.force_play_sound(self.ball_capture_sound)
+            sound.force_play_sound(self.ball_capture_sound)
 
     def detach(self):
         self.attached_ball = None
@@ -154,7 +156,7 @@ class PlayerSprite(game_object.GameObject):
             self.thrust = self.max_thrust
             self.thrust_gfx.visible = 1
             if not self.motor_sound_playing:
-                self.force_play_sound(self.motor_sound, -1)
+                sound.force_play_sound(self.motor_sound, -1)
                 self.motor_sound_playing = 1
         else:
             if type(self).__name__ is not 'DemoPlayer':
@@ -194,7 +196,7 @@ class PlayerSprite(game_object.GameObject):
         # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
         if self._cooldown_counter == 0:
-            self.force_play_sound(self.bullet_sound)
+            sound.force_play_sound(self.bullet_sound)
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
             bullet.BasicShot(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
@@ -209,13 +211,13 @@ class PlayerSprite(game_object.GameObject):
             # self.attached_ball.shoot(x=ball_x, y=ball_y, direction=self.heading, speed=10)
             self.attached_ball.shoot(direction=self.heading, speed=10)
             self.attached_ball.detach()
-            self.force_play_sound(self.ball_shoot_sound)
+            sound.force_play_sound(self.ball_shoot_sound)
 
     def shoot_special(self):
         """ Ammutaan erikoisammus """
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
         if self._cooldown_counter_special == 0:
-            self.force_play_sound(self.bullet_sound)
+            sound.force_play_sound(self.bullet_sound)
             # TODO: laske dx, dy ammuksen initissä
             bullet_x = int(20 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(20 * math.cos(math.radians(self.heading)) * -1 + self.y)
