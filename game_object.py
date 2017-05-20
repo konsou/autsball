@@ -342,3 +342,12 @@ def get_angle_in_radians(point1, point2):
     return math.atan2(y_difference, x_difference)
 
 
+def rad2deg_custom(rad):
+    """ Muuttaa annetun kulman asteiksi, ottaen huomioon omituisuudet. Palauttaa INT-arvon välilä 0...359. """
+    degrees = 270 - math.degrees(rad)
+    while degrees < 0:
+        degrees += 360
+    while degrees > 359:
+        degrees -= 360
+    return int(degrees)
+

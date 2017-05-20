@@ -6,7 +6,7 @@ import random
 import xml.etree.ElementTree as ET
 from colors import *
 from assets import assets
-
+""" Sisältää tekstin käsittelyyn liittyvät jutut """
 num_images = {}
 last_scores = [0, 0]
 last_score_images = [None, None]

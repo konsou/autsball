@@ -8,6 +8,7 @@ import level
 import player
 import ball
 import text
+import effect
 from pygame.locals import *
 from colors import *
 from constants import *
@@ -53,9 +54,6 @@ class AUTSBallGame:
         self.player_count_team = {'red': 0, 'green': 0}
 
         self.ball = ball.BallSprite(level=self.current_level, parent=self)
-
-        # En ole varma onko tästä enää hyötyä
-        # self.checked_collisions = set()
 
         self.viewscreen_rect = None
         self.background_view_rect = None
@@ -195,21 +193,6 @@ class AUTSBallGame:
         text.show_score(self.window, (50, 10), self.score_green, team=0)
         text.show_score(self.window, (700, 10), self.score_red, team=1)
 
-        # Näytetään pallonsuuntamarkkeri
-        # TODO: muuta pallon sijaan nuoli joka osoittaa oikeaan suuntaan
-        # TODO: tee niin että jos pallo on lähempänä kuin 100 pikseliä niin markkeri on pallon päällä
-        if self.players[self.local_player_id].attached_ball is None:
-            if self.players[self.local_player_id].distance_squared(self.ball) >= 10000:
-                ball_angle = self.get_ball_angle_in_radians(self.ball)
-                vx = int(100 * math.cos(ball_angle))
-                vy = int(100 * math.sin(ball_angle))
-                marker_pos = (self.players[self.local_player_id].x + vx, self.players[self.local_player_id].y + vy)
-            else:
-                marker_pos = (self.ball.x, self.ball.y)
-            print marker_pos
-            pygame.draw.circle(self.window, (0, 0, 255),
-                                   marker_pos, 5)
-
         # Displayn update
         pygame.display.flip()
 
@@ -225,14 +208,6 @@ class AUTSBallGame:
             self.goal_green_sound.play()
         text.DisappearingText(pos=self.screen_center_point, text="GOAL!!!", frames_visible=120,
                          color=goal_text_color, font_size=120, flashes=1)
-
-    def get_ball_angle_in_radians(self, ball):
-        """ Tämä auttaa pallon suuntamarkkerin piirrossa """
-        point2 = (self.screen_size_x // 2, self.screen_size_y // 2)
-        point1 = ball.rect.center
-        x_difference = point1[0] - point2[0]
-        y_difference = point1[1] - point2[1]
-        return math.atan2(y_difference, x_difference)
 
     def exit(self):
         """ Tähän voi laittaa jotain mitä tulee ennen poistumista """

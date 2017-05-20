@@ -43,6 +43,8 @@ class PlayerSprite(game_object.GameObject):
         self.rect.center = self.parent.screen_center_point
         if self.owning_player_id == parent.local_player_id:
             self.is_centered_on_screen = 1
+            # Pallonsuuntamarkkeri
+            effect.BallDirectionMarker(self, self.parent.ball)
         else:
             self.is_centered_on_screen = 0
 
