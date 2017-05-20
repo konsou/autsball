@@ -186,10 +186,7 @@ class AUTSBallGame:
         groups.TextGroup.draw(self.window)
 
         # HUD
-        # self.show_text((10, 10), "Speed: " + str(math.hypot(self.player[0].vx, self.player[0].vy)))
         text.show_text(self.window, (10, 70), "FPS: " + str(self.clock.get_fps()))
-        #text.show_text(self.window, (10, 10), str(self.score_green), color=GREEN, font_size=40)
-        #text.show_text(self.window, (750, 10), str(self.score_red), color=RED, font_size=40)
         text.show_score(self.window, (50, 10), self.score_green, team=0)
         text.show_score(self.window, (700, 10), self.score_red, team=1)
 
@@ -211,9 +208,8 @@ class AUTSBallGame:
 
     def exit(self):
         """ Tähän voi laittaa jotain mitä tulee ennen poistumista """
+        self.is_running = 0
         pygame.quit()
-        # Jostain syystä vaatii myös tämän, muuten jää infinite looppi taustalle vaikka pygame-ikkuna katoaakin
-        sys.exit()
 
 
 if __name__ == '__main__':

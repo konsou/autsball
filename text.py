@@ -27,6 +27,7 @@ def show_text(win, pos, text, color=(255, 255, 255), bgcolor=(0, 0, 0), font_siz
 
 
 def show_score(win, pos, score, team):
+    # Tämä voisi olla parempi omana objektinaan, joka kuuluu TextGroupiin niin ei tarvitsisi erikseen kutsua
     if score != last_scores[team]:
         last_scores[team] = score
         score_numbers = map(int, str(score))
