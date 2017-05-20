@@ -251,23 +251,20 @@ class GameObject(pygame.sprite.Sprite):
 
     def check_collision_with_group(self, group):
         """ Tarkastaa törmääkö objekti ryhmässä oleviin toisiin objekteihin. """
-        # Käyttää tällä hetkellä pygamen apply_collision_to_move_vector:ä eli laskee radius-attribuutin mukaan törmäykset
-        # TODO: törmäyksissä käyttöön bitmask
         collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=pygame.sprite.collide_mask)
         for colliding_object in collide_list:
             # Emme halua törmätä itseemme
             # Skippaamme myös jo käsitellyt kollisiot
-            if colliding_object != self and (self, colliding_object) not in self.parent.checked_collisions:
+            if colliding_object != self: #  and (self, colliding_object) not in self.parent.checked_collisions:
                 # Kutsutaan objektin collided_with-metodia, se hoitaa törmäyskäyttäytymisen
                 self.collided_with(colliding_object)
                 # Lisätään käsitelty törmäys settiin ettei sitä toisteta tässä framessa enää
-                self.parent.checked_collisions.add((self, colliding_object))
+                # self.parent.checked_collisions.add((self, colliding_object))
                 # colliding_object.collided_with(self)
 
     def collided_with(self, other_object):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
         # Lasketaan törmäyksen liikemäärät
-        # TODO: ei oikein toimi kunnolla - tulee monia perättäisiä törmäyksiä
         self.apply_collision_to_move_vector(other_object)
 
     def collided_with_wall(self):

@@ -55,7 +55,7 @@ class AUTSBallGame:
         self.ball = ball.BallSprite(level=self.current_level, parent=self)
 
         # En ole varma onko tästä enää hyötyä
-        self.checked_collisions = set()
+        # self.checked_collisions = set()
 
         self.viewscreen_rect = None
         self.background_view_rect = None
@@ -136,19 +136,18 @@ class AUTSBallGame:
                     self.players[self.local_player_id].recover()
 
                 # Viewscreen rect: viewscreen absoluuttisissa koordinaateissa
-                self.viewscreen_rect = (self.players[self.local_player_id].x - self.screen_size_x // 2,
-                                        self.players[self.local_player_id].y - self.screen_size_y // 2,
-                                        self.screen_size_x,
-                                        self.screen_size_y)
+                self.viewscreen_rect = (self.players[self.local_player_id].x - WINDOW_SIZE[0] // 2,
+                                        self.players[self.local_player_id].y - WINDOW_SIZE[1] // 2,
+                                        WINDOW_SIZE[0],
+                                        WINDOW_SIZE[1])
 
                 # Background view rect: näytetään levelistä oikea kohta
-                self.background_view_rect = (self.screen_size_x // 2 - self.players[self.local_player_id].x,
-                                             self.screen_size_y // 2 - self.players[self.local_player_id].y,
-                                             self.screen_size_x,
-                                             self.screen_size_y)
+                self.background_view_rect = (WINDOW_SIZE[0] // 2 - self.players[self.local_player_id].x,
+                                             WINDOW_SIZE[1] // 2 - self.players[self.local_player_id].y,
+                                             WINDOW_SIZE[0],
+                                             WINDOW_SIZE[1])
 
                 # Spritejen päivitykset tässä
-                self.checked_collisions = set()
                 groups.BulletGroup.update(self.viewscreen_rect)
                 groups.BallGroup.update(self.viewscreen_rect)
                 groups.PlayerGroup.update(self.viewscreen_rect)
@@ -200,11 +199,16 @@ class AUTSBallGame:
         # TODO: muuta pallon sijaan nuoli joka osoittaa oikeaan suuntaan
         # TODO: tee niin että jos pallo on lähempänä kuin 100 pikseliä niin markkeri on pallon päällä
         if self.players[self.local_player_id].attached_ball is None:
-            ball_angle = self.get_ball_angle_in_radians(self.ball)
-            vx = int(100 * math.cos(ball_angle))
-            vy = int(100 * math.sin(ball_angle))
+            if self.players[self.local_player_id].distance_squared(self.ball) >= 10000:
+                ball_angle = self.get_ball_angle_in_radians(self.ball)
+                vx = int(100 * math.cos(ball_angle))
+                vy = int(100 * math.sin(ball_angle))
+                marker_pos = (self.players[self.local_player_id].x + vx, self.players[self.local_player_id].y + vy)
+            else:
+                marker_pos = (self.ball.x, self.ball.y)
+            print marker_pos
             pygame.draw.circle(self.window, (0, 0, 255),
-                               (self.screen_size_x // 2 + vx, self.screen_size_y // 2 + vy), 5)
+                                   marker_pos, 5)
 
         # Displayn update
         pygame.display.flip()
