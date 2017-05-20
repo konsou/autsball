@@ -5,7 +5,7 @@ import math
 import copy
 import types
 from colors import *
-from assets import assets, assets_rot
+from assets import assets, assets_rot, assets_mask, assets_rot_mask
 
 
 class GameObject(pygame.sprite.Sprite):
@@ -71,6 +71,9 @@ class GameObject(pygame.sprite.Sprite):
         # Tämä päivitetään myöhemmin, initoidaan kuitenkin ettei PyCharm herjaa
         self.viewscreen_rect = None
 
+    def __repr__(self):
+        return "<GAME OBJECT>"
+
     def load_image(self, image_file=None, frames_per_image=5):
         """ 
         Lataa kuvan/kuvat spritelle. Asettaa rect, radius, size.
@@ -78,7 +81,6 @@ class GameObject(pygame.sprite.Sprite):
         HUOM! Assettien esilatauksen myötä ei tue enää kuvaobjektien syöttämistä suoraan vaan AINA pitää olla
         tiedostonimi!
         """
-
         # Ensin katsotaan onko image_file muuta kuin yksittäinen stringi.
         # Jos on muuta niin oletetaan sen olevan lista/tuple/dict joka sitältää tiedostonimiä
         # ja ladataan sieltä kuvat animaatiota varten.
@@ -95,25 +97,15 @@ class GameObject(pygame.sprite.Sprite):
             self._animation_frame_counter = 0
             self._animation_current_image_counter = 0
             self._animation_enabled = 1
-        # Animaatio valmiiksi ladatuista kuvista
-        # Emme enää tue
-        # elif type(image) is types.ListType:
-        #     self._animation_images = image
-        #     self.image = self._animation_images[0]
-        #     self.animation_frames_per_image = frames_per_image
-        #     self._animation_frame_counter = 0
-        #     self._animation_current_image_counter = 0
-        #     self._animation_enabled = 1
         # Jos animaatio ei enabloitu niin jatketaan normaalisti
         else:
-            # Jos image on valmiiksi kuvaobjekti niin käytetään sitä
-            # Emme enää tue
-            # if image is not None:
-            #     self.image = image
             # Jos on annettu kuvatiedosto niin luetaan se
             self.image = assets[image_file]
             self.image_filename = image_file
             self._animation_enabled = 0
+
+        # bitmask collision detectionia varten
+        self.mask = assets_mask[self.image_filename]
 
         # Tämä tarvitaan rotaatioita varten
         self.original_image = self.image
@@ -188,6 +180,7 @@ class GameObject(pygame.sprite.Sprite):
 
     def animate_next_frame(self):
         """ Muuttaa image:ksi ja original_image:ksi seuraavan kuvan animaatiossa """
+        # TODO: tämän olisi hyvä vaikuttaa myös maskiin siltä varalta jos eri frameissa on eri koko
         self._animation_current_image_counter += 1
         try:
             self.image = self._animation_images[self._animation_current_image_counter]
@@ -202,6 +195,7 @@ class GameObject(pygame.sprite.Sprite):
         """ Muuttaa kuvaksi oikean esiladatun ja -rotatoidun kuvan """
         angle = int(angle)  # tällä sallitaan floatit handlingiin
         self.image = assets_rot[self.image_filename][angle]
+        self.mask = assets_rot_mask[self.image_filename][angle]
 
     def check_out_of_bounds(self):
         """ Pitää objektin pelialueen sisällä """
@@ -217,121 +211,101 @@ class GameObject(pygame.sprite.Sprite):
         elif self.y != y_before:
             self.move_vector.set_vy(0)
 
-    def check_collision_with_wall_and_goal(self):
-        """ Tarkastaa törmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa """
+    def check_collision_with_wall_and_goal(self, speculate=0):
+        """ 
+        Tarkastaa törmäyksen seiniin  ja mahdollisesti maaliin - eli juttuihin level-taustassa 
+        Palauttaa 1 jös tärmäsi seinään, muuten 0
+        Jos speculate on 1 niin laskee seinätörmäyksen ikään kuin oltaisiin jo seuraavassa framessa
+        """
+        wall_collision = 0
+
+        if speculate:
+            # Nykyiset arvot talteen
+            orig_x, orig_y = self.x, self.y
+            orig_x_previous, orig_y_previous = self.x_previous, self.y_previous
+            orig_move_vector = copy.copy(self.move_vector)
+
+            # Päivitetään liikettä ikään kuin oltaisiin jo seuraavassa framessa
+            self.update_movement()
+            self.check_out_of_bounds()
+
         # Katotaan mikä väri on levelissä tässä pisteessä - skipataan alfa
         current_point = self.level.image.get_at((self.x, self.y))[:3]
 
-        # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys ja vauhti menee nollaan
+        # Jos väri on muuta kuin musta/vihreä/punainen niin on törmäys ja kutsutaan tärmäysmetodia
         if current_point not in (BLACK, RED, GREEN):
-            # Soitetaan seinääntörmäysääni seuraavin ehdoin:
-            #  -nopeus yli 3 (ettei ihan pienistä tule jatkuvaa pärinää)
-            #  -jos on liikuttu
-            #  -ääni on olemassa
-            if self.move_vector.get_speed() > 3:
-                if self.wall_collide_sound and self.x != self.x_previous and self.y != self.y_previous:
-                    # print("Playing thump")
-                    self.force_play_sound(self.wall_collide_sound)
-            if self.is_bullet:
-                self.collide_with_wall()
-            else:
-                # Vauhti loppuu kuin seinään
-                self.move_vector.set_speed(0)
-                # Estetään seinän sisään menemistä tällä - eli jos olisi seinän sisällä niin vaihdetaan
-                # koordinaateiksi edelliset lukemat (jolloin oletettavasti ei ollut seinän sisällä)
-                self.x = self.x_previous
-                self.y = self.y_previous
+            if not speculate:
+                self.collided_with_wall()
+            wall_collision = 1
+        elif current_point in (RED, GREEN):
+            if not speculate:
+                self.is_in_goal(current_point)
 
-        # Jos objekti on pallo niin katsotaan onko maalissa
-        if self.is_ball:
-            # Punainen maali - piste vihreälle
-            if current_point == RED:
-                self.parent.score('GREEN')
-                self.reset()
-            # Vihreä maali - piste punaiselle
-            elif current_point == GREEN:
-                self.parent.score('RED')
-                self.reset()
+        if speculate:
+            # Palautetaan alkuperäiset arvot
+            self.x, self.y = orig_x, orig_y
+            self.x_previous, self.y_previous = orig_x_previous, orig_y_previous
+            self.move_vector = orig_move_vector
 
-    def speculate_collision_with_wall(self):
-        """ 
-        Spekuloi mahdollista törmäystä walliin
-        
-        Palauttaa 1 jos törmäisi
-        Palauttaa 0 jos ei törmäisi
-        
-        TODO: turhaa koodin duplikointia, keksi tapa parantaa? 
-        """
-        move_vector_copy = copy.copy(self.move_vector)
+        return wall_collision
 
-        # Gravityn vaikutus
-        if self.gravity_affects:
-            move_vector_copy.add_to_vy(self.parent.gravity)
-
-        # Max speed rajoittaa
-        move_vector_copy.set_speed(min(move_vector_copy.get_speed(), self.max_speed))
-
-        # Muutetaan koordinaatteja liikemäärän mukaan
-        x = int(move_vector_copy.get_vx() + self.x)
-        y = int(move_vector_copy.get_vy() + self.y)
-
-        # Out of bounds-check
-        x = max(0, x)
-        x = min(self.level.size_x - 1, x)
-        y = max(0, y)
-        y = min(self.level.size_y - 1, y)
-
-        # Katotaan mikä väri on levelissä tässä pisteessä - skipataan alfa
-        current_point = self.level.image.get_at((x, y))[:3]
-        # print("Current point (copy):", current_point)
-        if current_point not in (BLACK, RED, GREEN):
-            #print("Speculative collision detected")
-            return 1
-        else:
-            return 0
-
-    def check_collision_with_bullets(self, BulletGroup):
-        """ Tarkastaa törmääkö objekti bulletteihin. Jos törmää niin laskee törmäyksen ja soittaa törmäysäänen. """
-        # dokill=True eli bullet tapetaan törmäyksessä
-        # Käyttää tällä hetkellä pygamen collide_circle:ä eli laskee radius-attribuutin mukaan törmäykset
-        # TODO: törmäyksissä käyttöön bitmask?
-        collide_list = pygame.sprite.spritecollide(self, BulletGroup, dokill=True, collided=pygame.sprite.collide_circle)
-        if len(collide_list) > 0:
-            self.collide_circle(collide_list[0])
-            collide_list[0].collide_with_player()  # kutsutaan bulletin törmäysmetodia jos siellä on jotain mitä pitää tehdä
-            if self.bullet_collide_sound is not None:
-                self.force_play_sound(self.bullet_collide_sound)
-
-    def check_collision_with_players(self, playergroup):
-        """ Tarkastaa törmääkö objekti pelaajiin. Jos törmää niin laskee törmäyksen. """
-        # TODO: törmäysääni
-        # TODO: törmäyksissä käyttöön bitmask?
-        collide_list = pygame.sprite.spritecollide(self, playergroup, dokill=False,
-                                                   collided=pygame.sprite.collide_circle)
-        for colliding_player in collide_list:
+    def check_collision_with_group(self, group):
+        """ Tarkastaa törmääkö objekti ryhmässä oleviin toisiin objekteihin. """
+        collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=pygame.sprite.collide_mask)
+        for colliding_object in collide_list:
             # Emme halua törmätä itseemme
-            if colliding_player != self:
-                self.collide_circle(collide_list[0])
-        
-    def collide_circle(self, other_object):
+            # Skippaamme myös jo käsitellyt kollisiot
+            if colliding_object != self: #  and (self, colliding_object) not in self.parent.checked_collisions:
+                # Kutsutaan objektin collided_with-metodia, se hoitaa törmäyskäyttäytymisen
+                self.collided_with(colliding_object)
+                # Lisätään käsitelty törmäys settiin ettei sitä toisteta tässä framessa enää
+                # self.parent.checked_collisions.add((self, colliding_object))
+                # colliding_object.collided_with(self)
+
+    def collided_with(self, other_object):
+        """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
+        # Lasketaan törmäyksen liikemäärät
+        self.apply_collision_to_move_vector(other_object)
+
+    def collided_with_wall(self):
+        """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
+        # Soitetaan seinääntörmäysääni jos nopeus yli 3 ja on liikkunut viime kerrasta
+        if self.move_vector.get_speed() > 3 and self.x != self.x_previous and self.y != self.y_previous:
+            self.force_play_sound(self.wall_collide_sound)
+
+        # Vauhti loppuu kuin seinään
+        self.move_vector.set_speed(0)
+        # Estetään seinän sisään menemistä tällä - eli jos olisi seinän sisällä niin vaihdetaan
+        # koordinaateiksi edelliset lukemat (jolloin oletettavasti ei ollut seinän sisällä)
+        self.x = self.x_previous
+        self.y = self.y_previous
+
+    def is_in_goal(self, point_color):
+        """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
+        pass
+
+    def apply_collision_to_move_vector(self, other_object):
         """ 
-        Törmäyttää kaksi GameObjectia, jotka oletetaan ympyrän muotoisiksi.
-        Laskee suunnat ja liikemäärät uusiksi.
+        Törmäyttää itsensä toiseen GameObjectiin.
+        Oletetaan molemmat ympyrän muotoisiksi.
+        --> Laskee VAIN SELF:IN suunnat ja liikemäärät uusiksi. <--
         Jopa ottaa massat huomioon!
         Vähän luulen että tässä on vielä viilaamisen varaa, ei tunnu aivan oikealta kaikissa tilanteissa...
         """
         angle_to_other = get_angle_in_radians(other_object.rect.center, self.rect.center)
         self.move_vector.set_direction(angle_to_other - math.pi)
-        other_object.move_vector.set_direction(angle_to_other)
+        # other_object.move_vector.set_direction(angle_to_other)
 
-        speed1 = self.move_vector.get_speed()
+        # speed1 = self.move_vector.get_speed()
         speed2 = other_object.move_vector.get_speed()
         mass1 = self.mass
         mass2 = other_object.mass
         speed1_new = (mass2 / mass1) * speed2
-        speed2_new = (mass1 / mass2) * speed1
+        # speed2_new = (mass1 / mass2) * speed1
         self.move_vector.set_speed(speed1_new)
-        other_object.move_vector.set_speed(speed2_new)
+        # Yritetään estää toisen sisään menemistä
+        self.x, self.y = self.x_previous, self.y_previous
+        # other_object.move_vector.set_speed(speed2_new)
 
     def distance_squared(self, other_object):
         """ Laskee etäisyyden neliön toiseen GameObjectiin. Näin vältetään neliöjuuren laskeminen joka on kallista. """
@@ -367,4 +341,13 @@ def get_angle_in_radians(point1, point2):
     y_difference = point1[1] - point2[1]
     return math.atan2(y_difference, x_difference)
 
+
+def rad2deg_custom(rad):
+    """ Muuttaa annetun kulman asteiksi, ottaen huomioon omituisuudet. Palauttaa INT-arvon välilä 0...359. """
+    degrees = 270 - math.degrees(rad)
+    while degrees < 0:
+        degrees += 360
+    while degrees > 359:
+        degrees -= 360
+    return int(degrees)
 
