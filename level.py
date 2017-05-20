@@ -34,13 +34,13 @@ class Level(pygame.sprite.Sprite):
             background_image.set_alpha(None)
         except AttributeError:
             background_image = pygame.Surface((50, 50))
-            # background_image = pygame.image.load('gfx/cave_background.png').convert()
+            # background_image = pygame.image.load('gfx/background_cave.png').convert()
         try:
             self.off_level_image = assets[current_level.find('images/off-level').text]
             self.off_level_image.set_alpha(None)
         except AttributeError:
             self.off_level_image = pygame.Surface((50, 50))
-            # self.off_level_image = pygame.image.load('gfx/cave_indestructible_rock.png').convert()
+            # self.off_level_image = pygame.image.load('gfx/background_cave_indestructible_rock.png').convert()
 
         # Levelin koko, rect, center_point
         self.size_x = self.image.get_width()

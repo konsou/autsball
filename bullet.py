@@ -127,7 +127,7 @@ class Switcher(BulletSprite):
     """ Vaihtaa paikkaa toisen objektin kanssa """
     def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0,
                  speed=10):
-        image_file = ['gfx/switcher1.png', 'gfx/switcher2.png']
+        image_file = ['gfx/bullet_switcher1.png', 'gfx/bullet_switcher2.png']
         BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
                               image_file=image_file, pos=pos, direction=direction, speed=speed)
 

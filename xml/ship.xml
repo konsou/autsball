@@ -40,8 +40,8 @@
 
     <ship name="Fatship" public="1">
         <images>
-            <team_red_image>gfx/fatship_red_32.png</team_red_image>
-            <team_green_image>gfx/fatship_green_32.png</team_green_image>
+            <team_red_image>gfx/ship_fatship_red_32.png</team_red_image>
+            <team_green_image>gfx/ship_fatship_green_32.png</team_green_image>
             <motor_flame_offset>15</motor_flame_offset>
             <!-- Idea tässä: jos samalla tagilla useita kuvia niin niistä tehdään animaatio -->
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
@@ -121,11 +121,11 @@
             <motor_flame_image>gfx/motorflame_twin_16_2.png</motor_flame_image>
             <motor_flame_image>gfx/motorflame_twin_16_3.png</motor_flame_image>
             <rear_smoke_offset>20</rear_smoke_offset>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_0.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_1.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_2.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_3.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_4.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_0.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_1.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_2.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_3.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_4.png</rear_smoke_image>
         </images>
         <sounds>
             <motor_sound>sfx/shhhh_v2.wav</motor_sound>
@@ -158,11 +158,11 @@
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10c.png</motor_flame_image>
             <rear_smoke_offset>20</rear_smoke_offset>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_0.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_1.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_2.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_3.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_4.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_0.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_1.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_2.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_3.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_4.png</rear_smoke_image>
         </images>
         <sounds>
             <motor_sound>sfx/shhhh_v2.wav</motor_sound>

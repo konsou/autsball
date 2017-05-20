@@ -38,7 +38,7 @@ class AUTSBallGame:
         self.goal_red_sound = assets['sfx/goal_red.wav']
 
         # Instansioidaan leveli
-        self.current_level = level.Level(level_name='Vertical Challenge')
+        self.current_level = level.Level(level_name='Test Level')
         self.gravity = self.current_level.gravity
 
         # Instansioidaan pelaaja ja pallo

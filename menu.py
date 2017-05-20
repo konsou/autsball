@@ -7,7 +7,7 @@ import effect
 from pygame.locals import *
 from colors import *
 from constants import *
-from assets import assets, assets_rot, load_assets
+from assets import assets, load_assets
 from ui_components import Button, ButtonGroup, LabelImageText, Checkbox, CheckboxGroup, Slider
 
 
@@ -16,7 +16,7 @@ def debug_run():
     pygame.display.set_caption("Menu test")
     clock = pygame.time.Clock()
 
-    window.fill((0, 0, 0))
+    window.fill(BLACK)
 
     # Ladataan settingsit
     # TODO: Siirrä asetusten lataus assettien latauksen kanssa samaan?
@@ -34,7 +34,6 @@ def debug_run():
     # 2) pygamen init
     pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
     pygame.init()
-    # pygame.mixer.init()
     music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
     music_player.volume = Settings.data['music_volume']
     if Settings.data['music_on']:
@@ -75,7 +74,7 @@ def debug_run():
     # Background action
     background_action = menu_background_action.BackgroundAction()
     # Tämä tummentaa tausta-actionin
-    darken_surface = pygame.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]))
+    darken_surface = pygame.Surface(WINDOW_SIZE)
     darken_surface.set_alpha(128)
 
     # Settings menu
