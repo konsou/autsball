@@ -7,7 +7,6 @@ import bullet
 import groups
 import text
 import sound
-import hud
 from colors import *
 from constants import *
 from pygame.locals import *
@@ -47,7 +46,7 @@ class PlayerSprite(game_object.GameObject):
         if self.owning_player_id == parent.local_player_id:
             self.is_centered_on_screen = 1
             # Pallonsuuntamarkkeri
-            hud.BallDirectionMarker(self, self.parent.ball)
+            effect.BallDirectionMarker(self, self.parent.ball)
         else:
             self.is_centered_on_screen = 0
 

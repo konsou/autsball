@@ -2,7 +2,7 @@
 import pygame
 import os
 import time
-import hud
+import effect
 from constants import *
 from pygame.locals import *
 from colors import *
@@ -86,7 +86,7 @@ def load_assets(window):
                 # files_size_total += file_size
                 files_size_current += file_size
                 files_size_total_inc_rot += file_size
-                hud.draw_loading_bar(window, files_size_current, files_size_total)
+                effect.draw_loading_bar(window, files_size_current, files_size_total)
                 # number_of_files += 1
                 width = assets[asset_key].get_width()
                 height = assets[asset_key].get_height()
@@ -118,7 +118,7 @@ def load_assets(window):
                 # files_size_total += file_size
                 files_size_current += file_size
                 files_size_total_inc_rot += file_size
-                hud.draw_loading_bar(window, files_size_current, files_size_total)
+                effect.draw_loading_bar(window, files_size_current, files_size_total)
                 # number_of_files += 1
                 if DEBUG_TEXT: print "Loaded %r" % filepath
                 # Äänitiedostoja emme rotatoi :)
