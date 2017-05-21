@@ -3,7 +3,6 @@ import pygame
 import random
 import tinytag
 import groups
-from assets import assets
 
 
 """

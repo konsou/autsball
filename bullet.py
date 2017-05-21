@@ -9,6 +9,8 @@ from assets import assets, assets_rot
 
 
 class BulletSprite(game_object.GameObject):
+    cooldown = 80  # millisekuntia
+
     """ direction asteina, tulee PlayerSpriten headingista """
     def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, image_file=None,
                  pos=(0, 0), direction=0, speed=10):
@@ -17,9 +19,10 @@ class BulletSprite(game_object.GameObject):
         self.shooting_player = shooting_player
         self.rect.center = pos
         self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
+        # Lisätään ampuvan pelaajan liikevektori että se vaikuttaa loogisella tavalla bulletin liikemäärään
+        self.move_vector.add_vector(shooting_player.move_vector)
         self.max_speed = 20
         self.mass = 0.1
-        # self.explosion_force = 1
 
         self.is_bullet = 1
         self.group = group
@@ -77,17 +80,23 @@ class BulletSprite(game_object.GameObject):
 
 
 class BasicShot(BulletSprite):
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0,0), direction=0, speed=10):
-        BulletSprite.__init__(self, parent=parent, level=level, group=group, image_file='gfx/bullet_5.png',
-                              pos=pos, direction=direction, speed=speed)
+    cooldown = 80
+
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0,0), direction=0,
+                 speed=10):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file='gfx/bullet_5.png', pos=pos, direction=direction, speed=speed)
         self.mass = 0.1
 
 
 class DumbFire(BulletSprite):
+    cooldown = 3000
+
     """ Iso ammus joka räjähtää törmätessä """
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0,0), direction=0, speed=10):
-        BulletSprite.__init__(self, parent=parent, level=level, group=group, image_file='gfx/bullet_10.png',
-                              pos=pos, direction=direction, speed=speed)
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0,0), direction=0,
+                 speed=10):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file='gfx/bullet_10.png', pos=pos, direction=direction, speed=speed)
 
         self.mass = 0.2
         self.explosion_force = 10
@@ -107,9 +116,13 @@ class DumbFire(BulletSprite):
 
 
 class Dirtball(BulletSprite):
+    cooldown = 3000
+
     """ Iso ammus joka luo maastoa törmätessä """
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0, speed=10):
-        BulletSprite.__init__(self, parent=parent, level=level, group=group, image_file='gfx/bullet_10.png',
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0,
+                 speed=10):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file='gfx/bullet_10.png',
                               pos=pos, direction=direction, speed=speed)
 
         self.mass = 0.2
@@ -124,6 +137,8 @@ class Dirtball(BulletSprite):
 
 
 class Switcher(BulletSprite):
+    cooldown = 3000
+
     """ Vaihtaa paikkaa toisen objektin kanssa """
     def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0,
                  speed=10):

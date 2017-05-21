@@ -5,8 +5,9 @@ import math
 import copy
 import types
 import sound
+import assets
 from colors import *
-from assets import assets, assets_rot, assets_mask, assets_rot_mask
+# from assets import assets, assets_rot, assets_mask, assets_rot_mask
 
 
 class GameObject(pygame.sprite.Sprite):
@@ -89,7 +90,7 @@ class GameObject(pygame.sprite.Sprite):
             self._animation_images = []
             self._animation_image_filenames = []
             for current_image in image_file:
-                self._animation_images.append(assets[current_image])
+                self._animation_images.append(assets.assets[current_image])
                 self._animation_image_filenames.append(current_image)
             self.image = self._animation_images[0]
             self.image_filename = self._animation_image_filenames[0]
@@ -101,12 +102,12 @@ class GameObject(pygame.sprite.Sprite):
         # Jos animaatio ei enabloitu niin jatketaan normaalisti
         else:
             # Jos on annettu kuvatiedosto niin luetaan se
-            self.image = assets[image_file]
+            self.image = assets.assets[image_file]
             self.image_filename = image_file
             self._animation_enabled = 0
 
         # bitmask collision detectionia varten
-        self.mask = assets_mask[self.image_filename]
+        self.mask = assets.assets_mask[self.image_filename]
 
         # Tämä tarvitaan rotaatioita varten
         self.original_image = self.image
@@ -195,8 +196,8 @@ class GameObject(pygame.sprite.Sprite):
     def rot_self_image_keep_size(self, angle):
         """ Muuttaa kuvaksi oikean esiladatun ja -rotatoidun kuvan """
         angle = int(angle)  # tällä sallitaan floatit handlingiin
-        self.image = assets_rot[self.image_filename][angle]
-        self.mask = assets_rot_mask[self.image_filename][angle]
+        self.image = assets.assets_rot[self.image_filename][angle]
+        self.mask = assets.assets_rot_mask[self.image_filename][angle]
 
     def check_out_of_bounds(self):
         """ Pitää objektin pelialueen sisällä """

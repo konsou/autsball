@@ -8,6 +8,7 @@ import player
 import ball
 import text
 import effect
+import hud
 from pygame.locals import *
 from colors import *
 from constants import *
@@ -58,7 +59,7 @@ class AUTSBallGame:
         self.frame_counter = 0
 
         # Ladataan numerokuvat
-        text.init_scores()
+        hud.init_scores()
 
     def start(self):
         if not self.is_running:
@@ -180,8 +181,8 @@ class AUTSBallGame:
 
         # HUD
         text.show_text(self.window, (10, 70), "FPS: " + str(self.clock.get_fps()))
-        text.show_score(self.window, (50, 10), self.score_green, team=0)
-        text.show_score(self.window, (700, 10), self.score_red, team=1)
+        hud.show_score(self.window, (50, 10), self.score_green, team=0)
+        hud.show_score(self.window, (700, 10), self.score_red, team=1)
 
         # Antialiasing!
         effect.antialiasing(self.window, graphic_quality=Settings.data['graphic_quality'])

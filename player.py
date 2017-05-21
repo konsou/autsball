@@ -7,6 +7,7 @@ import bullet
 import groups
 import text
 import sound
+import hud
 from colors import *
 from constants import *
 from pygame.locals import *
@@ -46,7 +47,7 @@ class PlayerSprite(game_object.GameObject):
         if self.owning_player_id == parent.local_player_id:
             self.is_centered_on_screen = 1
             # Pallonsuuntamarkkeri
-            effect.BallDirectionMarker(self, self.parent.ball)
+            hud.BallDirectionMarker(self, self.parent.ball)
         else:
             self.is_centered_on_screen = 0
 
@@ -87,13 +88,17 @@ class PlayerSprite(game_object.GameObject):
         self.max_speed = int(current_ship.find('max_speed').text)
         self.mass = float(current_ship.find('mass').text)
         self._max_acceleration = self.max_thrust / self.mass
-        self._cooldown_basic_shot = int(current_ship.find('cooldown_basic_shot').text)  # framea
-        self._cooldown_special = int(current_ship.find('cooldown_special').text)
-        self._cooldown_after_ball_shot = int(current_ship.find('cooldown_after_ball_shot').text) # cooldown sen jälkeen kun pallo on ammuttu
-        self._cooldown_counter = 0  # cooldown-counter1
+        self.cooldown_multiplier_basic = float(current_ship.find('cooldown_multiplier_basic').text)
+        self.cooldown_multiplier_special = float(current_ship.find('cooldown_multiplier_special').text)
+        self._cooldown_after_ball_shot = 60
+        self._cooldown_counter = 0
         self._cooldown_counter_special = 0
         self._recovery_time = float(current_ship.find('recovery_time').text)  # sekunteja jopa!
         self._recovery_started_at = 0
+
+        # Abilityt
+        self.basic_shot = bullet.BasicShot
+        self.special = bullet.DumbFire
 
     def __repr__(self):
         return "<SHIP {} {}>".format(self.owning_player_id, self.name)
@@ -115,14 +120,13 @@ class PlayerSprite(game_object.GameObject):
         self.check_collision_with_group(groups.BulletGroup)
 
         # Lasketaan cooldownia
-        if self._cooldown_counter > 0:
-            self._cooldown_counter -= 1
-        if self._cooldown_counter_special > 0:
-            self._cooldown_counter_special -= 1
+        self._cooldown_counter += self.parent.clock.get_time()
+        self._cooldown_counter_special += self.parent.clock.get_time()
 
         # Jos on pallo kytkettynä niin lisätään paljon cooldownia
-        if self.attached_ball is not None:
-            self._cooldown_counter = self._cooldown_after_ball_shot
+        # TODO: laita toimimaan uudestaan
+        # if self.attached_ball is not None:
+        #     self._cooldown_counter = self._cooldown_after_ball_shot
 
         if self._recovery_started_at != 0:
             if (pygame.time.get_ticks() - self._recovery_started_at) // 1000 > self._recovery_time - 1:
@@ -193,22 +197,20 @@ class PlayerSprite(game_object.GameObject):
     def shoot(self):
         # Ammutaan perusammus
         # Pelaajan nopeus vaikuttaa ammuksen vauhtiin
-        # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
+        # TODO: uudista cooldownit - määritys bullet.py:ssä, aikaperusteinen
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
-        if self._cooldown_counter == 0:
+        if self._cooldown_counter > self.basic_shot.cooldown:
+            # TODO: siirrä ääni bulletin ominaisuudeksi
             sound.force_play_sound(self.bullet_sound)
+            # TODO: siirrä näiden laskenta bulletin hoidettavaksi
             bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.BasicShot(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
-                         speed=10 + self.move_vector.get_speed())
-            self._cooldown_counter = self._cooldown_basic_shot
+            self.basic_shot(shooting_player=self, level=self.level, parent=self.parent, pos=(bullet_x, bullet_y),
+                             direction=self.heading)
+            self._cooldown_counter = 0
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
-            # ball_x = self.attached_ball.image.get_width() * math.sin(math.radians(self.heading)) * -1 + self.x
-            # ball_y = self.attached_ball.image.get_height() * math.cos(math.radians(self.heading)) * -1 + self.y
-
-            # self.attached_ball.shoot(x=ball_x, y=ball_y, direction=self.heading, speed=10)
             self.attached_ball.shoot(direction=self.heading, speed=10)
             self.attached_ball.detach()
             sound.force_play_sound(self.ball_shoot_sound)
@@ -216,14 +218,14 @@ class PlayerSprite(game_object.GameObject):
     def shoot_special(self):
         """ Ammutaan erikoisammus """
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
-        if self._cooldown_counter_special == 0:
+        if self._cooldown_counter_special > self.special.cooldown:
             sound.force_play_sound(self.bullet_sound)
             # TODO: laske dx, dy ammuksen initissä
             bullet_x = int(20 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(20 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.Switcher(shooting_player=self, level=self.level, parent=self.parent, pos=(bullet_x, bullet_y),
-                            direction=self.heading, speed=10 + self.move_vector.get_speed())
-            self._cooldown_counter_special = self._cooldown_special
+            self.special(shooting_player=self, level=self.level, parent=self.parent, pos=(bullet_x, bullet_y),
+                            direction=self.heading, speed=10)
+            self._cooldown_counter_special = 0
 
     def recover(self):
         """ Aloittaa recovery-laskennan """

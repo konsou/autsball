@@ -32,9 +32,8 @@
         <max_thrust>0.35</max_thrust><!-- float -->
         <max_speed>10</max_speed><!-- int -->
         <mass>1.0</mass><!-- float -->
-        <cooldown_basic_shot>5</cooldown_basic_shot><!-- int, framea -->
-        <cooldown_special>60</cooldown_special><!-- int, framea -->
-        <cooldown_after_ball_shot>60</cooldown_after_ball_shot><!-- int, framea -->
+        <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>3</recovery_time><!-- float, sekuntia -->
     </ship>
 
@@ -69,9 +68,8 @@
         <max_thrust>0.4</max_thrust>
         <max_speed>10</max_speed>
         <mass>2</mass>
-        <cooldown_basic_shot>5</cooldown_basic_shot>
-        <cooldown_special>60</cooldown_special>
-        <cooldown_after_ball_shot>60</cooldown_after_ball_shot>
+        <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>1</recovery_time>
     </ship>
 
@@ -104,9 +102,8 @@
         <max_thrust>0.35</max_thrust>
         <max_speed>50</max_speed>
         <mass>0.3</mass>
-        <cooldown_basic_shot>5</cooldown_basic_shot>
-        <cooldown_special>60</cooldown_special>
-        <cooldown_after_ball_shot>60</cooldown_after_ball_shot>
+        <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>1</recovery_time>
     </ship>
     
@@ -142,9 +139,8 @@
         <max_thrust>0.4</max_thrust>
         <max_speed>10</max_speed>
         <mass>1.5</mass>
-        <cooldown_basic_shot>5</cooldown_basic_shot>
-        <cooldown_special>60</cooldown_special>
-        <cooldown_after_ball_shot>60</cooldown_after_ball_shot>
+        <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>1</recovery_time>
     </ship>
 
@@ -179,9 +175,8 @@
         <max_thrust>0.4</max_thrust>
         <max_speed>10</max_speed>
         <mass>1.5</mass>
-        <cooldown_basic_shot>5</cooldown_basic_shot>
-        <cooldown_special>60</cooldown_special>
-        <cooldown_after_ball_shot>60</cooldown_after_ball_shot>
+        <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>1</recovery_time>
     </ship>
 </data>

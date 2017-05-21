@@ -2,6 +2,7 @@
 import pygame
 import os
 import time
+import hud
 from constants import *
 from pygame.locals import *
 from colors import *
@@ -85,7 +86,7 @@ def load_assets(window):
                 # files_size_total += file_size
                 files_size_current += file_size
                 files_size_total_inc_rot += file_size
-                _draw_loading_bar(window, files_size_current, files_size_total)
+                hud.draw_loading_bar(window, files_size_current, files_size_total)
                 # number_of_files += 1
                 width = assets[asset_key].get_width()
                 height = assets[asset_key].get_height()
@@ -117,7 +118,7 @@ def load_assets(window):
                 # files_size_total += file_size
                 files_size_current += file_size
                 files_size_total_inc_rot += file_size
-                _draw_loading_bar(window, files_size_current, files_size_total)
+                hud.draw_loading_bar(window, files_size_current, files_size_total)
                 # number_of_files += 1
                 if DEBUG_TEXT: print "Loaded %r" % filepath
                 # Äänitiedostoja emme rotatoi :)
@@ -150,26 +151,6 @@ def rot_image(original_image, angle):
     rot_rect.center = rot_image.get_rect().center
     rot_image = rot_image.subsurface(rot_rect).copy()
     return rot_image
-
-
-def _draw_loading_bar(window, current, total, bar_width=400, bar_height=30, pos=(200, 335), color=BLACK):
-    """
-    Piirtää ruudulle latauspalkin.
-    window - pygamen ruutuobjekti
-    current - ladattavan jutun nykyinen arvo
-    total - ladattavan jutun täysi arvo
-    bar_width - latauspalkin leveys kun lataus on valmis
-    bar_height - latauspalkin korkeus 
-    pos - positio
-    color - väri  
-    """
-    current = float(current)  # vaatii tämän ettei tee integer divisionia
-    width = int(current / total * bar_width)  # lasketaan loading barin leveys
-    height = bar_height
-    loading_bar_surface = pygame.Surface((width, height))
-    loading_bar_surface.fill(color)
-    blitrect = window.blit(loading_bar_surface, pos)
-    pygame.display.update(blitrect)  # päivitetään vain se osa ruudusta mitä tarvii
 
 
 if __name__ == '__main__':
