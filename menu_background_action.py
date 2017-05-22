@@ -128,8 +128,8 @@ class DemoPlayer(player.PlayerSprite):
         if self._cooldown_counter == 0:
             bullet_x = int(28 * math.sin(math.radians(self.heading)) * -1 + self.x)
             bullet_y = int(28 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.BasicShot(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
-                         speed=20)
+            bullet.BasicShot(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), heading=self.heading,
+                             speed=20)
             self._cooldown_counter = self._cooldown_basic_shot
 
 

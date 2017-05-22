@@ -4,25 +4,40 @@ import math
 import game_object
 import groups
 import effect
+import copy
 from colors import *
 from assets import assets, assets_rot
 
 
 class BulletSprite(game_object.GameObject):
+    """ Ammuttavien juttujen perusclass. Tässä vakioarvot jos muuta ei overrideta: """
     cooldown = 80  # millisekuntia
+    max_speed = 20
+    mass = 0.1
+    speed = 10
 
     """ direction asteina, tulee PlayerSpriten headingista """
     def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, image_file=None,
-                 pos=(0, 0), direction=0, speed=10):
-        game_object.GameObject.__init__(self, group=group, image_file=image_file, start_position=pos,
+                 heading=0, speed=10):
+
+        game_object.GameObject.__init__(self, group=group, image_file=image_file,
                                         level=level, parent=parent)
+
+        self.heading = heading
+
+        # Lasketaan bulletin aloituspiste niin ettei ole aluksen sisällä.
+        # Tässä viilaamisen varaa vielä jos haluaa perfektoida mutta toimii aika hyvin
+        self.x = int((shooting_player.radius + self.radius + 2) * math.sin(math.radians(self.heading))
+                     * -1 + shooting_player.x)
+        self.y = int((shooting_player.radius + self.radius + 2) * math.cos(math.radians(self.heading))
+                     * -1 + shooting_player.y)
+
         self.shooting_player = shooting_player
-        self.rect.center = pos
-        self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
+        self.rect.center = (self.x, self.y)
+        self.move_vector.set_speed_direction(speed, math.radians(270 - heading))
+
         # Lisätään ampuvan pelaajan liikevektori että se vaikuttaa loogisella tavalla bulletin liikemäärään
         self.move_vector.add_vector(shooting_player.move_vector)
-        self.max_speed = 20
-        self.mass = 0.1
 
         self.is_bullet = 1
         self.group = group
@@ -80,27 +95,30 @@ class BulletSprite(game_object.GameObject):
 
 
 class BasicShot(BulletSprite):
+    """ Perusammus alhaisella massalla mutta suht pienellä cooldownilla """
     cooldown = 80
+    mass = 0.1
+    speed = 10
+    image_file = 'gfx/bullet_5.png'
 
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0,0), direction=0,
-                 speed=10):
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
         BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
-                              image_file='gfx/bullet_5.png', pos=pos, direction=direction, speed=speed)
-        self.mass = 0.1
+                              image_file=self.image_file, heading=heading, speed=self.speed)
 
 
 class DumbFire(BulletSprite):
-    cooldown = 3000
-
     """ Iso ammus joka räjähtää törmätessä """
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0,0), direction=0,
-                 speed=10):
-        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
-                              image_file='gfx/bullet_10.png', pos=pos, direction=direction, speed=speed)
+    cooldown = 3000
+    mass = 0.2
+    speed = 10
+    explosion_force = 10
+    explosion_radius = 50
+    image_file = 'gfx/bullet_10.png'
 
-        self.mass = 0.2
-        self.explosion_force = 10
-        self.explosion_radius = 50
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup,
+                 heading=0):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=self.image_file, heading=heading, speed=self.speed)
 
     def collided_with_wall(self):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
@@ -116,16 +134,16 @@ class DumbFire(BulletSprite):
 
 
 class Dirtball(BulletSprite):
-    cooldown = 3000
-
     """ Iso ammus joka luo maastoa törmätessä """
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0,
-                 speed=10):
-        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
-                              image_file='gfx/bullet_10.png',
-                              pos=pos, direction=direction, speed=speed)
+    cooldown = 3000
+    mass = 0.2
+    speed = 10
+    image_file = 'gfx/bullet_10.png'
 
-        self.mass = 0.2
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=self.image_file,
+                              heading=heading, speed=self.speed)
 
     def collided_with_wall(self):
         pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
@@ -137,14 +155,14 @@ class Dirtball(BulletSprite):
 
 
 class Switcher(BulletSprite):
+    """ Vaihtaa paikkaa toisen objektin kanssa törmäyksessä """
     cooldown = 3000
+    mass = 0.001
+    image_file = ['gfx/bullet_switcher1.png', 'gfx/bullet_switcher2.png']
 
-    """ Vaihtaa paikkaa toisen objektin kanssa """
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0,
-                 speed=10):
-        image_file = ['gfx/bullet_switcher1.png', 'gfx/bullet_switcher2.png']
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
         BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
-                              image_file=image_file, pos=pos, direction=direction, speed=speed)
+                              image_file=self.image_file, heading=heading, speed=self.speed)
 
         self.mass = 0
 
@@ -155,11 +173,12 @@ class Switcher(BulletSprite):
     def collided_with(self, other_object):
         """ 
         Vaihtaa ampujan paikkaa törmäävän objektin kanssa
-        TODO: jostan syystä jos osuu palloon niin attachaa aina, korjaa? 
         """
-        temp_x, temp_y = self.shooting_player.x, self.shooting_player.y
-        self.shooting_player.x, self.shooting_player.y = other_object.x, other_object.y
+        temp_x, temp_y = tuple((self.shooting_player.x, self.shooting_player.y))
+        self.shooting_player.x, self.shooting_player.y = tuple((other_object.x, other_object.y))
         other_object.x, other_object.y = temp_x, temp_y
+        # Tämä tarvitaan että viewscreen pysyy mukana paikanvaihdoksessa
+        self.parent.calc_viewscreen_rect()
         self.update_rect()
         other_object.update_rect()
         self.kill()

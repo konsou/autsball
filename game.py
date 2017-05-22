@@ -126,17 +126,8 @@ class AUTSBallGame:
                 if pressed_keys[pygame.K_BACKSPACE]:
                     self.players[self.local_player_id].recover()
 
-                # Viewscreen rect: viewscreen absoluuttisissa koordinaateissa
-                self.viewscreen_rect = (self.players[self.local_player_id].x - WINDOW_SIZE[0] // 2,
-                                        self.players[self.local_player_id].y - WINDOW_SIZE[1] // 2,
-                                        WINDOW_SIZE[0],
-                                        WINDOW_SIZE[1])
-
-                # Background view rect: näytetään levelistä oikea kohta
-                self.background_view_rect = (WINDOW_SIZE[0] // 2 - self.players[self.local_player_id].x,
-                                             WINDOW_SIZE[1] // 2 - self.players[self.local_player_id].y,
-                                             WINDOW_SIZE[0],
-                                             WINDOW_SIZE[1])
+                # Lasketaan viewscreen- ja background rectit
+                self.calc_viewscreen_rect()
 
                 # Spritejen päivitykset tässä
                 groups.BulletGroup.update(self.viewscreen_rect)
@@ -179,7 +170,7 @@ class AUTSBallGame:
         groups.TextGroup.draw(self.window)
 
         # HUD
-        text.show_text(self.window, (10, 70), "FPS: " + str(self.clock.get_fps()))
+        text.show_text(self.window, (10, 70), "FPS: " + str(round(self.clock.get_fps(), 2)))
         text.show_score(self.window, (50, 10), self.score_green, team=0)
         text.show_score(self.window, (700, 10), self.score_red, team=1)
         # Ammusten cooldownien latauspalkit
@@ -205,6 +196,20 @@ class AUTSBallGame:
 
         # Displayn update
         pygame.display.flip()
+
+    def calc_viewscreen_rect(self):
+        """ Laskee viewscreen_rectin ja background_view_rectin """
+        # Viewscreen rect: viewscreen absoluuttisissa koordinaateissa
+        self.viewscreen_rect = pygame.Rect((self.players[self.local_player_id].x - WINDOW_SIZE[0] // 2,
+                                            self.players[self.local_player_id].y - WINDOW_SIZE[1] // 2,
+                                            WINDOW_SIZE[0],
+                                            WINDOW_SIZE[1]))
+
+        # Background view rect: näytetään levelistä oikea kohta
+        self.background_view_rect = pygame.Rect((WINDOW_SIZE[0] // 2 - self.players[self.local_player_id].x,
+                                                 WINDOW_SIZE[1] // 2 - self.players[self.local_player_id].y,
+                                                 WINDOW_SIZE[0],
+                                                 WINDOW_SIZE[1]))
 
     def score(self, scoring_team):
         """ Tätä kutsutaan kun tulee maali """
@@ -240,7 +245,7 @@ if __name__ == '__main__':
     load_assets(window)
 
     game = AUTSBallGame()
-    game.add_player(0, team='red', ship_name='Muumi')
+    game.add_player(0, team='red', ship_name='Teafighter')
     game.add_player(1, team='green', ship_name='Muumi')
     game.add_player(2, team='red', ship_name='Rocket')
     game.add_player(3, team='green', ship_name='Fatship')

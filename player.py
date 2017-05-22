@@ -82,12 +82,12 @@ class PlayerSprite(game_object.GameObject):
         self.attached_ball = None
 
         # Abilityt
-        self.basic_shot = bullet.BasicShot
-        self.special = bullet.DumbFire
+        self.basic_shot = bullet.Dirtball
+        self.special = bullet.Switcher
 
         # Shipin ominaisuudet
         self.handling = float(current_ship.find('handling').text)  # kuinka monta astetta kääntyy per frame
-        self.max_thrust = float(current_ship.find('max_thrust').text)  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
+        self.max_thrust = float(current_ship.find('max_thrust').text)
         self.max_speed = int(current_ship.find('max_speed').text)
         self.mass = float(current_ship.find('mass').text)
         self._max_acceleration = self.max_thrust / self.mass
@@ -202,10 +202,8 @@ class PlayerSprite(game_object.GameObject):
             # TODO: siirrä ääni bulletin ominaisuudeksi
             sound.force_play_sound(self.bullet_sound)
             # TODO: siirrä näiden laskenta bulletin hoidettavaksi
-            bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
-            bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            self.basic_shot(shooting_player=self, level=self.level, parent=self.parent, pos=(bullet_x, bullet_y),
-                             direction=self.heading)
+            self.basic_shot(shooting_player=self, level=self.level, parent=self.parent,
+                             heading=self.heading)
             self._cooldown_counter = 0
 
         # Jos pallo on liitettynä niin ammutaan se
@@ -219,11 +217,8 @@ class PlayerSprite(game_object.GameObject):
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
         if self._cooldown_counter_special > self.special.cooldown:
             sound.force_play_sound(self.bullet_sound)
-            # TODO: laske dx, dy ammuksen initissä
-            bullet_x = int(20 * math.sin(math.radians(self.heading)) * -1 + self.x)
-            bullet_y = int(20 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            self.special(shooting_player=self, level=self.level, parent=self.parent, pos=(bullet_x, bullet_y),
-                            direction=self.heading, speed=10)
+            self.special(shooting_player=self, level=self.level, parent=self.parent,
+                         heading=self.heading)
             self._cooldown_counter_special = 0
 
     def recover(self):
