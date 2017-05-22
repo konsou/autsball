@@ -82,8 +82,8 @@ class PlayerSprite(game_object.GameObject):
         self.attached_ball = None
 
         # Abilityt
-        self.basic_shot = bullet.Dirtball
-        self.special = bullet.Switcher
+        self.basic_shot = bullet.BasicShot
+        self.special = bullet.Bouncer
 
         # Shipin ominaisuudet
         self.handling = float(current_ship.find('handling').text)  # kuinka monta astetta kääntyy per frame

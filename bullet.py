@@ -4,7 +4,7 @@ import math
 import game_object
 import groups
 import effect
-import copy
+import random
 from colors import *
 from assets import assets, assets_rot
 
@@ -158,13 +158,12 @@ class Switcher(BulletSprite):
     """ Vaihtaa paikkaa toisen objektin kanssa törmäyksessä """
     cooldown = 3000
     mass = 0.001
+    speed = 10
     image_file = ['gfx/bullet_switcher1.png', 'gfx/bullet_switcher2.png']
 
     def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
         BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
                               image_file=self.image_file, heading=heading, speed=self.speed)
-
-        self.mass = 0
 
     def collided_with_wall(self):
         """ Mitään ei tapahdu seinätörmäyksessä """
@@ -183,4 +182,38 @@ class Switcher(BulletSprite):
         other_object.update_rect()
         self.kill()
 
+
+class Bouncer(BulletSprite):
+    """ Pomppii, räjähtää vähän """
+    cooldown = 2000
+    mass = 0.2
+    speed = 10
+    explosion_force = 5
+    explosion_radius = 25
+    number_of_bounces = 5
+    image_file = 'gfx/bullet_10.png'
+
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=self.image_file, heading=heading, speed=self.speed)
+        self._bounce_counter = 0
+
+    def collided_with_wall(self):
+        pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
+        randomvalue = random.uniform(-0.5, 0.5)
+        self.move_vector.set_direction(self.move_vector.get_direction() - math.pi + randomvalue)
+        effect.Explosion(image_file='gfx/explosion_30.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
+                         explosion_force=self.explosion_force)
+        self._bounce_counter += 1
+        if self._bounce_counter > self.number_of_bounces:
+            self.kill()
+
+    def collided_with(self, other_object):
+        pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
+        self.apply_collision_to_move_vector(other_object)
+        effect.Explosion(image_file='gfx/explosion_30.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
+                         explosion_force=self.explosion_force)
+        self._bounce_counter += 1
+        if self._bounce_counter > self.number_of_bounces:
+            self.kill()
 
