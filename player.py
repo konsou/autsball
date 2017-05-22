@@ -41,8 +41,8 @@ class PlayerSprite(game_object.GameObject):
             thrust_image_file.append(value.text)
 
         self.thrust_gfx = effect.MotorFlame(attached_player=self, image_file=thrust_image_file,
-                                              visible=0, parent=parent, offset=motor_flame_offset)
-        self.rect.center = SCREEN_CENTER_POINT
+                                            visible=0, parent=parent, offset=motor_flame_offset)
+        self.rect.center = WINDOW_CENTER_POINT
         if self.owning_player_id == parent.local_player_id:
             self.is_centered_on_screen = 1
             # Pallonsuuntamarkkeri
@@ -81,6 +81,10 @@ class PlayerSprite(game_object.GameObject):
         # Pallo
         self.attached_ball = None
 
+        # Abilityt
+        self.basic_shot = bullet.BasicShot
+        self.special = bullet.DumbFire
+
         # Shipin ominaisuudet
         self.handling = float(current_ship.find('handling').text)  # kuinka monta astetta kääntyy per frame
         self.max_thrust = float(current_ship.find('max_thrust').text)  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
@@ -90,14 +94,10 @@ class PlayerSprite(game_object.GameObject):
         self.cooldown_multiplier_basic = float(current_ship.find('cooldown_multiplier_basic').text)
         self.cooldown_multiplier_special = float(current_ship.find('cooldown_multiplier_special').text)
         self._cooldown_after_ball_shot = 60
-        self._cooldown_counter = 0
-        self._cooldown_counter_special = 0
+        self._cooldown_counter = self.basic_shot.cooldown
+        self._cooldown_counter_special = self.special.cooldown
         self._recovery_time = float(current_ship.find('recovery_time').text)  # sekunteja jopa!
         self._recovery_started_at = 0
-
-        # Abilityt
-        self.basic_shot = bullet.BasicShot
-        self.special = bullet.DumbFire
 
     def __repr__(self):
         return "<SHIP {} {}>".format(self.owning_player_id, self.name)

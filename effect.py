@@ -218,7 +218,7 @@ def draw_loading_bar(window, current, total, bar_width=400, bar_height=30, pos=(
     """
     # TODO: muuta tämäkin classiksi
     current = float(current)  # vaatii tämän ettei tee integer divisionia
-    width = int(current / total * bar_width)  # lasketaan loading barin leveys
+    width = min(bar_width, int(current / total * bar_width))  # lasketaan loading barin leveys
     height = bar_height
     loading_bar_surface = pygame.Surface((width, height))
     loading_bar_surface.fill(color)

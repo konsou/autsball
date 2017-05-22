@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <data>
-    <!-- EI VIELÄ KÄYTÖSSÄ KOODIN PUOLELLA -->
     <ship name="V-Wing" public="1">
         <images>
             <team_red_image>gfx/ship1_red_20px.png</team_red_image>

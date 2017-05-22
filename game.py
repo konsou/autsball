@@ -182,6 +182,23 @@ class AUTSBallGame:
         text.show_text(self.window, (10, 70), "FPS: " + str(self.clock.get_fps()))
         text.show_score(self.window, (50, 10), self.score_green, team=0)
         text.show_score(self.window, (700, 10), self.score_red, team=1)
+        # Ammusten cooldownien latauspalkit
+        effect.draw_loading_bar(window=self.window,
+                                current=self.players[self.local_player_id]._cooldown_counter,
+                                total=self.players[self.local_player_id].basic_shot.cooldown,
+                                bar_width=50, bar_height=5,
+                                pos=(WINDOW_CENTER_POINT[0] - 25,
+                                     WINDOW_CENTER_POINT[1] + self.players[self.local_player_id].radius + 10),
+                                color=GREEN
+                                )
+        effect.draw_loading_bar(window=self.window,
+                                current=self.players[self.local_player_id]._cooldown_counter_special,
+                                total=self.players[self.local_player_id].special.cooldown,
+                                bar_width=50, bar_height=5,
+                                pos=(WINDOW_CENTER_POINT[0] - 25,
+                                     WINDOW_CENTER_POINT[1] + self.players[self.local_player_id].radius + 17),
+                                color=RED
+                                )
 
         # Antialiasing!
         effect.antialiasing(self.window, graphic_quality=Settings.data['graphic_quality'])
@@ -199,8 +216,8 @@ class AUTSBallGame:
             self.score_green += 1
             goal_text_color = GREEN
             sound.force_play_sound(self.goal_green_sound)
-        text.DisappearingText(clock=self.clock, pos=SCREEN_CENTER_POINT, text="GOAL!!!", ms_visible=2000,
-                         color=goal_text_color, font_size=120, flashes=1)
+        text.DisappearingText(clock=self.clock, pos=WINDOW_CENTER_POINT, text="GOAL!!!", ms_visible=2000,
+                              color=goal_text_color, font_size=120, flashes=1)
 
     def exit(self):
         """ Tähän voi laittaa jotain mitä tulee ennen poistumista """
