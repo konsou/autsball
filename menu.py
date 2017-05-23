@@ -137,13 +137,13 @@ def debug_run():
                 if 'click' in settings_back_button.handleEvent(event):
                     active_mode = Modes.MainMenu
                 if 'click' in music_checkbox.handleEvent(event):
+                    # Tallennetaan arvo settings-tiedostoon
+                    Settings.data['music_on'] = music_checkbox.checked
+                    Settings.save()
                     if music_checkbox.checked:
                         music_player.play()
                     else:
                         music_player.stop()
-                    # Tallennetaan arvo settings-tiedostoon
-                    Settings.data['music_on'] = music_checkbox.checked
-                    Settings.save()
                 for event_string in music_volume_slider.handleEvent(event):
                     if event_string is 'drag':
                         music_player.volume = music_volume_slider.value

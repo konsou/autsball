@@ -3,6 +3,7 @@ import pygame
 import random
 import tinytag
 import groups
+from constants import *
 
 
 """
@@ -65,6 +66,7 @@ class MusicPlayer(pygame.sprite.Sprite):
 
         # Fadeout - counter alkaa counter_startista ja vähentää siitä
         # Muuttaa alfa-arvoa jos counter on välillä 0...255
+        # Tämä siis infoblurbin fadeouttia, ei musiikin
         self._fadeout_counter = 0
         self._fadeout_counter_start = 1000
         self._fadeout_decrement = 5
@@ -97,25 +99,26 @@ class MusicPlayer(pygame.sprite.Sprite):
         Soittaa playlist[]:issä olevan playlist_pointer:in määrittämän tähän ruutuun validin biisin. 
         Jos soittolista on käyty loppuun niin aloitetaan alusta (shufflettaen jos niin määritetty).
         """
-        try:
-            current_song = self.playlist[self.playlist_pointer]
-        except IndexError:
-            # Jos playlist on loppu niin aletaan alusta
-            if self._shuffle:
-                self.shuffle_playlist()
-            self.playlist_pointer = 0
-            current_song = self.playlist[0]
+        if Settings.data['music_on']:
+            try:
+                current_song = self.playlist[self.playlist_pointer]
+            except IndexError:
+                # Jos playlist on loppu niin aletaan alusta
+                if self._shuffle:
+                    self.shuffle_playlist()
+                self.playlist_pointer = 0
+                current_song = self.playlist[0]
 
-        # Tarkastetaan onko biisi validi tähän ruutuun
-        if self._screen in current_song.allowed_screens:
-            pygame.mixer.music.load(current_song.filename)
-            pygame.mixer.music.play()
-            # Näytetään infoblurb
-            self.now_playing(current_song)
-            # print("Now playing:", current_song.filename, current_song.title, current_song.artist)
-        else:
-            # Song not allowed in this screen. Next!
-            self.next()
+            # Tarkastetaan onko biisi validi tähän ruutuun
+            if self._screen in current_song.allowed_screens:
+                pygame.mixer.music.load(current_song.filename)
+                pygame.mixer.music.play()
+                # Näytetään infoblurb
+                self.now_playing(current_song)
+                # print("Now playing:", current_song.filename, current_song.title, current_song.artist)
+            else:
+                # Song not allowed in this screen. Next!
+                self.next()
 
     def update(self):
         """ Tämä laskee infoblurbin fadeoutin """
