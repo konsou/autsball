@@ -205,7 +205,7 @@ def debug_run():
                         #music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
                         if Settings.data['music_on']:
                             music_player.play()
-                            music_player.set_screen('menu')
+                            music_player.screen = 'menu'
             if event.type == pygame.QUIT:
                 running = False
             if event.type == music.MUSIC_FINISHED:

@@ -93,7 +93,12 @@ class MusicPlayer(pygame.sprite.Sprite):
         self._volume = volume
         pygame.mixer.music.set_volume(self._volume)
 
+    def _set_screen(self, screen):
+        self._screen = screen
+        self.next()
+
     volume = property(_get_volume, _set_volume)
+    screen = property(None, _set_screen)
 
     def play(self):
         """ 
@@ -187,10 +192,6 @@ class MusicPlayer(pygame.sprite.Sprite):
             self.rect.bottomleft = (self.screen_border_margin, self._window_size[1] - self.screen_border_margin)
         else:
             self.rect.bottomright = (self._window_size[0] - self.screen_border_margin, self._window_size[1] - self.screen_border_margin)
-
-    def set_screen(self, screen):
-        self._screen = screen
-        self.next()
 
     def shuffle_playlist(self):
         random.shuffle(self.playlist)
