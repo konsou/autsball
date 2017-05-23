@@ -43,6 +43,7 @@ class MusicPlayer(pygame.sprite.Sprite):
     """
     def __init__(self, pos='topleft', shuffle=1, screen='menu', group=None, window_size=(800, 600)):
         pygame.sprite.Sprite.__init__(self, group)
+        self.group = group
         self._shuffle = shuffle
         self._screen = screen
 
@@ -122,15 +123,17 @@ class MusicPlayer(pygame.sprite.Sprite):
 
     def update(self):
         """ Tämä laskee infoblurbin fadeoutin """
-        if self._fadeout_counter > 0:
-            self._fadeout_counter -= self._fadeout_decrement
-            # Jos _fadeout_counter on välillä 0..255 niin asetetaan alpha siitä
-            if 255 >= self._fadeout_counter >= 0:
-                self.image.set_alpha(self._fadeout_counter)
-        # Kuva tyhjäksi kun ollaan päästy nollaan
-        if self._fadeout_counter <= 0:
-            self.image = pygame.Surface((0, 0))
-            self.rect = self.image.get_rect()
+        if self in self.group:
+            if self._fadeout_counter > 0:
+                self._fadeout_counter -= self._fadeout_decrement
+                # Jos _fadeout_counter on välillä 0..255 niin asetetaan alpha siitä
+                if 255 >= self._fadeout_counter >= 0:
+                    self.image.set_alpha(self._fadeout_counter)
+            # Kuva tyhjäksi kun ollaan päästy nollaan
+            if self._fadeout_counter <= 0:
+                self.image = pygame.Surface((0, 0))
+                self.rect = self.image.get_rect()
+                self.kill()
 
     def stop(self):
         pygame.mixer.music.stop()
@@ -138,6 +141,9 @@ class MusicPlayer(pygame.sprite.Sprite):
 
     def now_playing(self, current_song):
         """ Näyttää soivan biisin tiedot ruudulla (infoblurb)"""
+        # Lisätään takaisin ryhmään että grafiikat päivittyy
+        self.add(self.group)
+
         # Tekstit
         line1 = "Now playing:"
         line2 = current_song.title
