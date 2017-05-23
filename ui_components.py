@@ -1,8 +1,8 @@
 # -*- coding: utf8 -*-
 import pygame
+import assets
 from pygame.locals import *
 from colors import *
-from assets import assets
 
 pygame.font.init()
 
@@ -27,9 +27,9 @@ class Button(object):
             self.surfaceHighlight = pygame.Surface(self._rect.size)
             self.has_text = True
         else:
-            self.surfaceNormal = assets[surface_images[0]]
-            self.surfaceDown = assets[surface_images[1]]
-            self.surfaceHighlight = assets[surface_images[2]]
+            self.surfaceNormal = assets.assets[surface_images[0]]
+            self.surfaceDown = assets.assets[surface_images[1]]
+            self.surfaceHighlight = assets.assets[surface_images[2]]
             self.has_text = False
 
         self.update()
@@ -194,7 +194,7 @@ class LabelImageText(pygame.sprite.Sprite):
     def __init__(self, group=None, image_text=None, position=(0, 0)):
         pygame.sprite.Sprite.__init__(self, group)
         try:
-            self.image = assets['gfx/UI_text_%s.png' % image_text]
+            self.image = assets.assets['gfx/UI_text_%s.png' % image_text]
         except pygame.error:
             # Jos kuvaa ei löydy, käytä rendattua fonttia?
             self.image = pygame.Surface()
@@ -206,8 +206,8 @@ class Checkbox(pygame.sprite.Sprite):
 
     def __init__(self, group=None, checked=True, position=(0, 0), checkbox_group=None):
         pygame.sprite.Sprite.__init__(self, group)
-        self._unchecked_image = assets['gfx/UI_checkbox_base.png']
-        self._checked_image = assets['gfx/UI_checkbox_checked.png']
+        self._unchecked_image = assets.assets['gfx/UI_checkbox_base.png']
+        self._checked_image = assets.assets['gfx/UI_checkbox_checked.png']
         self._checked = checked
         if self._checked:
             self.image = self._checked_image
@@ -364,8 +364,8 @@ class Slider(pygame.sprite.Sprite):
 
     def __init__(self, group=None, position=(0, 0), value=1.0):
         pygame.sprite.Sprite.__init__(self, group)
-        self._rail_image = assets['gfx/UI_slide_base.png']
-        self._knob_image = assets['gfx/UI_slide_knob.png']
+        self._rail_image = assets.assets['gfx/UI_slide_base.png']
+        self._knob_image = assets.assets['gfx/UI_slide_knob.png']
         self.image = self._rail_image
         self.rect = self.image.get_rect()
         self.rect.topleft = position
@@ -418,3 +418,24 @@ class Slider(pygame.sprite.Sprite):
         return retVal
 
     value = property(_get_value, _set_value)
+
+
+def draw_loading_bar(window, current, total, bar_width=400, bar_height=30, pos=(200, 335), color=BLACK):
+    """
+    Piirtää ruudulle latauspalkin.
+    window - pygamen ruutuobjekti
+    current - ladattavan jutun nykyinen arvo
+    total - ladattavan jutun täysi arvo
+    bar_width - latauspalkin leveys kun lataus on valmis
+    bar_height - latauspalkin korkeus 
+    pos - positio
+    color - väri  
+    """
+    # TODO: muuta tämäkin classiksi
+    current = float(current)  # vaatii tämän ettei tee integer divisionia
+    width = min(bar_width, int(current / total * bar_width))  # lasketaan loading barin leveys
+    height = bar_height
+    loading_bar_surface = pygame.Surface((width, height))
+    loading_bar_surface.fill(color)
+    blitrect = window.blit(loading_bar_surface, pos)
+    pygame.display.update(blitrect)  # päivitetään vain se osa ruudusta mitä tarvii

@@ -2,10 +2,11 @@
 import pygame
 import os
 import time
-import effect
+import ui_components
 from constants import *
 from pygame.locals import *
 from colors import *
+
 
 """ 
 Assettien esilataaja. Vakioasetuksilla esilataa kaikki gfx- ja sfx-kansioissa olevat png- ja wav-tiedostot.
@@ -86,7 +87,7 @@ def load_assets(window):
                 # files_size_total += file_size
                 files_size_current += file_size
                 files_size_total_inc_rot += file_size
-                effect.draw_loading_bar(window, files_size_current, files_size_total)
+                ui_components.draw_loading_bar(window, files_size_current, files_size_total)
                 # number_of_files += 1
                 width = assets[asset_key].get_width()
                 height = assets[asset_key].get_height()
@@ -118,7 +119,7 @@ def load_assets(window):
                 # files_size_total += file_size
                 files_size_current += file_size
                 files_size_total_inc_rot += file_size
-                effect.draw_loading_bar(window, files_size_current, files_size_total)
+                ui_components.draw_loading_bar(window, files_size_current, files_size_total)
                 # number_of_files += 1
                 if DEBUG_TEXT: print "Loaded %r" % filepath
                 # Äänitiedostoja emme rotatoi :)

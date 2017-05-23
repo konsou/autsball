@@ -5,8 +5,6 @@ import groups
 import pygame
 import vector
 import assets
-import numpy
-from colors import *
 from constants import *
 
 
@@ -204,25 +202,5 @@ class BallDirectionMarker(pygame.sprite.Sprite):
         else:
             self.rect.center = (-100, -100)
 
-
-def draw_loading_bar(window, current, total, bar_width=400, bar_height=30, pos=(200, 335), color=BLACK):
-    """
-    Piirtää ruudulle latauspalkin.
-    window - pygamen ruutuobjekti
-    current - ladattavan jutun nykyinen arvo
-    total - ladattavan jutun täysi arvo
-    bar_width - latauspalkin leveys kun lataus on valmis
-    bar_height - latauspalkin korkeus 
-    pos - positio
-    color - väri  
-    """
-    # TODO: muuta tämäkin classiksi
-    current = float(current)  # vaatii tämän ettei tee integer divisionia
-    width = min(bar_width, int(current / total * bar_width))  # lasketaan loading barin leveys
-    height = bar_height
-    loading_bar_surface = pygame.Surface((width, height))
-    loading_bar_surface.fill(color)
-    blitrect = window.blit(loading_bar_surface, pos)
-    pygame.display.update(blitrect)  # päivitetään vain se osa ruudusta mitä tarvii
 
 

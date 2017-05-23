@@ -1,6 +1,5 @@
 # -*- coding: utf8 -*-
 import game_object
-import game
 import pygame
 import math
 import random
@@ -11,9 +10,11 @@ import groups
 import effect
 import bullet
 import text
+import assets
 from colors import *
 from pygame.locals import *
 from constants import *
+
 
 """ IHAN HIRVEÄ SOTKU MUTTA TOIMII PÄÄOSIN """
 # TODO: MAJOR CLEANUP
@@ -117,18 +118,19 @@ class DemoPlayer(player.PlayerSprite):
         # print("New heading:", self.heading)
         # print("---")
         self.accelerate()
-        if self.attached_ball is None:
-            if random.randint(1, 20) == 1:
-                self.shoot()
+        # if self.attached_ball is None:
+            # if random.randint(1, 20) == 1:
+                # self.shoot()
 
         player.PlayerSprite.update(self, self.viewscreen_rect)
 
     def shoot(self):
         """ Pitää overrideta kun randomisyystä vakioarvot ei toimi """
         if self._cooldown_counter == 0:
-            bullet_x = int(28 * math.sin(math.radians(self.heading)) * -1 + self.x)
-            bullet_y = int(28 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.BasicShot(shooting_player=self, level=self.level, parent=self.parent, heading=self.heading)
+            # bullet_x = int(28 * math.sin(math.radians(self.heading)) * -1 + self.x)
+            # bullet_y = int(28 * math.cos(math.radians(self.heading)) * -1 + self.y)
+            shot_bullet = bullet.BasicShot(shooting_player=self, level=self.level, parent=self.parent, heading=self.heading)
+
             self._cooldown_counter = self._cooldown_basic_shot
 
 
@@ -206,6 +208,11 @@ class BackgroundAction(pygame.sprite.Sprite):
         self.checked_collisions = set()
         self.ball_pos = (self.ball.x, self.ball.y)
 
+        for current_player in groups.PlayerGroup:
+            if current_player.attached_ball is None:
+                if random.randint(1, 20) == 1:
+                    current_player.shoot()
+
         groups.BulletGroup.update(self.viewscreen_rect)
         groups.BallGroup.update(self.viewscreen_rect)
         groups.PlayerGroup.update()
@@ -250,6 +257,8 @@ def debug_run():
     global window
     window = pygame.display.set_mode((WINDOW_SIZE[0], WINDOW_SIZE[1]))
     pygame.display.set_caption("Menu test")
+    # Assettien esilataus
+    assets.load_assets(window)
     clock = pygame.time.Clock()
 
     background_action = BackgroundAction()

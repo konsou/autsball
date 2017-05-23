@@ -8,6 +8,7 @@ import player
 import ball
 import text
 import effect
+import ui_components
 from pygame.locals import *
 from colors import *
 from constants import *
@@ -174,7 +175,7 @@ class AUTSBallGame:
         text.show_score(self.window, (50, 10), self.score_green, team=0)
         text.show_score(self.window, (700, 10), self.score_red, team=1)
         # Ammusten cooldownien latauspalkit
-        effect.draw_loading_bar(window=self.window,
+        ui_components.draw_loading_bar(window=self.window,
                                 current=self.players[self.local_player_id]._cooldown_counter,
                                 total=self.players[self.local_player_id].basic_shot.cooldown,
                                 bar_width=50, bar_height=5,
@@ -182,7 +183,7 @@ class AUTSBallGame:
                                      WINDOW_CENTER_POINT[1] + self.players[self.local_player_id].radius + 10),
                                 color=GREEN
                                 )
-        effect.draw_loading_bar(window=self.window,
+        ui_components.draw_loading_bar(window=self.window,
                                 current=self.players[self.local_player_id]._cooldown_counter_special,
                                 total=self.players[self.local_player_id].special.cooldown,
                                 bar_width=50, bar_height=5,
