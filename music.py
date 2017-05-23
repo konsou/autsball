@@ -127,13 +127,14 @@ class MusicPlayer(pygame.sprite.Sprite):
             # Jos _fadeout_counter on välillä 0..255 niin asetetaan alpha siitä
             if 255 >= self._fadeout_counter >= 0:
                 self.image.set_alpha(self._fadeout_counter)
-            # Kuva tyhjäksi kun ollaan päästy nollaan
-            if self._fadeout_counter <= 0:
-                self.image = pygame.Surface((0, 0))
-                self.rect = self.image.get_rect()
+        # Kuva tyhjäksi kun ollaan päästy nollaan
+        if self._fadeout_counter <= 0:
+            self.image = pygame.Surface((0, 0))
+            self.rect = self.image.get_rect()
 
     def stop(self):
         pygame.mixer.music.stop()
+        self._fadeout_counter = 0
 
     def now_playing(self, current_song):
         """ Näyttää soivan biisin tiedot ruudulla (infoblurb)"""
