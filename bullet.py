@@ -166,7 +166,7 @@ class Dirtball(BulletSprite):
     cooldown = 3000
     mass = 0.2
     speed = 10
-    image_file = 'gfx/bullet_10.png'
+    image_file = 'gfx/bullet_dirtball_16.png'
 
     def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
         BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
