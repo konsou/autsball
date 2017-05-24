@@ -27,6 +27,7 @@ def debug_run():
     music_player_group = pygame.sprite.Group()
     main_menu_group = ButtonGroup()
     settings_group = pygame.sprite.Group()
+    ready_lobby_group = pygame.sprite.Group()
 
     # Music
     # HUOM! Inittien järjestys tärkeä!
@@ -68,9 +69,18 @@ def debug_run():
     main_menu_group.add(settings_button)
     main_menu_group.add(quit_button)
 
-    #Lobby
-    lobby_window = Button(Rect(150, 200, 500, 250), 'Lobby')
+    #MultiplayerLobby
+    create_game_button = Button(Rect(50, 200, 250, 70), 'Create')
+    join_game_button = Button(Rect(50, 300, 250, 70), 'Join')
     back_from_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
+
+    #ReadyLobby
+    LabelImageText(group=ready_lobby_group, image_text='settings', position=(50, 400))
+    ready_checkbox = Checkbox(group=ready_lobby_group, checked=False, position=(370, 415))
+    start_game_button = Button(Rect(50, 300, 250, 70), 'Start')
+    main_menu_from_ready_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
+
+
     #    player_name_field = Input_box()
     screen = pygame.display.set_mode((800,600))
 
@@ -219,9 +229,17 @@ def debug_run():
                     active_mode = Modes.MainMenu
                     window.fill(BLACK)
 
+                if 'click' in create_game_button.handleEvent(event):
+                    active_mode = Modes.ReadyLobby
+                    window.fill(BLACK)
+
+                if 'click' in join_game_button.handleEvent(event):
+                    active_mode = Modes.ReadyLobby
+                    window.fill(BLACK)
+
                 if 'click' in multiplayer_button.handleEvent(event):
                     active_mode = Modes.MultiplayerLobby
-                    name = raw_input('nimi')
+                    #tähän pelaajan nimen kysely
                     #window.fill(BLACK)
                 if 'click' in quit_button.handleEvent(event):
                     running = False
@@ -264,10 +282,31 @@ def debug_run():
 
             background_action.update()
             music_player_group.update()
-
             static_visual_components_group.draw(window)
-            lobby_window.draw(window)
+
+            create_game_button.draw(window)
+            join_game_button.draw(window)
             back_from_lobby_button.draw(window)
+
+            pygame.display.update()
+            clock.tick(GRAPHICS_FPS)
+
+        elif active_mode == Modes.ReadyLobby:
+            window.fill(0)
+
+            background_action.update()
+            music_player_group.update()
+            static_visual_components_group.draw(window)
+
+            ready_lobby_group.draw(window)
+            start_game_button.draw(window)
+            main_menu_from_ready_lobby_button.draw(window)
+            back_from_lobby_button.draw(window)
+
+            if 'click' in main_menu_from_ready_lobby_button.handleEvent(event):
+                active_mode = Modes.MainMenu
+                window.fill(BLACK)
+
 
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
