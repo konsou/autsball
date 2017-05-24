@@ -4,9 +4,7 @@ import game_object
 import groups
 import pygame
 import vector
-from assets import assets, assets_rot
-import numpy
-from colors import *
+import assets
 from constants import *
 
 
@@ -183,7 +181,7 @@ class BallDirectionMarker(pygame.sprite.Sprite):
     def __init__(self, local_player=None, ball=None):
         pygame.sprite.Sprite.__init__(self, groups.TextGroup)
         self.image_file = 'gfx/arrow_blue_32.png'
-        self.image = assets[self.image_file]
+        self.image = assets.assets[self.image_file]
         self.rect = self.image.get_rect()
         self.player = local_player
         self.ball = ball
@@ -192,7 +190,7 @@ class BallDirectionMarker(pygame.sprite.Sprite):
         if self.player.attached_ball is None:
             ball_angle_rad = game_object.get_angle_in_radians(self.ball.rect.center, self.player.rect.center)
             ball_angle_deg = game_object.rad2deg_custom(ball_angle_rad)
-            self.image = assets_rot[self.image_file][ball_angle_deg]
+            self.image = assets.assets_rot[self.image_file][ball_angle_deg]
             # Jos etäisyys palloon on yli 100 niin näytetään 100 pikselin päässä
             if self.player.distance_squared(self.ball) >= 10000:
                 vx = int(100 * math.cos(ball_angle_rad))
@@ -203,3 +201,6 @@ class BallDirectionMarker(pygame.sprite.Sprite):
                 self.rect.center = self.ball.rect.center
         else:
             self.rect.center = (-100, -100)
+
+
+

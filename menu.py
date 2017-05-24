@@ -7,7 +7,7 @@ import effect
 from pygame.locals import *
 from colors import *
 from constants import *
-from assets import assets, assets_rot, load_assets
+from assets import assets, load_assets
 from ui_components import Button, ButtonGroup, LabelImageText, Checkbox, CheckboxGroup, Slider
 
 
@@ -16,7 +16,7 @@ def debug_run():
     pygame.display.set_caption("Menu test")
     clock = pygame.time.Clock()
 
-    window.fill((0, 0, 0))
+    window.fill(BLACK)
 
     # Ladataan settingsit
     # TODO: Siirrä asetusten lataus assettien latauksen kanssa samaan?
@@ -34,7 +34,6 @@ def debug_run():
     # 2) pygamen init
     pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
     pygame.init()
-    # pygame.mixer.init()
     music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
     music_player.volume = Settings.data['music_volume']
     if Settings.data['music_on']:
@@ -73,10 +72,7 @@ def debug_run():
     practice_game = None
 
     # Background action
-    background_action = menu_background_action.BackgroundAction()
-    # Tämä tummentaa tausta-actionin
-    darken_surface = pygame.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]))
-    darken_surface.set_alpha(128)
+    background_action = menu_background_action.BackgroundAction(window, darken=1)
 
     # Settings menu
     settings_background = assets['gfx/UI_settings_background.png']
@@ -121,7 +117,7 @@ def debug_run():
                     del background_action
                     music_player.stop()
 
-                    practice_game = game.AUTSBallGame()
+                    practice_game = game.AUTSBallGame(window, level_name='Vertical Challenge')
                     practice_game.add_player(0, team='red', ship_name='Teafighter')
                     practice_game.add_player(1, team='green')
                     practice_game.add_player(2, team='red')
@@ -138,13 +134,13 @@ def debug_run():
                 if 'click' in settings_back_button.handleEvent(event):
                     active_mode = Modes.MainMenu
                 if 'click' in music_checkbox.handleEvent(event):
+                    # Tallennetaan arvo settings-tiedostoon
+                    Settings.data['music_on'] = music_checkbox.checked
+                    Settings.save()
                     if music_checkbox.checked:
                         music_player.play()
                     else:
                         music_player.stop()
-                    # Tallennetaan arvo settings-tiedostoon
-                    Settings.data['music_on'] = music_checkbox.checked
-                    Settings.save()
                 for event_string in music_volume_slider.handleEvent(event):
                     if event_string is 'drag':
                         music_player.volume = music_volume_slider.value
@@ -201,12 +197,12 @@ def debug_run():
                         del practice_game
                         active_mode = Modes.MainMenu
                         window.fill(BLACK)
-                        background_action = menu_background_action.BackgroundAction()
+                        background_action = menu_background_action.BackgroundAction(window=window, darken=1)
                         static_visual_components_group.draw(window)
                         #music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
                         if Settings.data['music_on']:
                             music_player.play()
-                            music_player.set_screen('menu')
+                            music_player.screen = 'menu'
             if event.type == pygame.QUIT:
                 running = False
             if event.type == music.MUSIC_FINISHED:
@@ -215,11 +211,8 @@ def debug_run():
         if active_mode == Modes.MainMenu:
             window.fill(0)
 
-            menu_background_action.background_group.update()
+            background_action.update()
             music_player_group.update()
-
-            menu_background_action.background_group.draw(window)
-            window.blit(darken_surface, (0, 0))
 
             static_visual_components_group.draw(window)
             main_menu_group.draw(window)
@@ -232,11 +225,9 @@ def debug_run():
         elif active_mode == Modes.SettingsMenu:
             window.fill(0)
 
-            menu_background_action.background_group.update()
+            background_action.update()
             music_player_group.update()
 
-            menu_background_action.background_group.draw(window)
-            window.blit(darken_surface, (0, 0))
             window.blit(settings_background, (0, 0))
 
             settings_group.draw(window)

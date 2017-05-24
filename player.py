@@ -6,14 +6,16 @@ import effect
 import bullet
 import groups
 import text
+import sound
 from colors import *
+from constants import *
 from pygame.locals import *
 from assets import assets, assets_rot
 
 
 class PlayerSprite(game_object.GameObject):
     def __init__(self, player_id=None, team=None, level=None, parent=None, ship_name='V-Wing',
-                 group=groups.PlayerGroup, spawn_point=None):
+                 group=groups.PlayerGroup, spawn_point=None, special=None):
         self.owning_player_id = player_id
         self.team = team
         self.name = ship_name
@@ -39,9 +41,9 @@ class PlayerSprite(game_object.GameObject):
             thrust_image_file.append(value.text)
 
         self.thrust_gfx = effect.MotorFlame(attached_player=self, image_file=thrust_image_file,
-                                              visible=0, parent=parent, offset=motor_flame_offset)
-        self.rect.center = self.parent.screen_center_point
-        if self.owning_player_id == parent.local_player_id:
+                                            visible=0, parent=parent, offset=motor_flame_offset)
+        self.rect.center = WINDOW_CENTER_POINT
+        if self.owning_player_id == parent.local_player_id and not self.parent.demogame:
             self.is_centered_on_screen = 1
             # Pallonsuuntamarkkeri
             effect.BallDirectionMarker(self, self.parent.ball)
@@ -56,13 +58,23 @@ class PlayerSprite(game_object.GameObject):
         self.smoke_effect_offset = int(current_ship.find('images/rear_smoke_offset').text)
 
         # Sound effex
-        self.motor_sound = assets[current_ship.find('sounds/motor_sound').text]
-        self.motor_sound_playing = 0
-        self.bullet_sound = assets[current_ship.find('sounds/bullet_sound').text]
-        self.ball_shoot_sound = assets[current_ship.find('sounds/ball_shoot_sound').text]
-        self.ball_capture_sound = assets[current_ship.find('sounds/ball_capture_sound').text]
-        self.wall_collide_sound = assets[current_ship.find('sounds/wall_collide_sound').text]
-        self.bullet_collide_sound = assets[current_ship.find('sounds/bullet_collide_sound').text]
+        if not self.parent.demogame:
+            self.motor_sound = assets[current_ship.find('sounds/motor_sound').text]
+            self.motor_sound_playing = 0
+            self.bullet_sound = assets[current_ship.find('sounds/bullet_sound').text]
+            self.ball_shoot_sound = assets[current_ship.find('sounds/ball_shoot_sound').text]
+            self.ball_capture_sound = assets[current_ship.find('sounds/ball_capture_sound').text]
+            self.wall_collide_sound = assets[current_ship.find('sounds/wall_collide_sound').text]
+            self.bullet_collide_sound = assets[current_ship.find('sounds/bullet_collide_sound').text]
+        else:
+            self.motor_sound = None
+            self.motor_sound_playing = 0
+            self.bullet_sound = None
+            self.ball_shoot_sound = None
+            self.ball_capture_sound = None
+            self.wall_collide_sound = None
+            self.bullet_collide_sound = None
+
 
         # Koordinaatit
         if not spawn_point:
@@ -79,17 +91,24 @@ class PlayerSprite(game_object.GameObject):
         # Pallo
         self.attached_ball = None
 
+        # Abilityt
+        self.basic_shot = bullet.BasicShot
+        if special is not None:
+            self.special = special
+        else:
+            self.special = bullet.Bouncer
+
         # Shipin ominaisuudet
         self.handling = float(current_ship.find('handling').text)  # kuinka monta astetta kääntyy per frame
-        self.max_thrust = float(current_ship.find('max_thrust').text)  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
+        self.max_thrust = float(current_ship.find('max_thrust').text)
         self.max_speed = int(current_ship.find('max_speed').text)
         self.mass = float(current_ship.find('mass').text)
         self._max_acceleration = self.max_thrust / self.mass
-        self._cooldown_basic_shot = int(current_ship.find('cooldown_basic_shot').text)  # framea
-        self._cooldown_special = int(current_ship.find('cooldown_special').text)
-        self._cooldown_after_ball_shot = int(current_ship.find('cooldown_after_ball_shot').text) # cooldown sen jälkeen kun pallo on ammuttu
-        self._cooldown_counter = 0  # cooldown-counter1
-        self._cooldown_counter_special = 0
+        self.cooldown_multiplier_basic = float(current_ship.find('cooldown_multiplier_basic').text)
+        self.cooldown_multiplier_special = float(current_ship.find('cooldown_multiplier_special').text)
+        self._cooldown_after_ball_shot = 60
+        self._cooldown_counter = self.basic_shot.cooldown
+        self._cooldown_counter_special = self.special.cooldown
         self._recovery_time = float(current_ship.find('recovery_time').text)  # sekunteja jopa!
         self._recovery_started_at = 0
 
@@ -113,14 +132,13 @@ class PlayerSprite(game_object.GameObject):
         self.check_collision_with_group(groups.BulletGroup)
 
         # Lasketaan cooldownia
-        if self._cooldown_counter > 0:
-            self._cooldown_counter -= 1
-        if self._cooldown_counter_special > 0:
-            self._cooldown_counter_special -= 1
+        self._cooldown_counter += self.parent.clock.get_time()
+        self._cooldown_counter_special += self.parent.clock.get_time()
 
         # Jos on pallo kytkettynä niin lisätään paljon cooldownia
-        if self.attached_ball is not None:
-            self._cooldown_counter = self._cooldown_after_ball_shot
+        # TODO: laita toimimaan uudestaan
+        # if self.attached_ball is not None:
+        #     self._cooldown_counter = self._cooldown_after_ball_shot
 
         if self._recovery_started_at != 0:
             if (pygame.time.get_ticks() - self._recovery_started_at) // 1000 > self._recovery_time - 1:
@@ -143,7 +161,7 @@ class PlayerSprite(game_object.GameObject):
     def attach_ball(self, ball):
         if self.attached_ball is None:
             self.attached_ball = ball
-            self.force_play_sound(self.ball_capture_sound)
+            sound.force_play_sound(self.ball_capture_sound)
 
     def detach(self):
         self.attached_ball = None
@@ -154,20 +172,19 @@ class PlayerSprite(game_object.GameObject):
             self.thrust = self.max_thrust
             self.thrust_gfx.visible = 1
             if not self.motor_sound_playing:
-                self.force_play_sound(self.motor_sound, -1)
+                sound.force_play_sound(self.motor_sound, -1)
                 self.motor_sound_playing = 1
         else:
-            if type(self).__name__ is not 'DemoPlayer':
-                self._smoke_counter += self.parent.clock.get_time()
-                if self._smoke_counter > self._smoke_interval:
-                    effect.SmokeEffect(start_position=(self.x, self.y),
-                                       effect_type='smoke',
-                                       parent=self.parent,
-                                       attached_player=self,
-                                       viewscreen_rect=self.viewscreen_rect,
-                                       image_files=self.smoke_effect_image_files,
-                                       offset=self.smoke_effect_offset)
-                    self._smoke_counter = 0
+            self._smoke_counter += self.parent.clock.get_time()
+            if self._smoke_counter > self._smoke_interval:
+                effect.SmokeEffect(start_position=(self.x, self.y),
+                                   effect_type='smoke',
+                                   parent=self.parent,
+                                   attached_player=self,
+                                   viewscreen_rect=self.viewscreen_rect,
+                                   image_files=self.smoke_effect_image_files,
+                                   offset=self.smoke_effect_offset)
+                self._smoke_counter = 0
 
     def stop_acceleration(self):
         if self.thrust > 0:
@@ -191,41 +208,34 @@ class PlayerSprite(game_object.GameObject):
     def shoot(self):
         # Ammutaan perusammus
         # Pelaajan nopeus vaikuttaa ammuksen vauhtiin
-        # TODO: pelaajan nopeus lisää aina ammuksen nopeutta saman verran riippumatta siitä mihin suuntaan se ammutaan!
+        # TODO: uudista cooldownit - määritys bullet.py:ssä, aikaperusteinen
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
-        if self._cooldown_counter == 0:
-            self.force_play_sound(self.bullet_sound)
-            bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
-            bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.BasicShot(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
-                         speed=10 + self.move_vector.get_speed())
-            self._cooldown_counter = self._cooldown_basic_shot
+        if self._cooldown_counter > self.basic_shot.cooldown:
+            # TODO: siirrä ääni bulletin ominaisuudeksi
+            sound.force_play_sound(self.bullet_sound)
+            # TODO: siirrä näiden laskenta bulletin hoidettavaksi
+            self.basic_shot(shooting_player=self, level=self.level, parent=self.parent,
+                             heading=self.heading)
+            self._cooldown_counter = 0
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
-            # ball_x = self.attached_ball.image.get_width() * math.sin(math.radians(self.heading)) * -1 + self.x
-            # ball_y = self.attached_ball.image.get_height() * math.cos(math.radians(self.heading)) * -1 + self.y
-
-            # self.attached_ball.shoot(x=ball_x, y=ball_y, direction=self.heading, speed=10)
             self.attached_ball.shoot(direction=self.heading, speed=10)
             self.attached_ball.detach()
-            self.force_play_sound(self.ball_shoot_sound)
+            sound.force_play_sound(self.ball_shoot_sound)
 
     def shoot_special(self):
         """ Ammutaan erikoisammus """
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
-        if self._cooldown_counter_special == 0:
-            self.force_play_sound(self.bullet_sound)
-            # TODO: laske dx, dy ammuksen initissä
-            bullet_x = int(20 * math.sin(math.radians(self.heading)) * -1 + self.x)
-            bullet_y = int(20 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.Switcher(shooting_player=self, level=self.level, parent=self.parent, pos=(bullet_x, bullet_y),
-                            direction=self.heading, speed=10 + self.move_vector.get_speed())
-            self._cooldown_counter_special = self._cooldown_special
+        if self._cooldown_counter_special > self.special.cooldown:
+            sound.force_play_sound(self.bullet_sound)
+            self.special(shooting_player=self, level=self.level, parent=self.parent,
+                         heading=self.heading)
+            self._cooldown_counter_special = 0
 
     def recover(self):
         """ Aloittaa recovery-laskennan """
         self._recovery_started_at = pygame.time.get_ticks()
-        text.DisappearingText(pos=self.parent.screen_center_point, text="RECOVERING...", frames_visible=240, flashes=1,
-                         font_size=80, color=RED)
+        text.DisappearingText(clock=self.parent.clock, pos=self.parent.screen_center_point, text="RECOVERING...",
+                              ms_visible=self._recovery_time * 1000, flashes=1, font_size=80, color=RED)
 

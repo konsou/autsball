@@ -9,13 +9,13 @@
     <level name="Vertical Challenge" public="1">
         <images>
             <!-- Itse levelikuva. Pakollinen. -->
-            <level-image>gfx/test_arena_vertical_challenge.png</level-image>
+            <level-image>gfx/level_vertical_challenge.png</level-image>
             <!--
             Background- ja off-level-kuvat.
             Määrittelyt ei pakollisia - jos määrittelyjä ei löydy niin ladataan mustaa pintaa tilalle.
             -->
-            <background>gfx/cave_background.png</background>
-            <off-level>gfx/cave_indestructible_rock.png</off-level>
+            <background>gfx/background_cave.png</background>
+            <off-level>gfx/background_cave_indestructible_rock.png</off-level>
         </images>
 
         <!-- Levelin leveys ja korkeus että nämä tiedot voi näyttää tulevassa levelinvalintaruudussa ilman että
@@ -52,9 +52,9 @@
 
     <level name="Test Level" public="1">
         <images>
-            <level-image>gfx/test_arena_2400x1200.png</level-image>
-            <background>gfx/cave_background.png</background>
-            <off-level>gfx/cave_indestructible_rock.png</off-level>
+            <level-image>gfx/level_test.png</level-image>
+            <background>gfx/background_cave.png</background>
+            <off-level>gfx/background_cave_indestructible_rock.png</off-level>
         </images>
 
         <width>2400</width>
@@ -80,7 +80,6 @@
     </level>
 
     <level name="Menu Background" public="0">
-        <!-- TODO: ota käyttöön oikeasti tämä menu backgroundissa -->
         <images>
             <level-image>gfx/menu_background_level.png</level-image>
         </images>
@@ -103,7 +102,7 @@
         </player_spawns>
 
         <ball_spawns>
-            <spawn_coordinates x="100" y="100" />
+            <spawn_coordinates x="400" y="300" />
         </ball_spawns>
     </level>
 

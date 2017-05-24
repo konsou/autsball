@@ -3,10 +3,12 @@ import pygame
 import groups
 import string
 import random
+import assets
 import xml.etree.ElementTree as ET
 from colors import *
-from assets import assets
+# from assets import assets
 """ Sisältää tekstin käsittelyyn liittyvät jutut """
+
 num_images = {}
 last_scores = [0, 0]
 last_score_images = [None, None]
@@ -15,19 +17,12 @@ last_score_images = [None, None]
 def init_scores():
     global last_score_images
     for i in range(0, 10):
-        num_images[i] = assets['gfx/num_%d.png' % i]
+        num_images[i] = assets.assets['gfx/num_%d.png' % i]
     last_score_images = [num_images[0], num_images[0]]
 
 
-def show_text(win, pos, text, color=(255, 255, 255), bgcolor=(0, 0, 0), font_size=24):
-    """ Utilityfunktio tekstin näyttämiseen ruudulla """
-    font = pygame.font.Font(None, font_size)
-    textimg = font.render(text, 1, color, bgcolor)
-    win.blit(textimg, pos)
-
-
 def show_score(win, pos, score, team):
-    # Tämä voisi olla parempi omana objektinaan, joka kuuluu TextGroupiin niin ei tarvitsisi erikseen kutsua
+    # Tämä voisi olla parempi omana objektinaan, joka kuuluu HudGroupiin niin ei tarvitsisi erikseen kutsua
     if score != last_scores[team]:
         last_scores[team] = score
         score_numbers = map(int, str(score))
@@ -43,14 +38,23 @@ def show_score(win, pos, score, team):
         win.blit(last_score_images[team], pos)
 
 
+def show_text(win, pos, text, color=(255, 255, 255), bgcolor=(0, 0, 0), font_size=24):
+    """ Utilityfunktio tekstin näyttämiseen ruudulla """
+    font = pygame.font.Font(None, font_size)
+    textimg = font.render(text, 1, color, bgcolor)
+    win.blit(textimg, pos)
+
+
 class DisappearingText(pygame.sprite.Sprite):
     """ Näyttää ruudulla tekstin x framen ajan """
-    def __init__(self, group=groups.TextGroup, pos=(0,0), text="", frames_visible=60,
-                 color=WHITE, bgcolor=None, font_size=24, flashes=0, flash_interval=10):
+    def __init__(self, group=groups.TextGroup, clock=None, pos=(0,0), text="", ms_visible=2000,
+                 color=WHITE, bgcolor=None, font_size=24, flashes=0, flash_interval=100):
         pygame.sprite.Sprite.__init__(self, group)
 
-        self.frame_counter = 0
-        self.frames_visible = frames_visible
+        self.clock = clock
+        self.start_time = pygame.time.get_ticks()
+        self.current_time = pygame.time.get_ticks()
+        self.ms_visible = ms_visible
 
         font = pygame.font.Font(None, font_size)
         self.image = font.render(text, 1, color)#, bgcolor)
@@ -60,15 +64,19 @@ class DisappearingText(pygame.sprite.Sprite):
 
         self.flashes = flashes
         self.flash_interval = flash_interval
+        self._flash_counter = 0
         self.visible = 1
 
     def update(self):
-        self.frame_counter += 1
-        if self.frame_counter > self.frames_visible:
+        self.current_time = pygame.time.get_ticks()
+        if self.current_time - self.start_time > self.ms_visible:
             self.kill()
 
-        if self.flashes and self.frame_counter % self.flash_interval == 0:
-            self.toggle_image()
+        if self.flashes:
+            self._flash_counter += self.clock.get_time()
+            if self._flash_counter > self.flash_interval:
+                self.toggle_image()
+                self._flash_counter = 0
 
     def toggle_image(self):
         if self.visible:

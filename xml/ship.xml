@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <data>
-    <!-- EI VIELÄ KÄYTÖSSÄ KOODIN PUOLELLA -->
     <ship name="V-Wing" public="1">
         <images>
             <team_red_image>gfx/ship1_red_20px.png</team_red_image>
@@ -32,16 +31,15 @@
         <max_thrust>0.35</max_thrust><!-- float -->
         <max_speed>10</max_speed><!-- int -->
         <mass>1.0</mass><!-- float -->
-        <cooldown_basic_shot>5</cooldown_basic_shot><!-- int, framea -->
-        <cooldown_special>60</cooldown_special><!-- int, framea -->
-        <cooldown_after_ball_shot>60</cooldown_after_ball_shot><!-- int, framea -->
+        <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>3</recovery_time><!-- float, sekuntia -->
     </ship>
 
     <ship name="Fatship" public="1">
         <images>
-            <team_red_image>gfx/fatship_red_32.png</team_red_image>
-            <team_green_image>gfx/fatship_green_32.png</team_green_image>
+            <team_red_image>gfx/ship_fatship_red_32.png</team_red_image>
+            <team_green_image>gfx/ship_fatship_green_32.png</team_green_image>
             <motor_flame_offset>15</motor_flame_offset>
             <!-- Idea tässä: jos samalla tagilla useita kuvia niin niistä tehdään animaatio -->
             <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
@@ -69,9 +67,8 @@
         <max_thrust>0.4</max_thrust>
         <max_speed>10</max_speed>
         <mass>2</mass>
-        <cooldown_basic_shot>5</cooldown_basic_shot>
-        <cooldown_special>60</cooldown_special>
-        <cooldown_after_ball_shot>60</cooldown_after_ball_shot>
+        <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>1</recovery_time>
     </ship>
 
@@ -104,9 +101,8 @@
         <max_thrust>0.35</max_thrust>
         <max_speed>50</max_speed>
         <mass>0.3</mass>
-        <cooldown_basic_shot>5</cooldown_basic_shot>
-        <cooldown_special>60</cooldown_special>
-        <cooldown_after_ball_shot>60</cooldown_after_ball_shot>
+        <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>1</recovery_time>
     </ship>
     
@@ -121,11 +117,11 @@
             <motor_flame_image>gfx/motorflame_twin_16_2.png</motor_flame_image>
             <motor_flame_image>gfx/motorflame_twin_16_3.png</motor_flame_image>
             <rear_smoke_offset>20</rear_smoke_offset>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_0.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_1.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_2.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_3.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_4.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_0.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_1.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_2.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_3.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_4.png</rear_smoke_image>
         </images>
         <sounds>
             <motor_sound>sfx/shhhh_v2.wav</motor_sound>
@@ -142,9 +138,8 @@
         <max_thrust>0.4</max_thrust>
         <max_speed>10</max_speed>
         <mass>1.5</mass>
-        <cooldown_basic_shot>5</cooldown_basic_shot>
-        <cooldown_special>60</cooldown_special>
-        <cooldown_after_ball_shot>60</cooldown_after_ball_shot>
+        <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>1</recovery_time>
     </ship>
 
@@ -158,11 +153,11 @@
             <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
             <motor_flame_image>gfx/motor_flame_10c.png</motor_flame_image>
             <rear_smoke_offset>20</rear_smoke_offset>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_0.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_1.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_2.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_3.png</rear_smoke_image>
-            <rear_smoke_image>gfx/rainbow_star_smoke_32_4.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_0.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_1.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_2.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_3.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_rainbow_star_32_4.png</rear_smoke_image>
         </images>
         <sounds>
             <motor_sound>sfx/shhhh_v2.wav</motor_sound>
@@ -179,9 +174,44 @@
         <max_thrust>0.4</max_thrust>
         <max_speed>10</max_speed>
         <mass>1.5</mass>
-        <cooldown_basic_shot>5</cooldown_basic_shot>
-        <cooldown_special>60</cooldown_special>
-        <cooldown_after_ball_shot>60</cooldown_after_ball_shot>
+        <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>1</recovery_time>
+    </ship>
+
+        <ship name="LactoAcidShip" public="1">
+        <images>
+            <team_red_image>gfx/ship_roosa.png</team_red_image>
+            <team_green_image>gfx/ship_roosa.png</team_green_image>
+            <motor_flame_offset>20</motor_flame_offset>
+            <!-- Idea tässä: jos samalla tagilla useita kuvia niin niistä tehdään animaatio -->
+            <motor_flame_image>gfx/motor_flame_10.png</motor_flame_image>
+            <motor_flame_image>gfx/motor_flame_10b.png</motor_flame_image>
+            <motor_flame_image>gfx/motor_flame_10c.png</motor_flame_image>
+            <rear_smoke_offset>20</rear_smoke_offset>
+            <rear_smoke_image>gfx/smoke_32_0.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_32_1.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_32_2.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_32_3.png</rear_smoke_image>
+            <rear_smoke_image>gfx/smoke_32_4.png</rear_smoke_image>
+        </images>
+        <sounds>
+            <motor_sound>sfx/shhhh_v2.wav</motor_sound>
+            <!-- Oikeampi paikka bullet soundille bullet-classin määrittelyssä? -->
+            <bullet_sound>sfx/pop.wav</bullet_sound>
+            <ball_shoot_sound>sfx/pchou.wav</ball_shoot_sound>
+            <ball_capture_sound>sfx/ball_capture.wav</ball_capture_sound>
+            <wall_collide_sound>sfx/thump4.wav</wall_collide_sound>
+            <bullet_collide_sound>sfx/metal_thud_2.wav</bullet_collide_sound>
+            <!-- TODO: lisää player collide sound -->
+        </sounds>
+
+        <handling>2.5</handling>
+        <max_thrust>0.4</max_thrust>
+        <max_speed>10</max_speed>
+        <mass>1.5</mass>
+        <cooldown_multiplier_basic>0.8</cooldown_multiplier_basic><!-- float -->
+        <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
+        <recovery_time>3</recovery_time>
     </ship>
 </data>
