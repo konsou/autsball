@@ -12,11 +12,12 @@ from constants import *
 
 class EffectSprite(game_object.GameObject):
     """ Yleinen efektisprite """
-    def __init__(self, parent=None, image=None, image_file=None, group=groups.EffectGroup,
+    def __init__(self, parent=None, image_file=None, group=groups.EffectGroup,
                  attached_player=None, attached_ball=None,
-                 effect_type=None, visible=1, start_position=None):
+                 effect_type=None, visible=1, start_position=None, offset=12):
         game_object.GameObject.__init__(self, group=group, image_file=image_file, start_position=start_position)
         self.attached_player = attached_player
+        self.offset = offset
         self.attached_ball = attached_ball
         self.effect_type = effect_type
         self.visible = visible
@@ -28,8 +29,8 @@ class EffectSprite(game_object.GameObject):
         if self.visible:
             self.animate()
             player_dir_radians = math.radians(self.attached_player.heading)
-            dx = int(12 * math.sin(player_dir_radians))
-            dy = int(12 * math.cos(player_dir_radians))
+            dx = int(self.offset * math.sin(player_dir_radians))
+            dy = int(self.offset * math.cos(player_dir_radians))
             self.rect.center = self.attached_player.rect.center[0] + dx, self.attached_player.rect.center[1] + dy
             self.rot_self_image_keep_size(self.attached_player.heading)
         else:
@@ -40,6 +41,15 @@ class EffectSprite(game_object.GameObject):
         self.attached_player = None
         self.attached_ball = None
         self.kill()
+
+
+class MotorFlame(EffectSprite):
+    def __init__(self, parent=None, image_file=None, group=groups.EffectGroup,
+                 attached_player=None, attached_ball=None,
+                 effect_type='motorflame', visible=1, start_position=None, offset=12):
+        EffectSprite.__init__(self, parent=parent, image_file=image_file, group=group,
+                              attached_player=attached_player, effect_type=effect_type, visible=visible,
+                              start_position=start_position, offset=offset)
 
 
 class TetherSprite(EffectSprite):
@@ -110,32 +120,11 @@ class Explosion(EffectSprite):
 
 
 class SmokeEffect(EffectSprite):
-
-    @staticmethod
-    def preload_images(image_files=None):
-        """ 
-        Ei oikeastaan enää preloadaa mitään vaan rakentaa vaan filelistan. Jätetty toistaiseksi paikoilleen.
-        TODO: poista kokonaan, assetit esiladataan muualla
-        """
-        smoke_image_files = []
-        if len(image_files) > 0:
-            for file_name in image_files:
-                smoke_image_files.append(file_name)
-        else:
-            smoke_image_files.append('gfx/smoke_32_0.png')
-            smoke_image_files.append('gfx/smoke_32_1.png')
-            smoke_image_files.append('gfx/smoke_32_2.png')
-            smoke_image_files.append('gfx/smoke_32_3.png')
-            smoke_image_files.append('gfx/smoke_32_4.png')
-
-        return smoke_image_files
-
     def __init__(self, start_position, parent=None, attached_player=None, effect_type='smoke', viewscreen_rect=None,
-                 image_files=None):
-
+                 image_files=None, offset=10):
         EffectSprite.__init__(self, image_file=image_files,
                               group=groups.EffectGroup, parent=parent, effect_type=effect_type,
-                              attached_player=attached_player)
+                              attached_player=attached_player, offset=offset)
         self.parent = parent
         self.viewscreen_rect = viewscreen_rect
         if self.parent is not None and type(parent).__name__ is not 'BackgroundAction':
@@ -146,8 +135,8 @@ class SmokeEffect(EffectSprite):
 
             # spawnaa oikeaan paikkaan (ei pelaajan sisään)
             player_dir_radians = math.radians(self.attached_player.heading)
-            dx = int(20 * math.sin(player_dir_radians))
-            dy = int(20 * math.cos(player_dir_radians))
+            dx = int(self.offset * math.sin(player_dir_radians))
+            dy = int(self.offset * math.cos(player_dir_radians))
             self.x, self.y = self.x + dx, self.y + dy
             self.rot_self_image_keep_size(self.attached_player.heading)  # en tiedä onko tästä iloa savun kanssa
         else:
@@ -187,3 +176,30 @@ def antialiasing(window, graphic_quality):
             pygame.transform.average_surfaces((window, surf1, surf2, surf3, surf4), window)
         else:
             pygame.transform.average_surfaces((window, surf1, surf2), window)
+
+
+class BallDirectionMarker(pygame.sprite.Sprite):
+    """ En ole ihan varma kuuluuko tämä tänne, text.py:hyn, vai pitäisikö tehdä oma file info-jutuille """
+    def __init__(self, local_player=None, ball=None):
+        pygame.sprite.Sprite.__init__(self, groups.TextGroup)
+        self.image_file = 'gfx/arrow_blue_32.png'
+        self.image = assets[self.image_file]
+        self.rect = self.image.get_rect()
+        self.player = local_player
+        self.ball = ball
+
+    def update(self):
+        if self.player.attached_ball is None:
+            ball_angle_rad = game_object.get_angle_in_radians(self.ball.rect.center, self.player.rect.center)
+            ball_angle_deg = game_object.rad2deg_custom(ball_angle_rad)
+            self.image = assets_rot[self.image_file][ball_angle_deg]
+            # Jos etäisyys palloon on yli 100 niin näytetään 100 pikselin päässä
+            if self.player.distance_squared(self.ball) >= 10000:
+                vx = int(100 * math.cos(ball_angle_rad))
+                vy = int(100 * math.sin(ball_angle_rad))
+                self.rect.center = (WINDOW_SIZE[0] // 2 + vx, WINDOW_SIZE[1] // 2 + vy)
+            # Jos etäisyys palloon on alle 100 niin näytetään marker pallon päällä
+            else:
+                self.rect.center = self.ball.rect.center
+        else:
+            self.rect.center = (-100, -100)

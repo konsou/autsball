@@ -33,15 +33,18 @@ class PlayerSprite(game_object.GameObject):
                                         image_file=image_file)
 
         # Thrust-gfx
+        motor_flame_offset = int(current_ship.find('images/motor_flame_offset').text)
         thrust_image_file = []
         for value in current_ship.findall('images/motor_flame_image'):
             thrust_image_file.append(value.text)
 
-        self.thrust_gfx = effect.EffectSprite(attached_player=self, image_file=thrust_image_file,
-                                              visible=0, parent=parent)
+        self.thrust_gfx = effect.MotorFlame(attached_player=self, image_file=thrust_image_file,
+                                              visible=0, parent=parent, offset=motor_flame_offset)
         self.rect.center = self.parent.screen_center_point
         if self.owning_player_id == parent.local_player_id:
             self.is_centered_on_screen = 1
+            # Pallonsuuntamarkkeri
+            effect.BallDirectionMarker(self, self.parent.ball)
         else:
             self.is_centered_on_screen = 0
 
@@ -50,7 +53,7 @@ class PlayerSprite(game_object.GameObject):
         self.smoke_effect_image_files = []
         for value in current_ship.findall('images/rear_smoke_image'):
             self.smoke_effect_image_files.append(value.text)
-        # self.smoke_effect_images = effect.SmokeEffect.preload_images(smoke_image_file)  # ladataan kuvat etukäteen
+        self.smoke_effect_offset = int(current_ship.find('images/rear_smoke_offset').text)
 
         # Sound effex
         self.motor_sound = assets[current_ship.find('sounds/motor_sound').text]
@@ -90,9 +93,11 @@ class PlayerSprite(game_object.GameObject):
         self._recovery_time = float(current_ship.find('recovery_time').text)  # sekunteja jopa!
         self._recovery_started_at = 0
 
+    def __repr__(self):
+        return "<SHIP {} {}>".format(self.owning_player_id, self.name)
+
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
         self.viewscreen_rect = viewscreen_rect
-
         """ Tämä haluaa tietää player- ja bulletgroupit että ne voi tarvittaessa määrittää vapaasti """
         # Lisätään liikemäärään thrust-vektori
         # Tässä jopa ottaa jo massan huomioon!
@@ -103,8 +108,9 @@ class PlayerSprite(game_object.GameObject):
 
         self.check_out_of_bounds()
         self.check_collision_with_wall_and_goal()
-        self.check_collision_with_players(player_group)
-        self.check_collision_with_bullets(bullet_group)
+        self.check_collision_with_group(groups.BallGroup)
+        self.check_collision_with_group(groups.PlayerGroup)
+        self.check_collision_with_group(groups.BulletGroup)
 
         # Lasketaan cooldownia
         if self._cooldown_counter > 0:
@@ -120,6 +126,19 @@ class PlayerSprite(game_object.GameObject):
             if (pygame.time.get_ticks() - self._recovery_started_at) // 1000 > self._recovery_time - 1:
                 self.reset()
                 self._recovery_started_at = 0
+
+    def collided_with(self, other_object):
+        """  
+        Emme törmää palloon jos se on attachattu 
+        Pallo-objekti hoitaa attachauksen pelaajaan, se ei ole tässä
+        """
+        apply_collision = 1
+        if other_object in groups.BallGroup:
+            if other_object == self.attached_ball:
+                apply_collision = 0
+
+        if apply_collision:
+            self.apply_collision_to_move_vector(other_object)
 
     def attach_ball(self, ball):
         if self.attached_ball is None:
@@ -146,7 +165,8 @@ class PlayerSprite(game_object.GameObject):
                                        parent=self.parent,
                                        attached_player=self,
                                        viewscreen_rect=self.viewscreen_rect,
-                                       image_files=self.smoke_effect_image_files)
+                                       image_files=self.smoke_effect_image_files,
+                                       offset=self.smoke_effect_offset)
                     self._smoke_counter = 0
 
     def stop_acceleration(self):
@@ -160,7 +180,6 @@ class PlayerSprite(game_object.GameObject):
         self.heading -= self.handling
         if self.heading < 0:
             self.heading += 360
-        # TODO: laske rotaatiot latausvaiheessa valmiiksi
         self.rot_self_image_keep_size(self.heading)
 
     def rotate_left(self):
@@ -197,10 +216,11 @@ class PlayerSprite(game_object.GameObject):
         # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
         if self._cooldown_counter_special == 0:
             self.force_play_sound(self.bullet_sound)
-            bullet_x = int(10 * math.sin(math.radians(self.heading)) * -1 + self.x)
-            bullet_y = int(10 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.Dirtball(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
-                         speed=10 + self.move_vector.get_speed())
+            # TODO: laske dx, dy ammuksen initissä
+            bullet_x = int(20 * math.sin(math.radians(self.heading)) * -1 + self.x)
+            bullet_y = int(20 * math.cos(math.radians(self.heading)) * -1 + self.y)
+            bullet.Switcher(shooting_player=self, level=self.level, parent=self.parent, pos=(bullet_x, bullet_y),
+                            direction=self.heading, speed=10 + self.move_vector.get_speed())
             self._cooldown_counter_special = self._cooldown_special
 
     def recover(self):
