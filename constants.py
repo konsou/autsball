@@ -14,7 +14,6 @@ class Modes:
 
 
 class Settings:
-
     settings_file = 'settings.pkl'
     data = {
         'music_on': True,

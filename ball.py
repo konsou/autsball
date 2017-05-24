@@ -39,7 +39,7 @@ class BallSprite(game_object.GameObject):
             self.bullet_collide_sound = None
 
     def __repr__(self):
-        return "<BALL>"
+        return "<BallSprite>"
 
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
         """ Päivittää palloa. Vaatii viewscreen_rect:in että osaa laskea näyttämisen oikein. """
