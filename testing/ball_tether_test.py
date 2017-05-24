@@ -37,7 +37,7 @@ class EmptyLevel(pygame.sprite.Sprite):
     """ Level-classi. Käytännössä vain taustakuva, logiikka tapahtuu muualla. """
     def __init__(self):
         pygame.sprite.Sprite.__init__(self, game.LevelGroup)
-        # self.image = pygame.image.load('gfx/test_arena_2400x1200.png').convert_alpha()
+        # self.image = pygame.image.load('gfx/level_test.png').convert_alpha()
         self.image = pygame.Surface((800, 600))
         self.size_x = self.image.get_width()
         self.size_y = self.image.get_height()

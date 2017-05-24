@@ -1,144 +1,21 @@
 # -*- coding: utf8 -*-
-import game_object
-import game
 import pygame
 import math
 import random
-import player
-import ball
-import level
+import game_object
+import game
 import groups
-import effect
 import bullet
 import text
+import assets
+import numpy
 from colors import *
 from pygame.locals import *
 from constants import *
-
-""" IHAN HIRVEÄ SOTKU MUTTA TOIMII PÄÄOSIN """
-# TODO: MAJOR CLEANUP
-# TODO: äänet pois
-# TODO: suuri optimointi, tökkii
-
-background_group = pygame.sprite.GroupSingle()
+from collections import deque
 
 
-class DemoPlayer(player.PlayerSprite):
-    def __init__(self, team=None, level=None, parent=None, pos=None):
-        if team == 'red':
-            image = pygame.image.load('gfx/ship1_red_20px.png').convert_alpha()
-        else:
-            image = pygame.image.load('gfx/ship1_green_20px.png').convert_alpha()
-
-        # Lisätään PlayerGroup-ryhmään
-        game_object.GameObject.__init__(self, group=groups.PlayerGroup, level=level, parent=parent,
-                                        image=image)
-
-        # Graffat
-        self.motor_flame_image = pygame.image.load('gfx/motor_flame_10.png').convert_alpha()
-        self.thrust_gfx = effect.EffectSprite(attached_player=self, image=self.motor_flame_image,
-                                                effect_type='motorflame', visible=0)
-        self.viewscreen_rect = (0, 0, 800, 600)
-
-        # Koordinaatit
-
-        # Heading ja thrust
-        self.heading = 0
-        self.thrust = 0
-
-        # Pallo
-        self.attached_ball = None
-
-        # Shipin ominaisuudet
-        self.handling = int(5)  # kuinka monta astetta kääntyy per frame
-        self.max_thrust = 0.35  # kun FPS 60, gravity 0.1 ja mass 1 niin 0.35 on aika hyvä
-        self.max_speed = 10
-        self.mass = 1.0
-        self._cooldown_basic_shot = 5  # framea
-        self._cooldown_special = 60
-        self._cooldown_after_ball_shot = 60  # cooldown sen jälkeen kun pallo on ammuttu
-        self._cooldown_counter = 0  # cooldown-counter1
-        self._cooldown_counter_special = 0
-        self._recovery_time = 3  # sekunteja jopa!
-        self._recovery_started_at = 0
-        self._max_acceleration = self.max_thrust / self.mass
-
-        self.gravity_affects = 1
-        self.team = team
-
-        if pos is not None:
-            self.start_position = pos
-        else:
-            if self.team == 'red':
-                self.start_position = (700, 300)
-            else:
-                self.start_position = (100, 300)
-
-        self.x, self.y = self.start_position
-        self.x_previous, self.y_previous = self.x, self.y
-
-        self.goal_green_pos = 50, 300
-        self.goal_red_pos = 750, 300
-        self.goal = 0,0
-
-        self.motor_sound_playing = 0
-        self.motor_sound = None
-        self.ball_capture_sound = None
-
-    def update(self):
-        if self.attached_ball is None:
-            self.goal = self.parent.ball_pos
-
-        else:
-            if self.team == 'red':
-                self.goal = self.goal_green_pos
-            else:
-                self.goal = self.goal_red_pos
-        # print("Team, goal point:", self.team, goal)
-        # print("Ball attached:", self.attached_ball)
-        # pygame.draw.line(window, game_object.blue, goal, (self.x, self.y))
-
-        new_heading = 270 - math.degrees(game_object.get_angle_in_radians(self.goal, (self.x, self.y)))
-        self.heading = new_heading
-        self.rot_self_image_keep_size(self.heading)
-
-        # heading_difference = game_object.get_angle_difference(self.heading, new_heading, degrees=1)
-        # print("Heading old, goal, difference:", self.heading, new_heading, heading_difference)
-        # if heading_difference > 0:
-            # print("Rotating right...")
-            # self.rotate_right()
-        # else:
-            # print("Rotating left...")
-            # self.rotate_left()
-        # print("New heading:", self.heading)
-        # print("---")
-        self.accelerate()
-        if self.attached_ball is None:
-            if random.randint(1, 20) == 1:
-                self.shoot()
-
-        player.PlayerSprite.update(self, self.viewscreen_rect)
-
-    def shoot(self):
-        """ Pitää overrideta kun randomisyystä vakioarvot ei toimi """
-        if self._cooldown_counter == 0:
-            bullet_x = int(28 * math.sin(math.radians(self.heading)) * -1 + self.x)
-            bullet_y = int(28 * math.cos(math.radians(self.heading)) * -1 + self.y)
-            bullet.BasicShot(level=self.level, parent=self.parent, pos=(bullet_x, bullet_y), direction=self.heading,
-                         speed=20)
-            self._cooldown_counter = self._cooldown_basic_shot
-
-
-class DemoBall(ball.BallSprite):
-    def __init__(self, level, parent):
-        ball.BallSprite.__init__(self, level=level, parent=parent)
-        self.gravity_affects = 1
-        self.image = pygame.image.load('gfx/ball_50_red.png').convert_alpha()
-        self.rect = self.image.get_rect()
-        self.start_position = (400, 300)
-        self.rect.center = self.start_position
-        self.x, self.y = self.start_position
-        self.x_previous, self.y_previous = self.start_position
+""" Näyttää taustatoimintaa menun takana """
 
 
 class Mouse(game_object.GameObject):
@@ -159,106 +36,168 @@ class Mouse(game_object.GameObject):
         self.update_rect()
 
 
-class BackgroundAction(pygame.sprite.Sprite):
-    def __init__(self):
-        pygame.sprite.Sprite.__init__(self, background_group)
+class BackgroundAction(game.AUTSBallGame):
+    def __init__(self, window=None, darken=0):
+        game.AUTSBallGame.__init__(self, window=window, level_name='Menu Background', demogame=1)
+        # Tämä tummentaa tausta-actionin
+        self.darken = darken
+        self.darken_surface = pygame.Surface(WINDOW_SIZE)
+        self.darken_surface.set_alpha(128)
 
-        # Vakioita
-        self.gravity = 0.1
-        self.screen_size_x = WINDOW_SIZE[0]
-        self.screen_size_y = WINDOW_SIZE[1]
-        self.screen_center_point = self.screen_size_x // 2, self.screen_size_y // 2
+        if self.current_level.background_image is not None:
+            # generoidaan taustakuva
+            self.background_image = pygame.Surface(WINDOW_SIZE)
+            surface_rect = self.background_image.get_rect()
+            image_rect = self.current_level.background_image.get_rect()
+            for x in range(0, surface_rect.width, image_rect.width):
+                for y in range(0, surface_rect.height, image_rect.height):
+                    self.background_image.blit(self.current_level.background_image, (x, y))
 
-        #self.level = level.Level(image_file='gfx/menu_background_level.png')
-        self.level = level.Level(level_name='Menu Background', colorkey=None)
-        self.ship1 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 200))
-        self.ship2 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 300))
-        self.ship3 = DemoPlayer(team='green', level=self.level, parent=self, pos=(700, 400))
-        self.ship4 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 200))
-        self.ship5 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 300))
-        self.ship6 = DemoPlayer(team='red', level=self.level, parent=self, pos=(100, 400))
-        self.ball = DemoBall(level=self.level, parent=self)
+        self.goal_green_pos = 50, 300
+        self.goal_red_pos = 750, 300
+        self.viewscreen_rect = pygame.Rect((0, 0, WINDOW_SIZE[0], WINDOW_SIZE[1]))
+        self.add_player(0, team='red', ship_name='Teafighter', special=bullet.Bouncer)
+        self.add_player(1, team='green', ship_name='LactoAcidShip', special=bullet.DumbFire)
+        self.add_player(2, team='red', ship_name='Muumi', special=bullet.Switcher)
+        self.add_player(3, team='green', ship_name='V-Wing', special=bullet.DumbFire)
+        self.add_player(4, team='red', ship_name='V-Wing', special=bullet.Dirtball)
+        self.add_player(5, team='green', ship_name='Fatship', special=bullet.DumbFire)
+
+        self.player_last_positions = {}
+        for current_player in self.players:
+            self.player_last_positions[current_player] = deque(maxlen=30)
 
         credits_text = text.make_credits_string()
         self.credits = text.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
-        self.mouse = Mouse(level=self.level, parent=self, group=groups.EffectGroup, follows=self.credits,
+        self.mouse = Mouse(level=self.current_level, parent=self, group=groups.EffectGroup, follows=self.credits,
                            x_offset=48, y_offset=-3)
 
-        self.image = pygame.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]))
-        self.rect = self.image.get_rect()
-        self.viewscreen_rect = (0, 0, WINDOW_SIZE[0], WINDOW_SIZE[1])
-
-        self.ball_pos = (self.ball.x, self.ball.y)
-
-        self.score_green = 0
-        self.score_red = 0
+        self.start()
 
     def update(self):
-        self.ball_pos = (self.ball.x, self.ball.y)
+        if self.is_running:
+            # Tämä estää errorin quitattaessa
+            if self.quit_game is False:
+                for event in pygame.event.get():
+                    if event.type == QUIT:
+                        self.quit_game = True
 
-        groups.BulletGroup.update(self.viewscreen_rect)
-        groups.BallGroup.update(self.viewscreen_rect)
-        groups.PlayerGroup.update()
-        groups.EffectGroup.update(self.viewscreen_rect)
-        groups.TextGroup.update()
+                # Super-AI:
+                for current_player in self.players:
+                    # Kaasu pohjassa aina
+                    self.players[current_player].accelerate()
+                    if self.players[current_player].attached_ball is None:
+                        # Suuntaa kohti palloa
+                        self.players[current_player].goal = (self.ball.x, self.ball.y)
+                    else:
+                        # Jos pallo on napattu niin suuntaa kohti maalia
+                        if self.players[current_player].team == 'red':
+                            self.players[current_player].goal = self.goal_green_pos
+                        else:
+                            self.players[current_player].goal = self.goal_red_pos
+                    # Asetetaan heading suoraan kohti targettia, kääntyminen on nössöille
+                    new_heading = 270 - math.degrees(game_object.get_angle_in_radians(self.players[current_player].goal,
+                                                                                      (self.players[current_player].x,
+                                                                                       self.players[current_player].y)))
+                    self.players[current_player].heading = new_heading
+                    while self.players[current_player].heading > 359:
+                        self.players[current_player].heading -= 360
+                    while self.players[current_player].heading < 0:
+                        self.players[current_player].heading += 360
+                    self.players[current_player].rot_self_image_keep_size(self.players[current_player].heading)
 
-        groups.LevelGroup.draw(self.image)
-        groups.BallGroup.draw(self.image)
-        groups.PlayerGroup.draw(self.image)
-        groups.BulletGroup.draw(self.image)
-        groups.EffectGroup.draw(self.image)
-        groups.TextGroup.draw(self.image)
+                    # Ampuillaan randomilla
+                    if self.players[current_player].attached_ball is None:
+                        if random.randint(1, 20) == 1:
+                            self.players[current_player].shoot()
+                        if random.randint(1, 40) == 1:
+                            self.players[current_player].shoot_special()
 
-        text.show_text(self.image, (10, 10), str(self.score_green), color=GREEN, font_size=40)
-        text.show_text(self.image, (750, 10), str(self.score_red), color=RED, font_size=40)
+                    # Tarkistetaan ollaanko oltu jumissa 30 framea
+                    # jos juu niin recoverataan
+                    current_pos = (self.players[current_player].x, self.players[current_player].y)
+                    self.player_last_positions[current_player].append(current_pos)
+                    if len(self.player_last_positions[current_player]) > 16:
+                        has_moved = 0
+                        for logged_pos in self.player_last_positions[current_player]:
+                            if logged_pos != current_pos:
+                                has_moved = 1
+                                break
+                        if not has_moved:
+                            self.players[current_player].recover()
 
-    def score(self, scoring_team=None):
-        self.ship1.detach()
-        self.ship2.detach()
-        self.ship3.detach()
-        self.ship4.detach()
-        self.ship5.detach()
-        self.ship6.detach()
+                # Spritejen päivitykset tässä
+                groups.BulletGroup.update(self.viewscreen_rect)
+                groups.BallGroup.update(self.viewscreen_rect)
+                groups.PlayerGroup.update(self.viewscreen_rect)
+                groups.EffectGroup.update(self.viewscreen_rect)
+                groups.TextGroup.update()
+
+                # Päivitetään graffat vaan joka toisessa framessa
+                if self.frame_counter % 2 == 0:
+                    self.update_graphics()
+
+                # Pelilogiikan FPS target 60, eli graffoilla siis 30
+                self.clock.tick(GRAPHICS_FPS)
+
+        if self.quit_game:
+            self.exit()
+
+    def update_graphics(self):
+        """ Grafiikoiden päivitysmetodi """
+        # Ruutu tyhjäksi
+        self.window.fill(BLACK)
+
+        # Piirretään levelin tausta
+        self.window.blit(self.background_image, (0, 0))
+
+        # Piirretään level
+        self.window.blit(self.current_level.image, (0, 0))
+
+        # Bullettien, pelaajan, pallon piirrot
+        groups.BulletGroup.draw(self.window)
+        groups.BallGroup.draw(self.window)
+        groups.PlayerGroup.draw(self.window)
+        groups.EffectGroup.draw(self.window)
+        groups.TextGroup.draw(self.window)
+
+        # HUD
+        text.show_score(self.window, (50, 10), self.score_green, team=0)
+        text.show_score(self.window, (700, 10), self.score_red, team=1)
+
+        if self.darken:
+            self.window.blit(self.darken_surface, (0,0))
+
+    def calc_viewscreen_rect(self):
+        """ Laskee viewscreen_rectin ja background_view_rectin """
+        # Viewscreen rect: viewscreen absoluuttisissa koordinaateissa
+        self.viewscreen_rect = pygame.Rect((0, 0, WINDOW_SIZE[0], WINDOW_SIZE[1]))
+
+    def score(self, scoring_team):
         """ Tätä kutsutaan kun tulee maali """
-        if scoring_team == 'RED':
+        if scoring_team == 'red':
             self.score_red += 1
             goal_text_color = RED
-        elif scoring_team == 'GREEN':
+        elif scoring_team == 'green':
             self.score_green += 1
             goal_text_color = GREEN
-        text.DisappearingText(pos=(400,525), text="GOAL!!!", frames_visible=60,
-                                  color=goal_text_color, font_size=120, flashes=1)
-
-    def kill_me(self):
-        groups.empty_groups()
-        background_group.empty()
-        self.kill()
+        text.DisappearingText(clock=self.clock, pos=(400, 550), text="GOAL!!!", ms_visible=2000,
+                              color=goal_text_color, font_size=120, flashes=1)
 
 
 def debug_run():
     pygame.init()
-    global window
-    window = pygame.display.set_mode((WINDOW_SIZE[0], WINDOW_SIZE[1]))
-    pygame.display.set_caption("Menu test")
-    clock = pygame.time.Clock()
+    window = pygame.display.set_mode(WINDOW_SIZE)
+    pygame.display.set_caption("Background Action test")
+    # Assettien esilataus
+    assets.load_assets(window)
 
-    background_action = BackgroundAction()
+    bg_game = BackgroundAction(window, darken=1)
 
-    running = True
-    while running:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                running = False
-            elif event.type == MOUSEBUTTONUP:
-                #print event.pos
-                effect.Explosion(pos=event.pos)
-
-        window.fill((0, 0, 0))
-        background_group.update()
-        background_group.draw(window)
-
-        pygame.display.update()
-        clock.tick(30)
+    while bg_game.is_running:
+        bg_game.update()
+        if bg_game.is_running:
+            pygame.display.flip()
 
     pygame.quit()
 

@@ -85,8 +85,8 @@ class CollidingBall(game_object.GameObject):
         # if self in SpawnedBallGroup:
             # self.x, self.y = pygame.mouse.get_pos()
             # self.update_rect()
-            # pygame.draw.line(win, YELLOW, (self.x, self.y), (center_ball.x, center_ball.y))
-            # pygame.draw.line(win, YELLOW, (self.x, self.y),
+            # pygame.draw.line(window, YELLOW, (self.x, self.y), (center_ball.x, center_ball.y))
+            # pygame.draw.line(window, YELLOW, (self.x, self.y),
             #                  (self.x + 50 * self.move_vector.get_vx(), self.y + 50 * self.move_vector.get_vy()))
             # show_text((10,50), "Angle to center: " + str(math.degrees(get_angle_in_radians(center_ball.rect.center, self.rect.center))))
             # show_text((10,70), "Angle of move vector:" + str(math.degrees(self.move_vector.get_direction())))
@@ -109,7 +109,7 @@ class CollidingBall(game_object.GameObject):
             for colliding_sprite in collide_list:
                 if colliding_sprite != self:
                     # print(colliding_sprite)
-                    self.collide_circle(collide_list[0])
+                    self.apply_collision_to_move_vector(collide_list[0])
 
     def check_out_of_bounds(self):
         """ Pitää objektin pelialueen sisällä, palauttaa 1 jos on ulkopuolella """
@@ -157,7 +157,7 @@ while running:
     #CenterBallGroup.update()
 
 
-    #CenterBallGroup.draw(win)
+    #CenterBallGroup.draw(window)
     SpawnedBallGroup.draw(win)
 
 
