@@ -148,9 +148,9 @@ class PlayerSprite(game_object.GameObject):
         self._cooldown_counter_special += self.parent.clock.get_time()
 
         # Jos on pallo kytkettynä niin lisätään paljon cooldownia
-        # TODO: laita toimimaan uudestaan
-        # if self.attached_ball is not None:
-        #     self._cooldown_counter = self._cooldown_after_ball_shot
+        if self.attached_ball is not None:
+            self._cooldown_counter = self._cooldown_after_ball_shot * -1
+            self._cooldown_counter_special = self._cooldown_after_ball_shot * -1
 
         if self._recovery_started_at != 0:
             if (pygame.time.get_ticks() - self._recovery_started_at) // 1000 > self._recovery_time - 1:
@@ -228,13 +228,10 @@ class PlayerSprite(game_object.GameObject):
 
     def shoot(self):
         # Ammutaan perusammus
-        # Pelaajan nopeus vaikuttaa ammuksen vauhtiin
         # TODO: uudista cooldownit - määritys bullet.py:ssä, aikaperusteinen
-        # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
         if self._cooldown_counter > self.basic_shot.cooldown:
             # TODO: siirrä ääni bulletin ominaisuudeksi
             sound.force_play_sound(self.bullet_sound)
-            # TODO: siirrä näiden laskenta bulletin hoidettavaksi
             self.basic_shot(shooting_player=self, level=self.level, parent=self.parent,
                              heading=self.heading)
             self._cooldown_counter = 0
