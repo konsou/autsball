@@ -35,13 +35,20 @@ class PlayerSprite(game_object.GameObject):
                                         image_file=image_file)
 
         # Thrust-gfx
-        motor_flame_offset = int(current_ship.find('images/motor_flame_offset').text)
+        try:
+            motor_flame_offset = int(current_ship.find('images/motor_flame_offset').text)
+        except AttributeError:
+            motor_flame_offset = 0
         thrust_image_file = []
         for value in current_ship.findall('images/motor_flame_image'):
             thrust_image_file.append(value.text)
 
-        self.thrust_gfx = effect.MotorFlame(attached_player=self, image_file=thrust_image_file,
-                                            visible=0, parent=parent, offset=motor_flame_offset)
+        if len(thrust_image_file) > 0:
+            self.thrust_gfx = effect.MotorFlame(attached_player=self, image_file=thrust_image_file,
+                                                visible=0, parent=parent, offset=motor_flame_offset)
+        else:
+            self.thrust_gfx = None
+
         self.rect.center = WINDOW_CENTER_POINT
         if self.owning_player_id == parent.local_player_id and not self.parent.demogame:
             self.is_centered_on_screen = 1
@@ -55,7 +62,11 @@ class PlayerSprite(game_object.GameObject):
         self.smoke_effect_image_files = []
         for value in current_ship.findall('images/rear_smoke_image'):
             self.smoke_effect_image_files.append(value.text)
-        self.smoke_effect_offset = int(current_ship.find('images/rear_smoke_offset').text)
+
+        try:
+            self.smoke_effect_offset = int(current_ship.find('images/rear_smoke_offset').text)
+        except AttributeError:
+            self.smoke_effect_offset = 0
 
         # Sound effex
         if not self.parent.demogame:
@@ -74,7 +85,6 @@ class PlayerSprite(game_object.GameObject):
             self.ball_capture_sound = None
             self.wall_collide_sound = None
             self.bullet_collide_sound = None
-
 
         # Koordinaatit
         if not spawn_point:
@@ -113,7 +123,7 @@ class PlayerSprite(game_object.GameObject):
         self._recovery_started_at = 0
 
     def __repr__(self):
-        return "<SHIP {} {}>".format(self.owning_player_id, self.name)
+        return "<PlayerSprite {} {}>".format(self.owning_player_id, self.name)
 
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
         self.viewscreen_rect = viewscreen_rect
@@ -147,12 +157,15 @@ class PlayerSprite(game_object.GameObject):
 
     def collided_with(self, other_object):
         """  
-        Emme törmää palloon jos se on attachattu 
+        Emme törmää palloon jos se on attachattu itseemme 
         Pallo-objekti hoitaa attachauksen pelaajaan, se ei ole tässä
         """
         apply_collision = 1
         if other_object in groups.BallGroup:
             if other_object == self.attached_ball:
+                apply_collision = 0
+            # Emme myöskään törmää palloon jos kukaan ei ole napannut sitä
+            elif other_object.attached_player is None:
                 apply_collision = 0
 
         if apply_collision:
@@ -170,26 +183,29 @@ class PlayerSprite(game_object.GameObject):
     def accelerate(self):
         if self.thrust == 0:
             self.thrust = self.max_thrust
-            self.thrust_gfx.visible = 1
+            if self.thrust_gfx is not None:
+                self.thrust_gfx.visible = 1
             if not self.motor_sound_playing:
                 sound.force_play_sound(self.motor_sound, -1)
                 self.motor_sound_playing = 1
         else:
-            self._smoke_counter += self.parent.clock.get_time()
-            if self._smoke_counter > self._smoke_interval:
-                effect.SmokeEffect(start_position=(self.x, self.y),
-                                   effect_type='smoke',
-                                   parent=self.parent,
-                                   attached_player=self,
-                                   viewscreen_rect=self.viewscreen_rect,
-                                   image_files=self.smoke_effect_image_files,
-                                   offset=self.smoke_effect_offset)
-                self._smoke_counter = 0
+            if len(self.smoke_effect_image_files) > 0:
+                self._smoke_counter += self.parent.clock.get_time()
+                if self._smoke_counter > self._smoke_interval:
+                    effect.SmokeEffect(start_position=(self.x, self.y),
+                                       effect_type='smoke',
+                                       parent=self.parent,
+                                       attached_player=self,
+                                       viewscreen_rect=self.viewscreen_rect,
+                                       image_files=self.smoke_effect_image_files,
+                                       offset=self.smoke_effect_offset)
+                    self._smoke_counter = 0
 
     def stop_acceleration(self):
         if self.thrust > 0:
             self.thrust = 0
-            self.thrust_gfx.visible = 0
+            if self.thrust_gfx is not None:
+                self.thrust_gfx.visible = 0
             self.motor_sound.stop()
             self.motor_sound_playing = 0
 
@@ -236,6 +252,7 @@ class PlayerSprite(game_object.GameObject):
     def recover(self):
         """ Aloittaa recovery-laskennan """
         self._recovery_started_at = pygame.time.get_ticks()
-        text.DisappearingText(clock=self.parent.clock, pos=self.parent.screen_center_point, text="RECOVERING...",
-                              ms_visible=self._recovery_time * 1000, flashes=1, font_size=80, color=RED)
+        if not self.parent.demogame:
+            text.DisappearingText(clock=self.parent.clock, pos=WINDOW_CENTER_POINT, text="RECOVERING...",
+                                  ms_visible=self._recovery_time * 1000, flashes=1, font_size=80, color=RED)
 

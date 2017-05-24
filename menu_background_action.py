@@ -8,9 +8,11 @@ import groups
 import bullet
 import text
 import assets
+import numpy
 from colors import *
 from pygame.locals import *
 from constants import *
+from collections import deque
 
 
 """ Näyttää taustatoimintaa menun takana """
@@ -42,6 +44,15 @@ class BackgroundAction(game.AUTSBallGame):
         self.darken_surface = pygame.Surface(WINDOW_SIZE)
         self.darken_surface.set_alpha(128)
 
+        if self.current_level.background_image is not None:
+            # generoidaan taustakuva
+            self.background_image = pygame.Surface(WINDOW_SIZE)
+            surface_rect = self.background_image.get_rect()
+            image_rect = self.current_level.background_image.get_rect()
+            for x in range(0, surface_rect.width, image_rect.width):
+                for y in range(0, surface_rect.height, image_rect.height):
+                    self.background_image.blit(self.current_level.background_image, (x, y))
+
         self.goal_green_pos = 50, 300
         self.goal_red_pos = 750, 300
         self.viewscreen_rect = pygame.Rect((0, 0, WINDOW_SIZE[0], WINDOW_SIZE[1]))
@@ -51,6 +62,10 @@ class BackgroundAction(game.AUTSBallGame):
         self.add_player(3, team='green', ship_name='V-Wing', special=bullet.DumbFire)
         self.add_player(4, team='red', ship_name='V-Wing', special=bullet.Dirtball)
         self.add_player(5, team='green', ship_name='Fatship', special=bullet.DumbFire)
+
+        self.player_last_positions = {}
+        for current_player in self.players:
+            self.player_last_positions[current_player] = deque(maxlen=30)
 
         credits_text = text.make_credits_string()
         self.credits = text.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
@@ -67,15 +82,20 @@ class BackgroundAction(game.AUTSBallGame):
                     if event.type == QUIT:
                         self.quit_game = True
 
+                # Super-AI:
                 for current_player in self.players:
+                    # Kaasu pohjassa aina
                     self.players[current_player].accelerate()
                     if self.players[current_player].attached_ball is None:
+                        # Suuntaa kohti palloa
                         self.players[current_player].goal = (self.ball.x, self.ball.y)
                     else:
+                        # Jos pallo on napattu niin suuntaa kohti maalia
                         if self.players[current_player].team == 'red':
                             self.players[current_player].goal = self.goal_green_pos
                         else:
                             self.players[current_player].goal = self.goal_red_pos
+                    # Asetetaan heading suoraan kohti targettia, kääntyminen on nössöille
                     new_heading = 270 - math.degrees(game_object.get_angle_in_radians(self.players[current_player].goal,
                                                                                       (self.players[current_player].x,
                                                                                        self.players[current_player].y)))
@@ -86,11 +106,25 @@ class BackgroundAction(game.AUTSBallGame):
                         self.players[current_player].heading += 360
                     self.players[current_player].rot_self_image_keep_size(self.players[current_player].heading)
 
+                    # Ampuillaan randomilla
                     if self.players[current_player].attached_ball is None:
                         if random.randint(1, 20) == 1:
                             self.players[current_player].shoot()
                         if random.randint(1, 40) == 1:
                             self.players[current_player].shoot_special()
+
+                    # Tarkistetaan ollaanko oltu jumissa 30 framea
+                    # jos juu niin recoverataan
+                    current_pos = (self.players[current_player].x, self.players[current_player].y)
+                    self.player_last_positions[current_player].append(current_pos)
+                    if len(self.player_last_positions[current_player]) > 16:
+                        has_moved = 0
+                        for logged_pos in self.player_last_positions[current_player]:
+                            if logged_pos != current_pos:
+                                has_moved = 1
+                                break
+                        if not has_moved:
+                            self.players[current_player].recover()
 
                 # Spritejen päivitykset tässä
                 groups.BulletGroup.update(self.viewscreen_rect)
@@ -113,6 +147,9 @@ class BackgroundAction(game.AUTSBallGame):
         """ Grafiikoiden päivitysmetodi """
         # Ruutu tyhjäksi
         self.window.fill(BLACK)
+
+        # Piirretään levelin tausta
+        self.window.blit(self.background_image, (0, 0))
 
         # Piirretään level
         self.window.blit(self.current_level.image, (0, 0))

@@ -80,7 +80,10 @@ class AUTSBallGame:
         self.player_count = 0
         self.player_count_team = {'red': 0, 'green': 0}
         groups.empty_groups()
-        self.music_player.stop()
+        try:
+            self.music_player.stop()
+        except AttributeError:
+            pass
 
     def add_player(self, player_id=None, team=None, ship_name='V-Wing', special=None):
         # Lisää pelaajan pelaajalistaan
@@ -256,7 +259,7 @@ if __name__ == '__main__':
     load_assets(window)
 
     game = AUTSBallGame(window)
-    game.add_player(0, team='red', ship_name='LactoAcidShip')
+    game.add_player(0, team='red', ship_name='Trademark Fighter')
     game.add_player(1, team='green', ship_name='Muumi')
     game.add_player(2, team='red', ship_name='Rocket')
     game.add_player(3, team='green', ship_name='Fatship')

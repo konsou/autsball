@@ -82,6 +82,7 @@
     <level name="Menu Background" public="0">
         <images>
             <level-image>gfx/menu_background_level.png</level-image>
+            <background>gfx/background_cave.png</background>
         </images>
 
         <width>800</width>

@@ -113,7 +113,7 @@ def debug_run():
                     active_mode = Modes.Practice
                     window.fill(BLACK)
                     # Lopetetaan background action
-                    background_action.kill_me()
+                    background_action.destroy()
                     del background_action
                     music_player.stop()
 
@@ -193,7 +193,6 @@ def debug_run():
                 if event.type == KEYUP:
                     if event.key == K_ESCAPE:
                         practice_game.destroy()
-                        #groups.empty_groups()
                         del practice_game
                         active_mode = Modes.MainMenu
                         window.fill(BLACK)

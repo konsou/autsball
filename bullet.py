@@ -8,6 +8,8 @@ import random
 from colors import *
 from assets import assets, assets_rot
 
+# TODO: bulletit tuhoaa itsensä joskus ennen kuin kerkeävät törmätä
+
 
 class BulletSprite(game_object.GameObject):
     """ Ammuttavien juttujen perusclass. Tässä vakioarvot jos muuta ei overrideta: """
@@ -15,8 +17,10 @@ class BulletSprite(game_object.GameObject):
     max_speed = 20
     mass = 0.1
     speed = 10
+    rotate = 0
+    laser_movement = 0
 
-    """ direction asteina, tulee PlayerSpriten headingista """
+    # direction asteina, tulee PlayerSpriten headingista
     def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, image_file=None,
                  heading=0, speed=10):
 
@@ -36,20 +40,28 @@ class BulletSprite(game_object.GameObject):
         self.rect.center = (self.x, self.y)
         self.move_vector.set_speed_direction(speed, math.radians(270 - heading))
 
-        # Lisätään ampuvan pelaajan liikevektori että se vaikuttaa loogisella tavalla bulletin liikemäärään
-        self.move_vector.add_vector(shooting_player.move_vector)
+        if not self.laser_movement:
+            # Lisätään ampuvan pelaajan liikevektori että se vaikuttaa loogisella tavalla bulletin liikemäärään
+            self.move_vector.add_vector(shooting_player.move_vector)
+        else:
+            self.gravity_affects = 0
 
         self.is_bullet = 1
         self.group = group
 
         # SFX
-        self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump3.wav')
-        self.wall_collide_sound.set_volume(1)
+        if not self.parent.demogame:
+            self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump3.wav')
+            self.wall_collide_sound.set_volume(1)
+        else:
+            self.wall_collide_sound = None
 
     def update(self, viewscreen_rect):
         self.viewscreen_rect = viewscreen_rect
         self.update_movement()
         self.animate()
+        if self.rotate:
+            self.rot_self_image_keep_size(self.heading)
         self.check_out_of_bounds()
         # Out of bounds -check voi tappaa bulletin joten tehdään nämä vain jos ollaan vielä bulletgroupissa:
         if self in self.group:
@@ -104,6 +116,24 @@ class BasicShot(BulletSprite):
     def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
         BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
                               image_file=self.image_file, heading=heading, speed=self.speed)
+
+
+class GreenLaser(BulletSprite):
+    """ Star Wars -tyyppinen hidas laser - ei tuhoa seinää """
+    cooldown = 80
+    mass = 0.1
+    speed = 10
+    image_file = 'gfx/bullet_laser_green_16.png'
+    rotate = 1
+    laser_movement = 1
+
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=self.image_file, heading=heading, speed=self.speed)
+        # self.gravity_affects = 0
+
+    def collided_with_wall(self):
+        self.kill()
 
 
 class DumbFire(BulletSprite):
