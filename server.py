@@ -13,6 +13,13 @@ class Server(object):
         self._client_list = set()
         self._client_ip_id_combination = {}
         self._client_id_counter = 0
+
+        # lisää serveri client listaan
+        server_local_ip = '127.0.0.1'
+        self._client_list.add(server_local_ip)
+        self._client_ip_id_combination[server_local_ip] = self._client_id_counter
+        self._client_id_counter += 1
+
         # Aloitetaan clienttien odotus
         self._waiting_for_client_to_join = True
         self._in_game = False
@@ -64,11 +71,6 @@ class Server(object):
 
     def start_game(self):
         self._in_game = True
-        # TODO: lisää serveri client listaan
-        server_local_ip = '127.0.0.1'
-        self._client_list.add(server_local_ip)
-        self._client_ip_id_combination[server_local_ip] = self._client_id_counter
-        self._client_id_counter += 1
 
     def shutdown(self):
         self._in_game = False
