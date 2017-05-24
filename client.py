@@ -14,15 +14,17 @@ network_object = network.Network()
 network_object.bind_to_server('')
 
 # Kuunnellaan serveriä ensin, että saadaan selville sen osoite
-client_server_acknowledgement_message = b"I'm client"
+client_server_acknowledgement_message = b"Ok, let's have fun!"
 server_address = None
 while server_address is None:
     response_message = network_object.client_listen()
-    if response_message is not None:
+    if response_message is 'Join me':
         server_address = response_message[1]
         print server_address
         # Kun server on tunnistettu, lähetetään serverille oma osoite i.e. 'joinataan'
         network_object.client_send(client_server_acknowledgement_message, server_address)
+    elif response_message is not None:
+        print 'Not valid server'
 
 
 #pelaajan tiedot
