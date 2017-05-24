@@ -31,8 +31,12 @@ class BallSprite(game_object.GameObject):
         self.is_ball = 1
 
         # SFX
-        self.wall_collide_sound = assets['sfx/thump4.wav']
-        self.bullet_collide_sound = assets['sfx/metal_thud_3.wav']
+        if not self.parent.demogame:
+            self.wall_collide_sound = assets['sfx/thump4.wav']
+            self.bullet_collide_sound = assets['sfx/metal_thud_3.wav']
+        else:
+            self.wall_collide_sound = None
+            self.bullet_collide_sound = None
 
     def __repr__(self):
         return "<BALL>"

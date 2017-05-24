@@ -80,7 +80,6 @@
     </level>
 
     <level name="Menu Background" public="0">
-        <!-- TODO: ota käyttöön oikeasti tämä menu backgroundissa -->
         <images>
             <level-image>gfx/menu_background_level.png</level-image>
         </images>
@@ -103,7 +102,7 @@
         </player_spawns>
 
         <ball_spawns>
-            <spawn_coordinates x="100" y="100" />
+            <spawn_coordinates x="400" y="300" />
         </ball_spawns>
     </level>
 

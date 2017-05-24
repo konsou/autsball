@@ -72,10 +72,7 @@ def debug_run():
     practice_game = None
 
     # Background action
-    background_action = menu_background_action.BackgroundAction()
-    # Tämä tummentaa tausta-actionin
-    darken_surface = pygame.Surface(WINDOW_SIZE)
-    darken_surface.set_alpha(128)
+    background_action = menu_background_action.BackgroundAction(window, darken=1)
 
     # Settings menu
     settings_background = assets['gfx/UI_settings_background.png']
@@ -120,7 +117,7 @@ def debug_run():
                     del background_action
                     music_player.stop()
 
-                    practice_game = game.AUTSBallGame()
+                    practice_game = game.AUTSBallGame(window, level_name='Vertical Challenge')
                     practice_game.add_player(0, team='red', ship_name='Teafighter')
                     practice_game.add_player(1, team='green')
                     practice_game.add_player(2, team='red')
@@ -200,7 +197,7 @@ def debug_run():
                         del practice_game
                         active_mode = Modes.MainMenu
                         window.fill(BLACK)
-                        background_action = menu_background_action.BackgroundAction()
+                        background_action = menu_background_action.BackgroundAction(window=window, darken=1)
                         static_visual_components_group.draw(window)
                         #music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
                         if Settings.data['music_on']:
@@ -214,11 +211,8 @@ def debug_run():
         if active_mode == Modes.MainMenu:
             window.fill(0)
 
-            menu_background_action.background_group.update()
+            background_action.update()
             music_player_group.update()
-
-            menu_background_action.background_group.draw(window)
-            window.blit(darken_surface, (0, 0))
 
             static_visual_components_group.draw(window)
             main_menu_group.draw(window)
@@ -231,11 +225,9 @@ def debug_run():
         elif active_mode == Modes.SettingsMenu:
             window.fill(0)
 
-            menu_background_action.background_group.update()
+            background_action.update()
             music_player_group.update()
 
-            menu_background_action.background_group.draw(window)
-            window.blit(darken_surface, (0, 0))
             window.blit(settings_background, (0, 0))
 
             settings_group.draw(window)

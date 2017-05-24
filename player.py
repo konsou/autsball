@@ -15,7 +15,7 @@ from assets import assets, assets_rot
 
 class PlayerSprite(game_object.GameObject):
     def __init__(self, player_id=None, team=None, level=None, parent=None, ship_name='V-Wing',
-                 group=groups.PlayerGroup, spawn_point=None):
+                 group=groups.PlayerGroup, spawn_point=None, special=None):
         self.owning_player_id = player_id
         self.team = team
         self.name = ship_name
@@ -43,7 +43,7 @@ class PlayerSprite(game_object.GameObject):
         self.thrust_gfx = effect.MotorFlame(attached_player=self, image_file=thrust_image_file,
                                             visible=0, parent=parent, offset=motor_flame_offset)
         self.rect.center = WINDOW_CENTER_POINT
-        if self.owning_player_id == parent.local_player_id:
+        if self.owning_player_id == parent.local_player_id and not self.parent.demogame:
             self.is_centered_on_screen = 1
             # Pallonsuuntamarkkeri
             effect.BallDirectionMarker(self, self.parent.ball)
@@ -58,13 +58,23 @@ class PlayerSprite(game_object.GameObject):
         self.smoke_effect_offset = int(current_ship.find('images/rear_smoke_offset').text)
 
         # Sound effex
-        self.motor_sound = assets[current_ship.find('sounds/motor_sound').text]
-        self.motor_sound_playing = 0
-        self.bullet_sound = assets[current_ship.find('sounds/bullet_sound').text]
-        self.ball_shoot_sound = assets[current_ship.find('sounds/ball_shoot_sound').text]
-        self.ball_capture_sound = assets[current_ship.find('sounds/ball_capture_sound').text]
-        self.wall_collide_sound = assets[current_ship.find('sounds/wall_collide_sound').text]
-        self.bullet_collide_sound = assets[current_ship.find('sounds/bullet_collide_sound').text]
+        if not self.parent.demogame:
+            self.motor_sound = assets[current_ship.find('sounds/motor_sound').text]
+            self.motor_sound_playing = 0
+            self.bullet_sound = assets[current_ship.find('sounds/bullet_sound').text]
+            self.ball_shoot_sound = assets[current_ship.find('sounds/ball_shoot_sound').text]
+            self.ball_capture_sound = assets[current_ship.find('sounds/ball_capture_sound').text]
+            self.wall_collide_sound = assets[current_ship.find('sounds/wall_collide_sound').text]
+            self.bullet_collide_sound = assets[current_ship.find('sounds/bullet_collide_sound').text]
+        else:
+            self.motor_sound = None
+            self.motor_sound_playing = 0
+            self.bullet_sound = None
+            self.ball_shoot_sound = None
+            self.ball_capture_sound = None
+            self.wall_collide_sound = None
+            self.bullet_collide_sound = None
+
 
         # Koordinaatit
         if not spawn_point:
@@ -83,7 +93,10 @@ class PlayerSprite(game_object.GameObject):
 
         # Abilityt
         self.basic_shot = bullet.BasicShot
-        self.special = bullet.Bouncer
+        if special is not None:
+            self.special = special
+        else:
+            self.special = bullet.Bouncer
 
         # Shipin ominaisuudet
         self.handling = float(current_ship.find('handling').text)  # kuinka monta astetta kääntyy per frame
@@ -162,17 +175,16 @@ class PlayerSprite(game_object.GameObject):
                 sound.force_play_sound(self.motor_sound, -1)
                 self.motor_sound_playing = 1
         else:
-            if type(self).__name__ is not 'DemoPlayer':
-                self._smoke_counter += self.parent.clock.get_time()
-                if self._smoke_counter > self._smoke_interval:
-                    effect.SmokeEffect(start_position=(self.x, self.y),
-                                       effect_type='smoke',
-                                       parent=self.parent,
-                                       attached_player=self,
-                                       viewscreen_rect=self.viewscreen_rect,
-                                       image_files=self.smoke_effect_image_files,
-                                       offset=self.smoke_effect_offset)
-                    self._smoke_counter = 0
+            self._smoke_counter += self.parent.clock.get_time()
+            if self._smoke_counter > self._smoke_interval:
+                effect.SmokeEffect(start_position=(self.x, self.y),
+                                   effect_type='smoke',
+                                   parent=self.parent,
+                                   attached_player=self,
+                                   viewscreen_rect=self.viewscreen_rect,
+                                   image_files=self.smoke_effect_image_files,
+                                   offset=self.smoke_effect_offset)
+                self._smoke_counter = 0
 
     def stop_acceleration(self):
         if self.thrust > 0:

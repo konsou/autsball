@@ -16,7 +16,9 @@ from assets import assets, load_assets
 
 
 class AUTSBallGame:
-    def __init__(self):
+    def __init__(self, window=None, level_name='Test Level', demogame=0):
+        self.demogame = demogame
+        self.window = window
         self.is_running = False
         self.local_player_id = 0
 
@@ -26,20 +28,25 @@ class AUTSBallGame:
         # 2) pygamen init
         pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
         pygame.init()
-        self.window = pygame.display.set_mode(WINDOW_SIZE)
-        pygame.display.set_caption("AUTSball")
+        # self.window = pygame.display.set_mode(WINDOW_SIZE)
+        # pygame.display.set_caption("AUTSball")
         self.clock = pygame.time.Clock()
 
         # Taustamusiikki
-        self.music_player = music.MusicPlayer(screen='game', window_size=WINDOW_SIZE,
-                                              pos='bottomleft', group=groups.TextGroup, shuffle=0)
+        if not demogame:
+            self.music_player = music.MusicPlayer(screen='game', window_size=WINDOW_SIZE,
+                                                  pos='bottomleft', group=groups.TextGroup, shuffle=0)
 
         # SFX
-        self.goal_green_sound = assets['sfx/goal_green.wav']
-        self.goal_red_sound = assets['sfx/goal_red.wav']
+        if not demogame:
+            self.goal_green_sound = assets['sfx/goal_green.wav']
+            self.goal_red_sound = assets['sfx/goal_red.wav']
+        else:
+            self.goal_green_sound = None
+            self.goal_red_sound = None
 
         # Instansioidaan leveli
-        self.current_level = level.Level(level_name='Test Level')
+        self.current_level = level.Level(level_name=level_name)
         self.gravity = self.current_level.gravity
 
         # Instansioidaan pelaaja ja pallo
@@ -64,7 +71,8 @@ class AUTSBallGame:
     def start(self):
         if not self.is_running:
             self.is_running = True
-            self.music_player.play()
+            if not self.demogame:
+                self.music_player.play()
 
     def destroy(self):
         self.is_running = False
@@ -74,7 +82,7 @@ class AUTSBallGame:
         groups.empty_groups()
         self.music_player.stop()
 
-    def add_player(self, player_id=None, team=None, ship_name='V-Wing'):
+    def add_player(self, player_id=None, team=None, ship_name='V-Wing', special=None):
         # Lisää pelaajan pelaajalistaan
         if player_id is None:
             self.players[self.player_count] = player.PlayerSprite(player_id=player_id,
@@ -83,7 +91,8 @@ class AUTSBallGame:
                                                                   parent=self,
                                                                   ship_name=ship_name,
                                                                   spawn_point=self.current_level.player_spawns[team][
-                                                                              self.player_count_team[team]])
+                                                                              self.player_count_team[team]],
+                                                                  special=special)
 
         else:
             self.players[player_id] = player.PlayerSprite(player_id=player_id,
@@ -92,7 +101,8 @@ class AUTSBallGame:
                                                           parent=self,
                                                           ship_name=ship_name,
                                                           spawn_point=self.current_level.player_spawns[team][
-                                                                      self.player_count_team[team]])
+                                                                      self.player_count_team[team]],
+                                                          special=special)
 
         self.player_count += 1
         self.player_count_team[team] += 1
@@ -245,7 +255,7 @@ if __name__ == '__main__':
 
     load_assets(window)
 
-    game = AUTSBallGame()
+    game = AUTSBallGame(window)
     game.add_player(0, team='red', ship_name='LactoAcidShip')
     game.add_player(1, team='green', ship_name='Muumi')
     game.add_player(2, team='red', ship_name='Rocket')

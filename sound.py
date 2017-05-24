@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import pygame
+from constants import *
 
 
 def force_play_sound(sound, loops=0):
@@ -13,5 +14,6 @@ def force_play_sound(sound, loops=0):
     six times. The default value (zero) means the Sound is not repeated, and so is only played once. If loops is
     set to -1 the Sound will loop indefinitely (though you can still call stop() to stop it).
     """
-    if sound is not None:
-        pygame.mixer.find_channel(True).play(sound, loops)
+    if Settings.data['sounds_on']:
+        if sound is not None:
+            pygame.mixer.find_channel(True).play(sound, loops)
