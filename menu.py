@@ -320,6 +320,14 @@ def debug_run():
             if server_object is not None:
                 server_object.update(clock)
 
+            if 'click' in ready_checkbox.handleEvent(event):
+                if ready_checkbox.checked == False:
+                    ready_checkbox.checked == True
+                elif ready_checkbox.checked == False:
+                    ready_checkbox.checked == True
+
+
+
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
 
