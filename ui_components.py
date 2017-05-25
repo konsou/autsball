@@ -201,6 +201,17 @@ class LabelImageText(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = position
 
+class ShipSelectionImage(pygame.sprite.Sprite):
+
+    def __init__(self, group=None, image_text=None, position=(0, 0)):
+        pygame.sprite.Sprite.__init__(self, group)
+        try:
+            self.image = assets.assets['gfx/%s.png' % image_text]
+        except pygame.error:
+            # Jos kuvaa ei löydy, käytä rendattua fonttia?
+            self.image = pygame.Surface()
+        self.rect = self.image.get_rect()
+        self.rect.midbottom = position
 
 class Checkbox(pygame.sprite.Sprite):
 
@@ -214,7 +225,7 @@ class Checkbox(pygame.sprite.Sprite):
         else:
             self.image = self._unchecked_image
         self.rect = self.image.get_rect()
-        self.rect.topleft = position
+        self.rect.midbottom = position
 
         self._buttonDown = False
         self._mouseOverButton = False
