@@ -238,13 +238,13 @@ def debug_run():
                 if 'click' in create_game_button.handleEvent(event):
                     active_mode = Modes.ReadyLobby
                     window.fill(BLACK)
-                    server = Server()
+                    server_object = Server()
 
                 if 'click' in join_game_button.handleEvent(event):
                     client = Client()
 
-                    while not client.try_to_join_server():
-                        clock.tick(GRAPHICS_FPS)
+                    while not client.try_to_join_server(clock):
+                        pass
 
                     window.fill(BLACK)
                     active_mode = Modes.ReadyLobby

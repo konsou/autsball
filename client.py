@@ -16,23 +16,26 @@ class Client(object):
         self._server_address = None
         self._local_player_id = None
 
-    def try_to_join_server(self):
+    def try_to_join_server(self, clock):
         response_message = self._network.client_listen()
-        if response_message is 'Join me':
+        if response_message is not None and response_message[0] == 'Join me':
             self._server_address = response_message[1]
             self._network.client_send(self._acknowledgement_message, self._server_address)
-            print "Joining server %s" % self._server_address
-            has_id = False
-            while not has_id:
+            print "Joining server ", self._server_address
+            while self._local_player_id is None:
                 data = self._network.client_listen()
-                if data[0]['client_id'] is not None:
-                    self._local_player_id = data[0]['client_id']
-                    return True
-                else:
-                    print data[0]
+                if data is not None:
+                    if data[0]['client_id'] is not None:
+                        self._local_player_id = data[0]['client_id']
+                        return True
+                    else:
+                        print data[0]
         elif response_message is not None:
+            print response_message[0]
             print "Not valid server"
             return False
+
+        clock.tick(10)
 
 #Testauksen tässä vaiheessa clientiltä lähetetään ainostaan player_id, ja näppäimistökomennot.
 #Myöhemmin lisätään clientin oma ennustava grafiikan laskenta, jota korjataan serveriltä tulevalla tiedolla.

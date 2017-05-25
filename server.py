@@ -41,17 +41,17 @@ class Server(object):
                     # Lisätään client listaan
                     if client_response[0].startswith("My name is:"):
                         client_name = client_response[0].split(":")[1]
-                        client_id = self._client_id_counter
+                        client_id = {"client_id": self._client_id_counter}
                         self._client_list.add(client_response[1])
                         self._client_ip_id_combination[client_response[1]] = client_id
                         self._client_id_counter += 1
-                        print "Added client with ip %s" % client_response[1]
+                        print "Added client with ip ", client_response[1]
                         print "Client name is %s" % client_name
                         # Lähetetään pelaajalle sen oma id
                         packet_to_client = json.dumps(client_id)
                         self._network.client_send(packet_to_client, client_response[1])
                     else:
-                        print "Not valid client, he said '%s'" % client_response
+                        print "Not valid client, he said ", client_response
             finally:
                 pass
         # Pelin sisällä
