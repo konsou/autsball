@@ -251,9 +251,9 @@ class GameObject(pygame.sprite.Sprite):
 
         return wall_collision
 
-    def check_collision_with_group(self, group):
+    def check_collision_with_group(self, group, collided=pygame.sprite.collide_mask):
         """ Tarkastaa törmääkö objekti ryhmässä oleviin toisiin objekteihin. """
-        collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=pygame.sprite.collide_mask)
+        collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=collided)
         for colliding_object in collide_list:
             # Emme halua törmätä itseemme
             # Skippaamme myös jo käsitellyt kollisiot
