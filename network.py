@@ -11,7 +11,7 @@ class Network(object):
         # datagram socket
         self._socket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         # timeout to the socket so it doesn't block indefinitely when trying to receive data
-        self._socket.settimeout(0.2)
+        self._socket.settimeout(0.02)
         # port used to communicate
         self._port = 12345
         self._server_address = ('127.0.0.1', self._port)
