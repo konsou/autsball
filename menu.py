@@ -438,7 +438,7 @@ def debug_run():
                     server_updates = None
                 # print server_updates
                 multiplayer_game.update(server_updates=server_updates)
-                clock.tick(GRAPHICS_FPS)
+                # clock.tick(GRAPHICS_FPS)
 
     pygame.quit()
 

@@ -17,6 +17,7 @@ from assets import assets, load_assets
 
 class AUTSBallGame:
     def __init__(self, window=None, level_name='Test Level', demogame=0, client=False):
+        groups.empty_groups()
         self.demogame = demogame
         self.window = window
         self.is_running = False
@@ -84,7 +85,7 @@ class AUTSBallGame:
         self.players.clear()
         self.player_count = 0
         self.player_count_team = {'red': 0, 'green': 0}
-        groups.empty_groups()
+        # groups.empty_groups()
         try:
             self.music_player.stop()
         except AttributeError:
@@ -168,8 +169,9 @@ class AUTSBallGame:
                                     self.players[current_player_int].y = server_updates[server_update_key][current_player]['y']
                                     self.players[current_player_int].heading = server_updates[server_update_key][current_player]['heading']
                                     self.players[current_player_int].update_rect(self.viewscreen_rect)
+                                    self.players[current_player_int].rot_self_image_keep_size(self.players[current_player_int].heading)
                     # groups.PlayerGroup.update(self.viewscreen_rect)
-                    print groups.PlayerGroup
+                    # print groups.PlayerGroup
 
                 # print self.players[0].x, self.players[0].y, self.players[0].rect
                 # print self.players[1].x, self.players[1].y, self.players[1].rect
