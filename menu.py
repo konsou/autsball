@@ -60,14 +60,18 @@ def debug_run():
     multiplayer_button = Button(Rect(275, 310, 270, 50), surface_images=['gfx/UI_multiplayer_button_normal.png',
                                                                          'gfx/UI_multiplayer_button_down.png',
                                                                          'gfx/UI_multiplayer_button_highlight.png'])
-    settings_button = Button(Rect(275, 370, 195, 50), surface_images=['gfx/UI_settings_button_normal.png',
+    player_button = Button(Rect(285, 375, 270, 50), surface_images=['gfx/UI_player_button_normal.png',
+                                                                         'gfx/UI_player_button_down.png',
+                                                                         'gfx/UI_player_button_highlight.png'])
+    settings_button = Button(Rect(275, 430, 195, 50), surface_images=['gfx/UI_settings_button_normal.png',
                                                                       'gfx/UI_settings_button_down.png',
                                                                       'gfx/UI_settings_button_highlight.png'])
-    quit_button = Button(Rect(275, 430, 135, 50), surface_images=['gfx/UI_quit_button_normal.png',
+    quit_button = Button(Rect(275, 490, 195, 50), surface_images=['gfx/UI_quit_button_normal.png',
                                                                   'gfx/UI_quit_button_down.png',
                                                                   'gfx/UI_quit_button_highlight.png'])
     main_menu_group.add(practice_button)
     main_menu_group.add(multiplayer_button)
+    main_menu_group.add(player_button)
     main_menu_group.add(settings_button)
     main_menu_group.add(quit_button)
 
@@ -313,6 +317,7 @@ def debug_run():
             ready_lobby_group.draw(window)
             if server_object is not None:
                 start_game_button.draw(window)
+                main_menu_from_ready_lobby_button.draw(window)
             else:
                 main_menu_from_ready_lobby_button.draw(window)
 
