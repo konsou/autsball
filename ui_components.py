@@ -419,6 +419,130 @@ class Slider(pygame.sprite.Sprite):
 
     value = property(_get_value, _set_value)
 
+class TextField(object):
+    def __init__(self, group=None, position=(0, 0)):
+        pygame.sprite.Sprite.__init__(self, group)
+        self._unchecked_image = assets.assets['gfx/UI_checkbox_base.png']
+        self._checked_image = assets.assets['gfx/UI_checkbox_checked.png']
+        self._checked = checked
+        if self._checked:
+            self.image = self._checked_image
+        else:
+            self.image = self._unchecked_image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = position
+
+        self._buttonDown = False
+        self._mouseOverButton = False
+        self._lastMouseDownOverButton = False
+        self._visible = True
+
+        self._checkbox_group = checkbox_group
+        if self._checkbox_group is not None:
+            self._checkbox_group.add(self)
+
+    def change_state(self, state=None, group_update=False):
+        if state is None:
+            self._checked = not self._checked
+        else:
+            self._checked = state
+
+        if self._checked:
+            self.image = self._checked_image
+        else:
+            self.image = self._unchecked_image
+
+        if self._checkbox_group is not None and not group_update:
+            self._checkbox_group.update_checkboxes(self)
+
+    def _get_checked(self):
+        return self._checked
+
+    def _set_checked(self, state):
+        self.change_state(state)
+
+    def draw(self, surfaceObj):
+        if self._visible:
+            if self._checked:
+                surfaceObj.blit(self._checked_image, self.rect)
+            else:
+                surfaceObj.blit(self._unchecked_image, self.rect)
+
+    def handleEvent(self, eventObj):
+        if eventObj.type not in (MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN) or not self._visible:
+            return []
+
+        retVal = []
+
+        hasExited = False
+        if not self._mouseOverButton and self.rect.collidepoint(eventObj.pos):
+            # mouse entered the button
+            self._mouseOverButton = True
+            self.mouseEnter(eventObj)
+            retVal.append('enter')
+        elif self._mouseOverButton and not self.rect.collidepoint(eventObj.pos):
+            # mouse exited the button
+            self._mouseOverButton = False
+            hasExited = True
+
+        if self.rect.collidepoint(eventObj.pos):
+            # mouse event happened over the button
+            if eventObj.type == MOUSEMOTION:
+                self.mouseMove(eventObj)
+                retVal.append('move')
+            elif eventObj.type == MOUSEBUTTONDOWN:
+                self._buttonDown = True
+                self._lastMouseDownOverButton = True
+                self.mouseDown(eventObj)
+                retVal.append('down')
+        else:
+            if eventObj.type in (MOUSEBUTTONUP, MOUSEBUTTONDOWN):
+                # Mouse up/down event happened off the button, no mouseClick()
+                self._lastMouseDownOverButton = False
+
+        doMouseClick = False
+        if eventObj.type == MOUSEBUTTONUP:
+            if self._lastMouseDownOverButton:
+                doMouseClick = True
+            self._lastMouseDownOverButton = False
+
+            if self._buttonDown:
+                self._buttonDown = False
+                self.mouseUp(eventObj)
+                retVal.append('up')
+
+            if doMouseClick:
+                self._buttonDown = False
+                self.mouseClick(eventObj)
+                retVal.append('click')
+                self.change_state()
+
+        if hasExited:
+            self.mouseExit(eventObj)
+            retVal.append('exit')
+
+        return retVal
+
+    def mouseClick(self, event):
+        pass
+
+    def mouseEnter(self, event):
+        pass
+
+    def mouseMove(self, event):
+        pass
+
+    def mouseExit(self, event):
+        pass
+
+    def mouseDown(self, event):
+        pass
+
+    def mouseUp(self, event):
+        pass
+
+    checked = property(_get_checked, _set_checked)
+
 
 def draw_loading_bar(window, current, total, bar_width=400, bar_height=30, pos=(200, 335), color=BLACK):
     """
