@@ -25,7 +25,7 @@ class Server(object):
         self._waiting_for_client_to_join = True
         self._in_game = False
         # Serverin updatejen intervalli millisekunteina
-        self._update_interval = 5
+        self._update_interval = 20
         self._update_counter = 0
 
         # Game instance

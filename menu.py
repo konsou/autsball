@@ -354,6 +354,7 @@ def debug_run():
                 client_object.send_input()
                 server_updates = client_object.get_server_updates()
                 #multiplayer_game.update()
+                clock.tick(GRAPHICS_FPS)
 
     pygame.quit()
 
