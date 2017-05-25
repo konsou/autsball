@@ -89,6 +89,7 @@ def debug_run():
     active_mode = Modes.MainMenu
     practice_game = None
     multiplayer_game = None
+    client_wait_for_player_data_after_start = False
 
     # Background action
     background_action = menu_background_action.BackgroundAction(window, darken=1)
@@ -331,14 +332,28 @@ def debug_run():
                         music_player.stop()
 
                         multiplayer_game = game.AUTSBallGame(window)
-                        server_object.start_game(multiplayer_game)
+                        server_object.start_game(multiplayer_game, clock)
 
             if server_object is not None:
                 server_object.update(clock)
             elif client_object is not None:
-                if client_object.wait_for_server_start_game():
-                    active_mode = Modes.MultiplayerGame
-                    window.fill(BLACK)
+                if client_object.wait_for_server_start_game() and not client_wait_for_player_data_after_start:
+                    multiplayer_game = game.AUTSBallGame(window, client=True)
+                    multiplayer_game.local_player_id = client_object.client_id
+                    client_wait_for_player_data_after_start = True
+                elif client_wait_for_player_data_after_start:
+                    if client_object.wait_for_player_data_after_start(multiplayer_game):
+                        window.fill(BLACK)
+
+                        # Lopetetaan background action
+                        background_action.destroy()
+                        del background_action
+                        music_player.stop()
+
+                        multiplayer_game.start()
+                        active_mode = Modes.MultiplayerGame
+
+
 
             if 'click' in ready_checkbox.handleEvent(event):
                 pass
@@ -352,8 +367,8 @@ def debug_run():
                 #multiplayer_game.update()
             elif client_object is not None:
                 client_object.send_input()
-                server_updates = client_object.get_server_updates()
-                #multiplayer_game.update()
+                #server_updates = client_object.get_server_updates()
+                multiplayer_game.update()
                 clock.tick(GRAPHICS_FPS)
 
     pygame.quit()

@@ -48,6 +48,20 @@ class Client(object):
         else:
             return False
 
+    def wait_for_player_data_after_start(self, game_instance):
+        response_message = self._network.client_listen()
+        if response_message is not None:
+            if response_message[1] == self._server_address:
+                print "We got ships from server!"
+                for player_id, info in response_message[0].iteritems():
+                    game_instance.add_player(int(player_id), team=info[0], ship_name=info[1])
+                    print "Added ship for player ", player_id
+                return True
+            else:
+                return False
+        else:
+            return False
+
     def send_input(self):
         player_keyboard_commands = {'player_id': self._local_player_id,
                                     'up': 0,
@@ -98,6 +112,10 @@ class Client(object):
 
         return server_data
 
+    def _get_client_id(self):
+        return self._local_player_id
+
+    client_id = property(_get_client_id)
 
 #Testauksen tässä vaiheessa clientiltä lähetetään ainostaan player_id, ja näppäimistökomennot.
 #Myöhemmin lisätään clientin oma ennustava grafiikan laskenta, jota korjataan serveriltä tulevalla tiedolla.

@@ -16,11 +16,12 @@ from assets import assets, load_assets
 
 
 class AUTSBallGame:
-    def __init__(self, window=None, level_name='Test Level', demogame=0):
+    def __init__(self, window=None, level_name='Test Level', demogame=0, client=False):
         self.demogame = demogame
         self.window = window
         self.is_running = False
         self.local_player_id = 0
+        self._is_client = client
 
         # Pygamen inittejä
         # HUOM! Inittien järjestys tärkeä!
@@ -124,22 +125,23 @@ class AUTSBallGame:
                     if event.type == music.MUSIC_FINISHED:
                         self.music_player.next()
 
-#Tähän silmukka, jossa käydään clientiltä tulleet komennot pelaajittain läpi
-                pressed_keys = pygame.key.get_pressed()
-                if pressed_keys[K_UP]:
-                    self.players[self.local_player_id].accelerate()
-                else:
-                    self.players[self.local_player_id].stop_acceleration()
-                if pressed_keys[K_RIGHT]:
-                    self.players[self.local_player_id].rotate_right()
-                if pressed_keys[K_LEFT]:
-                    self.players[self.local_player_id].rotate_left()
-                if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
-                    self.players[self.local_player_id].shoot()
-                if pressed_keys[K_LCTRL] or pressed_keys[K_RCTRL]:
-                    self.players[self.local_player_id].shoot_special()
-                if pressed_keys[pygame.K_BACKSPACE]:
-                    self.players[self.local_player_id].recover()
+            #Tähän silmukka, jossa käydään clientiltä tulleet komennot pelaajittain läpi
+                if not self._is_client:
+                    pressed_keys = pygame.key.get_pressed()
+                    if pressed_keys[K_UP]:
+                        self.players[self.local_player_id].accelerate()
+                    else:
+                        self.players[self.local_player_id].stop_acceleration()
+                    if pressed_keys[K_RIGHT]:
+                        self.players[self.local_player_id].rotate_right()
+                    if pressed_keys[K_LEFT]:
+                        self.players[self.local_player_id].rotate_left()
+                    if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
+                        self.players[self.local_player_id].shoot()
+                    if pressed_keys[K_LCTRL] or pressed_keys[K_RCTRL]:
+                        self.players[self.local_player_id].shoot_special()
+                    if pressed_keys[pygame.K_BACKSPACE]:
+                        self.players[self.local_player_id].recover()
 
                 # Lasketaan viewscreen- ja background rectit
                 self.calc_viewscreen_rect()

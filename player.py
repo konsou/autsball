@@ -18,7 +18,7 @@ class PlayerSprite(game_object.GameObject):
                  group=groups.PlayerGroup, spawn_point=None, special=None):
         self.owning_player_id = player_id
         self.team = team
-        self.name = ship_name
+        self.ship_name = ship_name
 
         # Ladataan xml-file
         root = text.read_xml('xml/ship.xml')
@@ -123,7 +123,7 @@ class PlayerSprite(game_object.GameObject):
         self._recovery_started_at = 0
 
     def __repr__(self):
-        return "<PlayerSprite {} {}>".format(self.owning_player_id, self.name)
+        return "<PlayerSprite {} {}>".format(self.owning_player_id, self.ship_name)
 
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
         self.viewscreen_rect = viewscreen_rect

@@ -82,7 +82,7 @@ class Server(object):
 
             # TODO: Lasketaan pelin kulku ja muodostetaan paketti clienteille
             for current_id in client_inputs:
-                print current_id, client_inputs[current_id]
+                #print current_id, client_inputs[current_id]
                 if client_inputs[current_id]['up']:
                     self._game_instance.players[current_id].accelerate()
                 else:
@@ -104,13 +104,12 @@ class Server(object):
             # TODO: Päivitetään tiedot clienteille
             #self._network.server_send_message(packet_to_clients)
 
-    def start_game(self, game_instance):
+    def start_game(self, game_instance, clock):
         self._waiting_for_client_to_join = False
         self._in_game = True
         self._network.server_send_message(b'Start game')
         self._game_instance = game_instance
         self._game_instance.local_player_id = 0
-        print "add players"
         i = 0
         for ip, player_id in self._client_ip_id_combination.iteritems():
             if i % 2:
@@ -118,8 +117,20 @@ class Server(object):
             else:
                 team = "red"
             self._game_instance.add_player(player_id, team=team)
-            print player_id
             i += 1
+
+        clock.tick(1)
+
+        # Kerro clienteille pelaajista ja aluksista
+        player_infos = {}
+        for index, player in self._game_instance.players.iteritems():
+            player_infos[player.owning_player_id] = (player.team, player.ship_name)
+        player_package = json.dumps(player_infos)
+        self._network.server_send_message(player_package)
+
+        clock.tick(1)
+
+        # Aloita peli
         self._game_instance.start()
 
     def shutdown(self):
