@@ -19,6 +19,7 @@ class Server(object):
         self._client_list.add(server_local_ip)
         self._client_ip_id_combination[server_local_ip] = self._client_id_counter
         self._client_id_counter += 1
+        print "Server created, local client joined"
 
         # Aloitetaan clienttien odotus
         self._waiting_for_client_to_join = True
@@ -28,6 +29,7 @@ class Server(object):
         self._update_counter = 0
 
     def update(self, clock):
+        # Lobby-vaihe
         if self._waiting_for_client_to_join:
             try:
                 # Lähetetään viesti clienteille, jotta ne saa tietää serverin osoitteen
@@ -37,14 +39,22 @@ class Server(object):
                 client_response = self._network.server_listen()
                 if client_response is not None:
                     # Lisätään client listaan
-                    if client_response[0] is "Ok, let's have fun!":
-                        self.client_list.add(client_response[1])
-                        self._client_ip_id_combination[client_response[1]] = self._client_id_counter
+                    if client_response[0].startswith("My name is:"):
+                        client_name = client_response[0].split(":")[1]
+                        client_id = self._client_id_counter
+                        self._client_list.add(client_response[1])
+                        self._client_ip_id_combination[client_response[1]] = client_id
                         self._client_id_counter += 1
+                        print "Added client with ip %s" % client_response[1]
+                        print "Client name is %s" % client_name
+                        # Lähetetään pelaajalle sen oma id
+                        packet_to_client = json_dumps(client_id)
+                        self._network.client_send(packet_to_client, client_response[1])
                     else:
                         print "Not valid client, he said '%s'" % client_response
             finally:
                 pass
+        # Pelin sisällä
         elif self._in_game:
             client_inputs = set()
             while self._update_counter < self._update_interval:

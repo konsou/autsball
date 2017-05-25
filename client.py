@@ -5,31 +5,32 @@ import json
 import pygame
 from pygame.locals import *
 
+
+class Client(object):
+
+    def __init__(self, player_name="Nemo"):
+        self._network = network.Network()
+        self._player_name = player_name
+        self._network.bind_to_server('')
+        self._acknowledgement_message = b"My name is:%s" % self._player_name
+        self._server_address = None
+
+    def try_to_join_server(self):
+        response_message = self._network.client_listen()
+        if response_message is 'Join me':
+            self._server_address = response_message[1]
+            self._network.client_send(self._acknowledgement_message, self._server_address)
+            print "Joining server %s" % self._server_address
+        elif response_message is not None:
+            print "Not valid server"
+
 #Testauksen tässä vaiheessa clientiltä lähetetään ainostaan player_id, ja näppäimistökomennot.
 #Myöhemmin lisätään clientin oma ennustava grafiikan laskenta, jota korjataan serveriltä tulevalla tiedolla.
 # Eihän serveriä kiinnosta mitä client laskee? Näkisin, että serveriltä tulee koordinaatit ja nopeusvektori. Niiden pitäisi riittää clientille
 
-network_object = network.Network()
-
-network_object.bind_to_server('')
-
-# Kuunnellaan serveriä ensin, että saadaan selville sen osoite
-client_server_acknowledgement_message = b"Ok, let's have fun!"
-server_address = None
-while server_address is None:
-    response_message = network_object.client_listen()
-    if response_message is 'Join me':
-        server_address = response_message[1]
-        print server_address
-        # Kun server on tunnistettu, lähetetään serverille oma osoite i.e. 'joinataan'
-        network_object.client_send(client_server_acknowledgement_message, server_address)
-    elif response_message is not None:
-        print 'Not valid server'
-
 
 #pelaajan tiedot
 #pelaajan nimeä ei varmaankaan tarvitse lähetttää joka kerta, id riittää
-player_name = 'Tursa'
 player_id = 1
 #pelaajan komennot dictionaryyn, koska on voitava ottaa yhtäaikaa useampia komentoja vastaan
 # TODO: Lähetä vain komentojen muutokset (keyup/keydown) liikenteen vähentämiseksi

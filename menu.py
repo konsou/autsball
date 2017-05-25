@@ -4,6 +4,7 @@ import game
 import menu_background_action
 import music
 import effect
+from server import Server
 from pygame.locals import *
 from colors import *
 from constants import *
@@ -121,6 +122,10 @@ def debug_run():
                                                                                'gfx/UI_back_button_down.png',
                                                                                'gfx/UI_back_button_highlight.png'])
 
+    # Multiplayer stuff
+    server_object = None
+    client_object = None
+
     running = True
     while running:
 
@@ -232,6 +237,7 @@ def debug_run():
                 if 'click' in create_game_button.handleEvent(event):
                     active_mode = Modes.ReadyLobby
                     window.fill(BLACK)
+                    server = Server()
 
                 if 'click' in join_game_button.handleEvent(event):
                     active_mode = Modes.ReadyLobby
@@ -307,9 +313,19 @@ def debug_run():
                 active_mode = Modes.MainMenu
                 window.fill(BLACK)
 
+            if 'click' in start_game_button.handleEvent(event):
+                active_mode = Modes.MultiplayerGame
+                window.fill(BLACK)
+
+            if server_object is not None:
+                server_object.update(clock)
 
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
+
+        elif active_mode == Modes.MultiplayerGame:
+            if server_object is not None:
+                server_object.update(clock)
 
     pygame.quit()
 
