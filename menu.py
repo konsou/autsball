@@ -86,6 +86,31 @@ def debug_run():
     start_game_button = Button(Rect(50, 300, 250, 70), 'Start')
     main_menu_from_ready_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
 
+    #Player menu
+    settings_background = assets['gfx/UI_settings_background.png']
+    LabelImageText(group=settings_group, image_text='settings', position=(250, 40))
+    LabelImageText(group=settings_group, image_text='music', position=(100, 160))
+
+    sound_volume_slider = Slider(group=settings_group, position=(350, 290), value=Settings.data['sound_volume'])
+    LabelImageText(group=settings_group, image_text='effects', position=(100, 380))
+    LabelImageText(group=settings_group, image_text='off', position=(290, 340))
+    LabelImageText(group=settings_group, image_text='low', position=(380, 340))
+    LabelImageText(group=settings_group, image_text='med', position=(470, 340))
+    LabelImageText(group=settings_group, image_text='high', position=(570, 340))
+    effects_checkbox_group = CheckboxGroup()
+    effects_off_checkbox = Checkbox(group=settings_group, checked=False, position=(310, 385),
+                                    checkbox_group=effects_checkbox_group)
+    effects_low_checkbox = Checkbox(group=settings_group, checked=False, position=(400, 385),
+                                    checkbox_group=effects_checkbox_group)
+    effects_med_checkbox = Checkbox(group=settings_group, checked=False, position=(490, 385),
+                                    checkbox_group=effects_checkbox_group)
+    effects_high_checkbox = Checkbox(group=settings_group, checked=True, position=(590, 385),
+                                     checkbox_group=effects_checkbox_group)
+    effects_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
+    settings_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
+                                                                               'gfx/UI_back_button_down.png',
+                                                                               'gfx/UI_back_button_highlight.png'])
+
     # player_name_field = Input_box()
     screen = pygame.display.set_mode((800, 600))
 
@@ -152,6 +177,9 @@ def debug_run():
                     practice_game.start()
                 if 'click' in multiplayer_button.handleEvent(event):
                     active_mode = Modes.MultiplayerLobby
+                    window.fill(BLACK)
+                if 'click' in player_button.handleEvent(event):
+                    active_mode = Modes.PlayerMenu
                     window.fill(BLACK)
                 if 'click' in settings_button.handleEvent(event):
                     active_mode = Modes.SettingsMenu
@@ -292,6 +320,23 @@ def debug_run():
             clock.tick(GRAPHICS_FPS)
         elif active_mode == Modes.Practice:
             practice_game.update()
+
+        elif active_mode == Modes.PlayerMenu:
+            window.fill(0)
+
+            background_action.update()
+            music_player_group.update()
+
+            window.blit(settings_background, (0, 0))
+
+            settings_group.draw(window)
+            settings_back_button.draw(window)
+            music_player_group.draw(window)
+
+            effect.antialiasing(window, graphic_quality=Settings.data['graphic_quality'])
+
+            pygame.display.update()
+            clock.tick(GRAPHICS_FPS)
 
         elif active_mode == Modes.MultiplayerLobby:
             window.fill(0)
