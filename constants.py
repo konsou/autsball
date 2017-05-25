@@ -10,7 +10,7 @@ PHYSICS_FPS = 60
 
 #because...
 class Modes:
-    MainMenu, SettingsMenu, Practice, MultiplayerLobby, ReadyLobby, MultiplayerGame = range(6)
+    MainMenu, SettingsMenu, Practice, PlayerMenu,  MultiplayerLobby, ReadyLobby, MultiplayerGame = range(7)
 
 
 class Settings:
