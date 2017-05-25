@@ -153,13 +153,27 @@ class AUTSBallGame:
                         groups.PlayerGroup.update(self.viewscreen_rect)
                         groups.EffectGroup.update(self.viewscreen_rect)
                         groups.TextGroup.update()
-                    else:
-                        print "Server sent this info:"
-                        print server_updates
-                        if server_updates is not None:
-                            for server_updates_key in server_updates:
-                                print server_updates_key
+                else:
+                    # self.calc_viewscreen_rect()
+                    # print "Server sent this info:"
+                    if server_updates is not None:
+                        # print server_updates
+                        # print "Current players:", self.players
+                        for server_update_key in server_updates:
+                            #print server_update_key, server_updates[server_update_key]
+                            if server_update_key == 'players':
+                                for current_player in server_updates[server_update_key]:
+                                    current_player_int = int(current_player)
+                                    self.players[current_player_int].x = server_updates[server_update_key][current_player]['x']
+                                    self.players[current_player_int].y = server_updates[server_update_key][current_player]['y']
+                                    self.players[current_player_int].heading = server_updates[server_update_key][current_player]['heading']
+                                    self.players[current_player_int].update_rect(self.viewscreen_rect)
+                    # groups.PlayerGroup.update(self.viewscreen_rect)
+                    print groups.PlayerGroup
 
+                # print self.players[0].x, self.players[0].y, self.players[0].rect
+                # print self.players[1].x, self.players[1].y, self.players[1].rect
+                # self.window.blit(self.players[self.local_player_id].image, (390, 290))
                 # Lasketaan viewscreen- ja background rectit
                 self.calc_viewscreen_rect()
 

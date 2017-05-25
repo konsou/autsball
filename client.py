@@ -107,8 +107,8 @@ class Client(object):
 
     def get_server_updates(self):
         server_data = self._network.client_listen()
-        if server_data is not None:
-            print server_data
+        # if server_data is not None:
+            # print server_data
 
         return server_data
 

@@ -34,6 +34,8 @@ class PlayerSprite(game_object.GameObject):
         game_object.GameObject.__init__(self, group=group, level=level, parent=parent,
                                         image_file=image_file)
 
+        print "player.py: image file:", self.image_filename
+        print self.image
         # Thrust-gfx
         try:
             motor_flame_offset = int(current_ship.find('images/motor_flame_offset').text)
@@ -121,6 +123,8 @@ class PlayerSprite(game_object.GameObject):
         self._cooldown_counter_special = self.special.cooldown
         self._recovery_time = float(current_ship.find('recovery_time').text)  # sekunteja jopa!
         self._recovery_started_at = 0
+
+        print "PlayerSprite groups: ", self.groups()
 
     def __repr__(self):
         return "<PlayerSprite {} {}>".format(self.owning_player_id, self.ship_name)

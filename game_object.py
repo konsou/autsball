@@ -140,12 +140,15 @@ class GameObject(pygame.sprite.Sprite):
             self.attached_ball.detach()
             self.detach()
 
-    def update_rect(self):
+    def update_rect(self, viewscreen_rect=None):
         """ 
         Päivittää objektin rectin ottamaan huomioon viewscreenin 
         Tämä metodi on tärkeää muistaa kutsua kun liikuttelee objektia! Muuten sekoaa. 
         """
         if not self.is_centered_on_screen:
+            if self.viewscreen_rect is None:
+                self.viewscreen_rect = viewscreen_rect
+
             self.rect.center = (self.x - self.viewscreen_rect[0],
                                 self.y - self.viewscreen_rect[1])
 

@@ -4,6 +4,7 @@ import game
 import menu_background_action
 import music
 import effect
+import json
 from server import Server
 from client import Client
 from pygame.locals import *
@@ -15,7 +16,7 @@ from ui_components import Button, ButtonGroup, LabelImageText, Checkbox, Checkbo
 
 def debug_run():
     window = pygame.display.set_mode((WINDOW_SIZE[0], WINDOW_SIZE[1]))
-    pygame.display.set_caption("Menu test")
+    pygame.display.set_caption("AUTSBall")
     clock = pygame.time.Clock()
 
     window.fill(BLACK)
@@ -361,7 +362,11 @@ def debug_run():
         elif active_mode == Modes.ReadyLobby:
             window.fill(0)
 
-            background_action.update()
+            # Badfix
+            try:
+                background_action.update()
+            except UnboundLocalError:
+                pass
             music_player_group.update()
             static_visual_components_group.draw(window)
 
@@ -394,17 +399,17 @@ def debug_run():
                 server_object.update(clock)
             elif client_object is not None:
                 if client_object.wait_for_server_start_game() and not client_wait_for_player_data_after_start:
+                    # Lopetetaan background action
+                    background_action.destroy()
+                    del background_action
+                    music_player.stop()
+
                     multiplayer_game = game.AUTSBallGame(window, client=True)
                     multiplayer_game.local_player_id = client_object.client_id
                     client_wait_for_player_data_after_start = True
                 elif client_wait_for_player_data_after_start:
                     if client_object.wait_for_player_data_after_start(multiplayer_game):
                         window.fill(BLACK)
-
-                        # Lopetetaan background action
-                        background_action.destroy()
-                        del background_action
-                        music_player.stop()
 
                         multiplayer_game.start()
                         active_mode = Modes.MultiplayerGame
@@ -421,8 +426,11 @@ def debug_run():
                 #multiplayer_game.update()
             elif client_object is not None:
                 client_object.send_input()
-                server_updates = client_object.get_server_updates()
-                #print server_updates
+                try:
+                    server_updates = client_object.get_server_updates()[0]
+                except TypeError:
+                    server_updates = None
+                # print server_updates
                 multiplayer_game.update(server_updates=server_updates)
                 clock.tick(GRAPHICS_FPS)
 
