@@ -34,8 +34,8 @@ class Client(object):
             print "Not valid server"
             return False
 
-#Testauksen tässä vaiheessa clientiltä lähetetään ainostaan player_id, ja näppäimistökomennot.
-#Myöhemmin lisätään clientin oma ennustava grafiikan laskenta, jota korjataan serveriltä tulevalla tiedolla.
+# Testauksen tässä vaiheessa clientiltä lähetetään ainostaan player_id, ja näppäimistökomennot.
+# Myöhemmin lisätään clientin oma ennustava grafiikan laskenta, jota korjataan serveriltä tulevalla tiedolla.
 # Eihän serveriä kiinnosta mitä client laskee? Näkisin, että serveriltä tulee koordinaatit ja nopeusvektori. Niiden pitäisi riittää clientille
 
 
