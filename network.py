@@ -70,7 +70,7 @@ class Network(object):
         except socket.timeout:
             return None
         else:
-            print('received {} from {}'.format(data, address))
+            #print('received {} from {}'.format(data, address))
             try:
                 recv_dict = json.loads(data)
             except ValueError:

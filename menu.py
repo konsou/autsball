@@ -75,10 +75,11 @@ def debug_run():
     create_game_button = Button(Rect(50, 200, 250, 70), 'Create')
     join_game_button = Button(Rect(50, 300, 250, 70), 'Join')
     back_from_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
+    player_is_host = False
 
     #ReadyLobby
-    LabelImageText(group=ready_lobby_group, image_text='settings', position=(50, 400))
-    ready_checkbox = Checkbox(group=ready_lobby_group, checked=False, position=(370, 415))
+    LabelImageText(group=ready_lobby_group, image_text='ready', position=(155, 400))
+    ready_checkbox = Checkbox(group=ready_lobby_group, checked=False, position=(300, 405))
     start_game_button = Button(Rect(50, 300, 250, 70), 'Start')
     main_menu_from_ready_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
 
@@ -241,9 +242,9 @@ def debug_run():
                     server_object = Server()
 
                 if 'click' in join_game_button.handleEvent(event):
-                    client = Client()
+                    client_object = Client()
 
-                    while not client.try_to_join_server(clock):
+                    while not client_object.try_to_join_server(clock):
                         pass
 
                     window.fill(BLACK)
@@ -311,20 +312,26 @@ def debug_run():
             static_visual_components_group.draw(window)
 
             ready_lobby_group.draw(window)
-            start_game_button.draw(window)
-            main_menu_from_ready_lobby_button.draw(window)
-            back_from_lobby_button.draw(window)
+            if server_object is not None:
+                start_game_button.draw(window)
+            else:
+                main_menu_from_ready_lobby_button.draw(window)
 
             if 'click' in main_menu_from_ready_lobby_button.handleEvent(event):
                 active_mode = Modes.MainMenu
                 window.fill(BLACK)
 
             if 'click' in start_game_button.handleEvent(event):
-                active_mode = Modes.MultiplayerGame
-                window.fill(BLACK)
+                if server_object is not None:
+                    active_mode = Modes.MultiplayerGame
+                    window.fill(BLACK)
+                    server_object.start_game()
 
             if server_object is not None:
                 server_object.update(clock)
+            elif client_object is not None:
+                if client_object.wait_for_server_start_game():
+                    active_mode = Modes.MultiplayerGame
 
             if 'click' in ready_checkbox.handleEvent(event):
                 if ready_checkbox.checked == False:
@@ -332,14 +339,16 @@ def debug_run():
                 elif ready_checkbox.checked == False:
                     ready_checkbox.checked == True
 
-
-
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
 
         elif active_mode == Modes.MultiplayerGame:
             if server_object is not None:
                 server_object.update(clock)
+                #multiplayer_game.update()
+            elif client_object is not None:
+                server_updates = client_object.get_server_updates()
+                #multiplayer_game.update()
 
     pygame.quit()
 

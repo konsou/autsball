@@ -28,14 +28,71 @@ class Client(object):
                     if data[0]['client_id'] is not None:
                         self._local_player_id = data[0]['client_id']
                         return True
-                    else:
-                        print data[0]
         elif response_message is not None:
-            print response_message[0]
-            print "Not valid server"
+            print "Noob host"
             return False
 
         clock.tick(10)
+
+    def wait_for_server_start_game(self):
+        response_message = self._network.client_listen()
+        if response_message is not None:
+            if response_message[1] == self._server_address and response_message[0] == 'Start game':
+                print "Server started the game, wohoo!"
+                return True
+            else:
+                return False
+        else:
+            return False
+
+    def send_input(self):
+        player_keyboard_commands = {'player_id': self._local_player_id,
+                                    'up': 0,
+                                    'left': 0,
+                                    'right': 0,
+                                    'lshift': 0,
+                                    'lctrl': 0,
+                                    'backspace': 0}
+
+        pressed_keys = pygame.key.get_pressed()
+        if pressed_keys[K_UP]:
+            player_keyboard_commands['up'] = 1
+        else:
+            player_keyboard_commands['up'] = 0
+        if pressed_keys[K_RIGHT]:
+            player_keyboard_commands['right'] = 1
+        else:
+            player_keyboard_commands['right'] = 0
+        if pressed_keys[K_LEFT]:
+            player_keyboard_commands['left'] = 1
+        else:
+            player_keyboard_commands['left'] = 0
+        if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
+            player_keyboard_commands['rshift'] = 1
+        else:
+            player_keyboard_commands['rshift'] = 0
+        if pressed_keys[K_LCTRL] or pressed_keys[K_RCTRL]:
+            player_keyboard_commands['rctrl'] = 1
+        else:
+            player_keyboard_commands['rctrl'] = 0
+
+        if pressed_keys[pygame.K_BACKSPACE]:
+            player_keyboard_commands['backspace'] = 1
+        else:
+            player_keyboard_commands['backspace'] = 0
+
+        # pelaajan tiedot pakettiin
+        player_data_packet = json.dumps(player_keyboard_commands)
+
+        self._network.client_send(player_data_packet, self._server_address)
+
+    def get_server_updates(self):
+        server_data = self._network.client_listen()
+        if server_data is not None:
+            print server_data
+
+        return server_data
+
 
 #Testauksen tässä vaiheessa clientiltä lähetetään ainostaan player_id, ja näppäimistökomennot.
 #Myöhemmin lisätään clientin oma ennustava grafiikan laskenta, jota korjataan serveriltä tulevalla tiedolla.
