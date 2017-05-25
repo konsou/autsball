@@ -4,6 +4,7 @@ from network import *
 import json
 import pygame
 from pygame.locals import *
+from types import *
 
 
 class Client(object):
@@ -25,9 +26,11 @@ class Client(object):
             while self._local_player_id is None:
                 data = self._network.client_listen()
                 if data is not None:
-                    if data[0]['client_id'] is not None:
-                        self._local_player_id = data[0]['client_id']
-                        return True
+                    if type(data[0]) is not StringType:
+                        if data[0]['client_id'] is not None:
+                            self._local_player_id = data[0]['client_id']
+                            print data[0]['client_id']
+                            return True
         elif response_message is not None:
             print "Noob host"
             return False
