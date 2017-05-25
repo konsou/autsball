@@ -30,6 +30,7 @@ def debug_run():
     main_menu_group = ButtonGroup()
     settings_group = pygame.sprite.Group()
     ready_lobby_group = pygame.sprite.Group()
+    player_menu_group = pygame.sprite.Group()
 
     # Music
     # HUOM! Inittien järjestys tärkeä!
@@ -88,26 +89,27 @@ def debug_run():
 
     #Player menu
     settings_background = assets['gfx/UI_settings_background.png']
-    LabelImageText(group=settings_group, image_text='settings', position=(250, 40))
-    LabelImageText(group=settings_group, image_text='music', position=(100, 160))
+    LabelImageText(group=settings_group, image_text='ready', position=(250, 40))
+    LabelImageText(group=settings_group, image_text='ready', position=(100, 160))
 
-    sound_volume_slider = Slider(group=settings_group, position=(350, 290), value=Settings.data['sound_volume'])
-    LabelImageText(group=settings_group, image_text='effects', position=(100, 380))
-    LabelImageText(group=settings_group, image_text='off', position=(290, 340))
-    LabelImageText(group=settings_group, image_text='low', position=(380, 340))
-    LabelImageText(group=settings_group, image_text='med', position=(470, 340))
-    LabelImageText(group=settings_group, image_text='high', position=(570, 340))
-    effects_checkbox_group = CheckboxGroup()
-    effects_off_checkbox = Checkbox(group=settings_group, checked=False, position=(310, 385),
-                                    checkbox_group=effects_checkbox_group)
-    effects_low_checkbox = Checkbox(group=settings_group, checked=False, position=(400, 385),
-                                    checkbox_group=effects_checkbox_group)
-    effects_med_checkbox = Checkbox(group=settings_group, checked=False, position=(490, 385),
-                                    checkbox_group=effects_checkbox_group)
-    effects_high_checkbox = Checkbox(group=settings_group, checked=True, position=(590, 385),
-                                     checkbox_group=effects_checkbox_group)
-    effects_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
-    settings_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
+    ship_selection_checkbox_group = CheckboxGroup()
+    ship_selection_1_checkbox = Checkbox(group=player_menu_group, checked=False, position=(60, 385),
+                                    checkbox_group=ship_selection_checkbox_group)
+    ship_selection_2_checkbox = Checkbox(group=player_menu_group, checked=False, position=(130, 385),
+                                    checkbox_group=ship_selection_checkbox_group)
+    ship_selection_3_checkbox = Checkbox(group=player_menu_group, checked=False, position=(220, 385),
+                                    checkbox_group=ship_selection_checkbox_group)
+    ship_selection_4_checkbox = Checkbox(group=player_menu_group, checked=True, position=(310, 385),
+                                     checkbox_group=ship_selection_checkbox_group)
+    ship_selection_5_checkbox = Checkbox(group=player_menu_group, checked=False, position=(400, 385),
+                                    checkbox_group=ship_selection_checkbox_group)
+    ship_selection_6_checkbox = Checkbox(group=player_menu_group, checked=False, position=(490, 385),
+                                    checkbox_group=ship_selection_checkbox_group)
+    ship_selection_7_checkbox = Checkbox(group=player_menu_group, checked=True, position=(590, 385),
+                                     checkbox_group=ship_selection_checkbox_group)
+
+    ship_selection_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
+    player_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
                                                                                'gfx/UI_back_button_down.png',
                                                                                'gfx/UI_back_button_highlight.png'])
 
@@ -323,6 +325,9 @@ def debug_run():
             practice_game.update()
 
         elif active_mode == Modes.PlayerMenu:
+            if 'click' in player_back_button.handleEvent(event):
+                active_mode = Modes.MainMenu
+
             window.fill(0)
 
             background_action.update()
@@ -330,11 +335,11 @@ def debug_run():
 
             window.blit(settings_background, (0, 0))
 
-            settings_group.draw(window)
-            settings_back_button.draw(window)
+            player_menu_group.draw(window)
+            player_back_button.draw(window)
             music_player_group.draw(window)
 
-            effect.antialiasing(window, graphic_quality=Settings.data['graphic_quality'])
+           # effect.antialiasing(window, graphic_quality=Settings.data['graphic_quality'])
 
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
