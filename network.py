@@ -85,3 +85,43 @@ class Network(object):
 
     def destroy(self):
         self._socket.close()
+
+
+def pack_dict(data_dict):
+    """ Pakkaa pelaajan näppäinkomennot INTiksi:
+    Player id - up - left - right - shoot_basic - shoot_special - recover  
+    Esim: 3010101"""
+    keys = ['player_id', 'up', 'left', 'right', 'shoot_basic', 'shoot_special', 'recover']
+    packed_int = 0
+    for n in range(7):
+        packed_int += int(data_dict[keys[n]]) * 10 ** (6 - n)
+    return packed_int
+
+
+def unpack_int(packed_int):
+    """ Unpackaa pakatun intin takaisin dictiksi """
+    keys = ['player_id', 'up', 'left', 'right', 'shoot_basic', 'shoot_special', 'recover']
+    data_dict = {}
+    for n in range(7):
+        current_value = packed_int / 10 ** (6 - n)
+        data_dict[keys[n]] = current_value
+        packed_int -= current_value * 10 ** (6 - n)
+    return data_dict
+
+
+def debug_run():
+    player_keyboard_commands = {'player_id': 3,
+                                'up': 1,
+                                'left': 1,
+                                'right': 1,
+                                'shoot_basic': 1,
+                                'shoot_special': 0,
+                                'recover': 1}
+    print player_keyboard_commands
+    packed_int = pack_dict(player_keyboard_commands)
+    print packed_int
+    print unpack_int(packed_int)
+
+
+if __name__ == '__main__':
+    debug_run()
