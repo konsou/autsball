@@ -88,6 +88,7 @@ def debug_run():
 
     active_mode = Modes.MainMenu
     practice_game = None
+    multiplayer_game = None
 
     # Background action
     background_action = menu_background_action.BackgroundAction(window, darken=1)
@@ -324,7 +325,13 @@ def debug_run():
                     if server_object is not None:
                         active_mode = Modes.MultiplayerGame
                         window.fill(BLACK)
-                        server_object.start_game()
+                        # Lopetetaan background action
+                        background_action.destroy()
+                        del background_action
+                        music_player.stop()
+
+                        multiplayer_game = game.AUTSBallGame(window)
+                        server_object.start_game(multiplayer_game)
 
             if server_object is not None:
                 server_object.update(clock)
@@ -344,6 +351,7 @@ def debug_run():
                 server_object.update(clock)
                 #multiplayer_game.update()
             elif client_object is not None:
+                client_object.send_input()
                 server_updates = client_object.get_server_updates()
                 #multiplayer_game.update()
 

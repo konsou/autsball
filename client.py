@@ -1,6 +1,6 @@
 # -*- coding: utf8 -*-
 
-import network
+from network import *
 import json
 import pygame
 from pygame.locals import *
@@ -9,7 +9,7 @@ from pygame.locals import *
 class Client(object):
 
     def __init__(self, player_name="Nemo"):
-        self._network = network.Network()
+        self._network = Network()
         self._player_name = player_name
         self._network.bind_to_server('')
         self._acknowledgement_message = b"My name is:%s" % self._player_name
@@ -50,9 +50,10 @@ class Client(object):
                                     'up': 0,
                                     'left': 0,
                                     'right': 0,
-                                    'lshift': 0,
-                                    'lctrl': 0,
-                                    'backspace': 0}
+                                    'shoot_basic': 0,
+                                    'shoot_special': 0,
+                                    'recover': 0}
+        keys = ['player_id', 'up', 'left', 'right', 'shoot_basic', 'shoot_special', 'recover']
 
         pressed_keys = pygame.key.get_pressed()
         if pressed_keys[K_UP]:
@@ -68,21 +69,22 @@ class Client(object):
         else:
             player_keyboard_commands['left'] = 0
         if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
-            player_keyboard_commands['rshift'] = 1
+            player_keyboard_commands['shoot_basic'] = 1
         else:
-            player_keyboard_commands['rshift'] = 0
+            player_keyboard_commands['shoot_basic'] = 0
         if pressed_keys[K_LCTRL] or pressed_keys[K_RCTRL]:
-            player_keyboard_commands['rctrl'] = 1
+            player_keyboard_commands['shoot_special'] = 1
         else:
-            player_keyboard_commands['rctrl'] = 0
+            player_keyboard_commands['shoot_special'] = 0
 
         if pressed_keys[pygame.K_BACKSPACE]:
-            player_keyboard_commands['backspace'] = 1
+            player_keyboard_commands['recover'] = 1
         else:
-            player_keyboard_commands['backspace'] = 0
+            player_keyboard_commands['recover'] = 0
 
         # pelaajan tiedot pakettiin
-        player_data_packet = json.dumps(player_keyboard_commands)
+
+        player_data_packet = json.dumps(pack_dict(player_keyboard_commands))
 
         self._network.client_send(player_data_packet, self._server_address)
 
