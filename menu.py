@@ -375,11 +375,12 @@ def debug_run():
                 if 'click' in start_game_button.handleEvent(event):
                     if server_object is not None:
                         active_mode = Modes.MultiplayerGame
-                        window.fill(BLACK)
                         # Lopetetaan background action
                         background_action.destroy()
                         del background_action
                         music_player.stop()
+                        window.fill(BLACK)
+                        pygame.display.flip()
 
                         multiplayer_game = game.AUTSBallGame(window)
                         server_object.start_game(multiplayer_game, clock)
@@ -402,8 +403,6 @@ def debug_run():
 
                         multiplayer_game.start()
                         active_mode = Modes.MultiplayerGame
-
-
 
             if 'click' in ready_checkbox.handleEvent(event):
                 pass
