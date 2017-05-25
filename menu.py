@@ -5,6 +5,7 @@ import menu_background_action
 import music
 import effect
 from server import Server
+from client import Client
 from pygame.locals import *
 from colors import *
 from constants import *
@@ -240,8 +241,13 @@ def debug_run():
                     server = Server()
 
                 if 'click' in join_game_button.handleEvent(event):
-                    active_mode = Modes.ReadyLobby
+                    client = Client()
+
+                    while not client.try_to_join_server():
+                        clock.tick(GRAPHICS_FPS)
+
                     window.fill(BLACK)
+                    active_mode = Modes.ReadyLobby
 
                 if 'click' in multiplayer_button.handleEvent(event):
                     active_mode = Modes.MultiplayerLobby

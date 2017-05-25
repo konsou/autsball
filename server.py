@@ -48,7 +48,7 @@ class Server(object):
                         print "Added client with ip %s" % client_response[1]
                         print "Client name is %s" % client_name
                         # Lähetetään pelaajalle sen oma id
-                        packet_to_client = json_dumps(client_id)
+                        packet_to_client = json.dumps(client_id)
                         self._network.client_send(packet_to_client, client_response[1])
                     else:
                         print "Not valid client, he said '%s'" % client_response

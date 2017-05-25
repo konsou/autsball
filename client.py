@@ -14,6 +14,7 @@ class Client(object):
         self._network.bind_to_server('')
         self._acknowledgement_message = b"My name is:%s" % self._player_name
         self._server_address = None
+        self._local_player_id = None
 
     def try_to_join_server(self):
         response_message = self._network.client_listen()
@@ -21,8 +22,17 @@ class Client(object):
             self._server_address = response_message[1]
             self._network.client_send(self._acknowledgement_message, self._server_address)
             print "Joining server %s" % self._server_address
+            has_id = False
+            while not has_id:
+                data = self._network.client_listen()
+                if data[0]['client_id'] is not None:
+                    self._local_player_id = data[0]['client_id']
+                    return True
+                else:
+                    print data[0]
         elif response_message is not None:
             print "Not valid server"
+            return False
 
 #Testauksen tässä vaiheessa clientiltä lähetetään ainostaan player_id, ja näppäimistökomennot.
 #Myöhemmin lisätään clientin oma ennustava grafiikan laskenta, jota korjataan serveriltä tulevalla tiedolla.
@@ -31,8 +41,9 @@ class Client(object):
 
 #pelaajan tiedot
 #pelaajan nimeä ei varmaankaan tarvitse lähetttää joka kerta, id riittää
-player_id = 1
 #pelaajan komennot dictionaryyn, koska on voitava ottaa yhtäaikaa useampia komentoja vastaan
+"""
+
 # TODO: Lähetä vain komentojen muutokset (keyup/keydown) liikenteen vähentämiseksi
 player_keyboard_commands = {'player_id': player_id,
                             'up': 0,
@@ -97,3 +108,5 @@ while True:
         # self.players[0].y = server_data['p0_x']
         # self.players[1].x = server_data['p1_x']
         # self.players[1].y = server_data['p1_x']
+
+"""
