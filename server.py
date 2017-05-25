@@ -71,8 +71,8 @@ class Server(object):
                         # tarkistetaan onko client lähettänyt jo inputit tässä syklissä
                         if self._client_ip_id_combination[data_dict[1][0]] not in client_inputs:
                             client_inputs[self._client_ip_id_combination[data_dict[1][0]]] = data_object
-                            print "Got client inputs from ", data_dict[1][0]
-                            print "Client input is ", data_object
+                            # print "Got client inputs from ", data_dict[1][0]
+                            # print "Client input is ", data_object
                         #else:
                             #print 'client already sent input on this cycle'
                 # clock.tick(PHYSICS_FPS)
@@ -81,6 +81,23 @@ class Server(object):
             self._update_counter = 0
 
             # TODO: Lasketaan pelin kulku ja muodostetaan paketti clienteille
+            for current_id in client_inputs:
+                print current_id, client_inputs[current_id]
+                if client_inputs[current_id]['up']:
+                    self._game_instance.players[current_id].accelerate()
+                else:
+                    self._game_instance.players[current_id].stop_acceleration()
+                if client_inputs[current_id]['right']:
+                    self._game_instance.players[current_id].rotate_right()
+                if client_inputs[current_id]['left']:
+                    self._game_instance.players[current_id].rotate_left()
+                if client_inputs[current_id]['shoot_basic']:
+                    self._game_instance.players[current_id].shoot()
+                if client_inputs[current_id]['shoot_special']:
+                    self._game_instance.players[current_id].shoot_special()
+                if client_inputs[current_id]['recover']:
+                    self._game_instance.players[current_id].recover()
+
             self._game_instance.update()
             #packet_to_client = json_dumps(update_information)
 

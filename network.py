@@ -110,6 +110,7 @@ def unpack_int(packed_int):
 
 
 def debug_run():
+    print "Packer test:"
     player_keyboard_commands = {'player_id': 3,
                                 'up': 1,
                                 'left': 1,
