@@ -307,6 +307,13 @@ def debug_run():
                 active_mode = Modes.MainMenu
                 window.fill(BLACK)
 
+            if 'click' in ready_checkbox.handleEvent(event):
+                if ready_checkbox.checked == False:
+                    ready_checkbox.checked == True
+                elif ready_checkbox.checked == False:
+                    ready_checkbox.checked == True
+
+
 
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
