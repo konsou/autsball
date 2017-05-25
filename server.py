@@ -68,6 +68,7 @@ class Server(object):
                         # tarkistetaan onko client lähettänyt jo inputit tässä syklissä
                         if self._client_ip_id_combination[data_dict[1]] not in client_inputs:
                             client_inputs[self._client_ip_id_combination[data_dict[1]]] = data_object
+                            print "Got client inputs from ", data_dict[1]
                         else:
                             print 'client already sent input on this cycle'
                 clock.tick(PHYSICS_FPS)
@@ -81,6 +82,7 @@ class Server(object):
 
     def start_game(self):
         self._in_game = True
+        self._network.server_send_message(b'Start game')
 
     def shutdown(self):
         self._in_game = False

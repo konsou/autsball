@@ -241,9 +241,9 @@ def debug_run():
                     server_object = Server()
 
                 if 'click' in join_game_button.handleEvent(event):
-                    client = Client()
+                    client_object = Client()
 
-                    while not client.try_to_join_server(clock):
+                    while not client_object.try_to_join_server(clock):
                         pass
 
                     window.fill(BLACK)
@@ -320,11 +320,16 @@ def debug_run():
                 window.fill(BLACK)
 
             if 'click' in start_game_button.handleEvent(event):
-                active_mode = Modes.MultiplayerGame
-                window.fill(BLACK)
+                if server_object is not None:
+                    active_mode = Modes.MultiplayerGame
+                    window.fill(BLACK)
+                    server_object.start_game()
 
             if server_object is not None:
                 server_object.update(clock)
+            elif client_object is not None:
+                if client_object.wait_for_server_start_game():
+                    active_mode = Modes.MultiplayerGame
 
             if 'click' in ready_checkbox.handleEvent(event):
                 if ready_checkbox.checked == False:
@@ -332,14 +337,16 @@ def debug_run():
                 elif ready_checkbox.checked == False:
                     ready_checkbox.checked == True
 
-
-
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
 
         elif active_mode == Modes.MultiplayerGame:
             if server_object is not None:
                 server_object.update(clock)
+                #multiplayer_game.update()
+            elif client_object is not None:
+                server_updates = client_object.get_server_updates()
+                #multiplayer_game.update()
 
     pygame.quit()
 
