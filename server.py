@@ -25,7 +25,7 @@ class Server(object):
         self._waiting_for_client_to_join = True
         self._in_game = False
         # Serverin updatejen intervalli millisekunteina
-        self._update_interval = 50
+        self._update_interval = 20
         self._update_counter = 0
 
     def update(self, clock):
@@ -81,6 +81,7 @@ class Server(object):
             #self._network.server_send_message(packet_to_clients)
 
     def start_game(self):
+        self._waiting_for_client_to_join = False
         self._in_game = True
         self._network.server_send_message(b'Start game')
 

@@ -75,7 +75,6 @@ def debug_run():
     create_game_button = Button(Rect(50, 200, 250, 70), 'Create')
     join_game_button = Button(Rect(50, 300, 250, 70), 'Join')
     back_from_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
-    player_is_host = False
 
     #ReadyLobby
     LabelImageText(group=ready_lobby_group, image_text='ready', position=(155, 400))
@@ -83,9 +82,8 @@ def debug_run():
     start_game_button = Button(Rect(50, 300, 250, 70), 'Start')
     main_menu_from_ready_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
 
-
-    #    player_name_field = Input_box()
-    screen = pygame.display.set_mode((800,600))
+    # player_name_field = Input_box()
+    screen = pygame.display.set_mode((800, 600))
 
 
     active_mode = Modes.MainMenu
@@ -321,23 +319,22 @@ def debug_run():
                 active_mode = Modes.MainMenu
                 window.fill(BLACK)
 
-            if 'click' in start_game_button.handleEvent(event):
-                if server_object is not None:
-                    active_mode = Modes.MultiplayerGame
-                    window.fill(BLACK)
-                    server_object.start_game()
+            if server_object is not None:
+                if 'click' in start_game_button.handleEvent(event):
+                    if server_object is not None:
+                        active_mode = Modes.MultiplayerGame
+                        window.fill(BLACK)
+                        server_object.start_game()
 
             if server_object is not None:
                 server_object.update(clock)
             elif client_object is not None:
                 if client_object.wait_for_server_start_game():
                     active_mode = Modes.MultiplayerGame
+                    window.fill(BLACK)
 
             if 'click' in ready_checkbox.handleEvent(event):
-                if ready_checkbox.checked == False:
-                    ready_checkbox.checked == True
-                elif ready_checkbox.checked == False:
-                    ready_checkbox.checked == True
+                pass
 
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
