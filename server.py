@@ -3,7 +3,7 @@
 from network import *
 import json
 from constants import *
-
+import time
 
 class Server(object):
 
@@ -118,8 +118,7 @@ class Server(object):
                 team = "red"
             self._game_instance.add_player(player_id, team=team)
             i += 1
-
-        clock.tick(1)
+        clock.tick(2)
 
         # Kerro clienteille pelaajista ja aluksista
         player_infos = {}
@@ -127,8 +126,6 @@ class Server(object):
             player_infos[player.owning_player_id] = (player.team, player.ship_name)
         player_package = json.dumps(player_infos)
         self._network.server_send_message(player_package)
-
-        clock.tick(1)
 
         # Aloita peli
         self._game_instance.start()
