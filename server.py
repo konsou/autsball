@@ -99,10 +99,18 @@ class Server(object):
                     self._game_instance.players[current_id].recover()
 
             self._game_instance.update()
-            #packet_to_client = json_dumps(update_information)
 
             # TODO: Päivitetään tiedot clienteille
-            #self._network.server_send_message(packet_to_clients)
+            update_information = {}
+            update_information['players'] = {}
+            for player_id in self._game_instance.players:
+                update_information['players'][player_id] = {}
+                update_information['players'][player_id]['x'] = self._game_instance.players[player_id].x
+                update_information['players'][player_id]['y'] = self._game_instance.players[player_id].y
+                update_information['players'][player_id]['heading'] = self._game_instance.players[player_id].heading
+            packet_to_client = json.dumps(update_information)
+            #print packet_to_client
+            self._network.server_send_message(packet_to_client)
 
     def start_game(self, game_instance, clock):
         self._waiting_for_client_to_join = False
@@ -126,6 +134,13 @@ class Server(object):
             player_infos[player.owning_player_id] = (player.team, player.ship_name)
         player_package = json.dumps(player_infos)
         self._network.server_send_message(player_package)
+        clock.tick(60)
+        self._network.server_send_message(player_package)
+        clock.tick(60)
+        self._network.server_send_message(player_package)
+        clock.tick(60)
+        self._network.server_send_message(player_package)
+        clock.tick(1)
 
         # Aloita peli
         self._game_instance.start()

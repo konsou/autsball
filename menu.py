@@ -416,8 +416,9 @@ def debug_run():
                 #multiplayer_game.update()
             elif client_object is not None:
                 client_object.send_input()
-                #server_updates = client_object.get_server_updates()
-                multiplayer_game.update()
+                server_updates = client_object.get_server_updates()
+                #print server_updates
+                multiplayer_game.update(server_updates=server_updates)
                 clock.tick(GRAPHICS_FPS)
 
     pygame.quit()

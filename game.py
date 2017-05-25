@@ -72,6 +72,10 @@ class AUTSBallGame:
     def start(self):
         if not self.is_running:
             self.is_running = True
+
+            # Lasketaan viewscreen- ja background rectit
+            self.calc_viewscreen_rect()
+
             if not self.demogame:
                 self.music_player.play()
 
@@ -115,7 +119,7 @@ class AUTSBallGame:
         # Poistaa pelaajan pelaajalistasta ja palauttaa kyseisen pelaajan tai Nonen jos pelaajaa ei löydy
         return self.players.pop(player_id, None)
 
-    def update(self):
+    def update(self, server_updates=None):
         if self.is_running:
             # Tämä estää errorin quitattaessa
             if self.quit_game is False:
@@ -124,34 +128,40 @@ class AUTSBallGame:
                         self.quit_game = True
                     if event.type == music.MUSIC_FINISHED:
                         self.music_player.next()
+                if server_updates is None:
+                    #Tähän silmukka, jossa käydään clientiltä tulleet komennot pelaajittain läpi
+                    if not self._is_client:
+                        pressed_keys = pygame.key.get_pressed()
+                        if pressed_keys[K_UP]:
+                            self.players[self.local_player_id].accelerate()
+                        else:
+                            self.players[self.local_player_id].stop_acceleration()
+                        if pressed_keys[K_RIGHT]:
+                            self.players[self.local_player_id].rotate_right()
+                        if pressed_keys[K_LEFT]:
+                            self.players[self.local_player_id].rotate_left()
+                        if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
+                            self.players[self.local_player_id].shoot()
+                        if pressed_keys[K_LCTRL] or pressed_keys[K_RCTRL]:
+                            self.players[self.local_player_id].shoot_special()
+                        if pressed_keys[pygame.K_BACKSPACE]:
+                            self.players[self.local_player_id].recover()
 
-            #Tähän silmukka, jossa käydään clientiltä tulleet komennot pelaajittain läpi
-                if not self._is_client:
-                    pressed_keys = pygame.key.get_pressed()
-                    if pressed_keys[K_UP]:
-                        self.players[self.local_player_id].accelerate()
+                        # Spritejen päivitykset tässä
+                        groups.BulletGroup.update(self.viewscreen_rect)
+                        groups.BallGroup.update(self.viewscreen_rect)
+                        groups.PlayerGroup.update(self.viewscreen_rect)
+                        groups.EffectGroup.update(self.viewscreen_rect)
+                        groups.TextGroup.update()
                     else:
-                        self.players[self.local_player_id].stop_acceleration()
-                    if pressed_keys[K_RIGHT]:
-                        self.players[self.local_player_id].rotate_right()
-                    if pressed_keys[K_LEFT]:
-                        self.players[self.local_player_id].rotate_left()
-                    if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
-                        self.players[self.local_player_id].shoot()
-                    if pressed_keys[K_LCTRL] or pressed_keys[K_RCTRL]:
-                        self.players[self.local_player_id].shoot_special()
-                    if pressed_keys[pygame.K_BACKSPACE]:
-                        self.players[self.local_player_id].recover()
+                        print "Server sent this info:"
+                        print server_updates
+                        if server_updates is not None:
+                            for server_updates_key in server_updates:
+                                print server_updates_key
 
                 # Lasketaan viewscreen- ja background rectit
                 self.calc_viewscreen_rect()
-
-                # Spritejen päivitykset tässä
-                groups.BulletGroup.update(self.viewscreen_rect)
-                groups.BallGroup.update(self.viewscreen_rect)
-                groups.PlayerGroup.update(self.viewscreen_rect)
-                groups.EffectGroup.update(self.viewscreen_rect)
-                groups.TextGroup.update()
 
                 # Päivitetään graffat vaan joka toisessa framessa
                 if self.frame_counter % 2 == 0:
