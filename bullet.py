@@ -4,34 +4,70 @@ import math
 import game_object
 import groups
 import effect
+import random
 from colors import *
 from assets import assets, assets_rot
 
+# TODO: bulletit tuhoaa itsensä joskus ennen kuin kerkeävät törmätä
+
 
 class BulletSprite(game_object.GameObject):
-    """ direction asteina, tulee PlayerSpriten headingista """
+    """ Ammuttavien juttujen perusclass. Tässä vakioarvot jos muuta ei overrideta: """
+    cooldown = 80  # millisekuntia
+    max_speed = 20
+    mass = 0.1
+    speed = 10
+    rotate = 0
+    laser_movement = 0
+
+    # direction asteina, tulee PlayerSpriten headingista
     def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, image_file=None,
-                 pos=(0, 0), direction=0, speed=10):
-        game_object.GameObject.__init__(self, group=group, image_file=image_file, start_position=pos,
+                 heading=0, speed=10):
+
+        game_object.GameObject.__init__(self, group=group, image_file=image_file,
                                         level=level, parent=parent)
+
+        self.heading = heading
+
+        # Lasketaan bulletin aloituspiste niin ettei ole aluksen sisällä.
+        # Tässä viilaamisen varaa vielä jos haluaa perfektoida mutta toimii aika hyvin
+        self.x = int((shooting_player.radius + self.radius + 2) * math.sin(math.radians(self.heading))
+                     * -1 + shooting_player.x)
+        self.y = int((shooting_player.radius + self.radius + 2) * math.cos(math.radians(self.heading))
+                     * -1 + shooting_player.y)
+
         self.shooting_player = shooting_player
-        self.rect.center = pos
-        self.move_vector.set_speed_direction(speed, math.radians(270 - direction))
-        self.max_speed = 20
-        self.mass = 0.1
-        # self.explosion_force = 1
+        self.rect.center = (self.x, self.y)
+        self.move_vector.set_speed_direction(speed, math.radians(270 - heading))
+
+        if not self.laser_movement:
+            # Lisätään ampuvan pelaajan liikevektori että se vaikuttaa loogisella tavalla bulletin liikemäärään
+            self.move_vector.add_vector(shooting_player.move_vector)
+        else:
+            self.gravity_affects = 0
 
         self.is_bullet = 1
         self.group = group
+        self.kill_pending = 0
 
         # SFX
-        self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump3.wav')
-        self.wall_collide_sound.set_volume(1)
+        if not self.parent.demogame:
+            self.wall_collide_sound = assets['sfx/thump3.wav']
+            self.wall_collide_sound.set_volume(1)
+        else:
+            self.wall_collide_sound = None
+
+    def __repr__(self):
+        return "<BulletSprite>"
 
     def update(self, viewscreen_rect):
+        if self.kill_pending:
+            self.kill()
         self.viewscreen_rect = viewscreen_rect
         self.update_movement()
         self.animate()
+        if self.rotate:
+            self.rot_self_image_keep_size(self.heading)
         self.check_out_of_bounds()
         # Out of bounds -check voi tappaa bulletin joten tehdään nämä vain jos ollaan vielä bulletgroupissa:
         if self in self.group:
@@ -52,101 +88,160 @@ class BulletSprite(game_object.GameObject):
             self.y = 0
             self.kill()
 
-    def get_non_alpha_pixels(self):
-        pixels = []
-        for x in range(0, self.image.get_width()):
-            for y in range(0, self.image.get_height()):
-                if self.image.get_at((x, y)).a > 0:
-                    pixels.append([x, y])
-        return pixels
-
     def collided_with_wall(self):
         """ 
         Tämä tapahtuu kun ammus törmää seinään 
         """
         # Tuhoaa seinää törmätessä ja myös itsensä
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-        self.kill()
+        self.kill_pending = 1
 
     def collided_with(self, other_object):
         """ 
         Tämä tapahtuu kun ammus törmää toiseen peliobjektiin. Vakiona vain tuhotaan ammus. Voi overrideta
         kustomikäyttäytymisen mahdollistamiseksi.
         """
-        self.kill()
+        self.kill_pending = 1
 
 
 class BasicShot(BulletSprite):
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0,0), direction=0, speed=10):
-        BulletSprite.__init__(self, parent=parent, level=level, group=group, image_file='gfx/bullet_5.png',
-                              pos=pos, direction=direction, speed=speed)
-        self.mass = 0.1
+    """ Perusammus alhaisella massalla mutta suht pienellä cooldownilla """
+    cooldown = 80
+    mass = 0.1
+    speed = 10
+    image_file = 'gfx/bullet_5.png'
+
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=self.image_file, heading=heading, speed=self.speed)
+
+
+class GreenLaser(BulletSprite):
+    """ Star Wars -tyyppinen hidas laser - ei tuhoa seinää """
+    cooldown = 80
+    mass = 0.1
+    speed = 10
+    image_file = 'gfx/bullet_laser_green_16.png'
+    rotate = 1
+    laser_movement = 1
+
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=self.image_file, heading=heading, speed=self.speed)
+        # self.gravity_affects = 0
+
+    def collided_with_wall(self):
+        self.kill_pending = 1
 
 
 class DumbFire(BulletSprite):
     """ Iso ammus joka räjähtää törmätessä """
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0,0), direction=0, speed=10):
-        BulletSprite.__init__(self, parent=parent, level=level, group=group, image_file='gfx/bullet_10.png',
-                              pos=pos, direction=direction, speed=speed)
+    cooldown = 3000
+    mass = 0.2
+    speed = 10
+    explosion_force = 10
+    explosion_radius = 50
+    image_file = 'gfx/bullet_10.png'
 
-        self.mass = 0.2
-        self.explosion_force = 10
-        self.explosion_radius = 50
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup,
+                 heading=0):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=self.image_file, heading=heading, speed=self.speed)
 
     def collided_with_wall(self):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
         effect.Explosion(image_file='gfx/explosion_50.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
-        self.kill()
+        self.kill_pending = 1
 
     def collided_with(self, other_object):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
         effect.Explosion(image_file='gfx/explosion_50.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
-        self.kill()
+        self.kill_pending = 1
 
 
 class Dirtball(BulletSprite):
     """ Iso ammus joka luo maastoa törmätessä """
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0, speed=10):
-        BulletSprite.__init__(self, parent=parent, level=level, group=group, image_file='gfx/bullet_10.png',
-                              pos=pos, direction=direction, speed=speed)
+    cooldown = 3000
+    mass = 0.2
+    speed = 10
+    image_file = 'gfx/bullet_dirtball_16.png'
 
-        self.mass = 0.2
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=self.image_file,
+                              heading=heading, speed=self.speed)
 
     def collided_with_wall(self):
         pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
-        self.kill()
+        self.kill_pending = 1
 
     def collided_with(self, other_object):
         pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
-        self.kill()
+        self.kill_pending = 1
 
 
 class Switcher(BulletSprite):
-    """ Vaihtaa paikkaa toisen objektin kanssa """
-    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, pos=(0, 0), direction=0,
-                 speed=10):
-        image_file = ['gfx/switcher1.png', 'gfx/switcher2.png']
-        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
-                              image_file=image_file, pos=pos, direction=direction, speed=speed)
+    """ Vaihtaa paikkaa toisen objektin kanssa törmäyksessä """
+    cooldown = 3000
+    mass = 0.001
+    speed = 10
+    image_file = ['gfx/bullet_switcher1.png', 'gfx/bullet_switcher2.png']
 
-        self.mass = 0
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=self.image_file, heading=heading, speed=self.speed)
 
     def collided_with_wall(self):
         """ Mitään ei tapahdu seinätörmäyksessä """
-        self.kill()
+        self.kill_pending = 1
 
     def collided_with(self, other_object):
         """ 
         Vaihtaa ampujan paikkaa törmäävän objektin kanssa
-        TODO: jostan syystä jos osuu palloon niin attachaa aina, korjaa? 
         """
-        temp_x, temp_y = self.shooting_player.x, self.shooting_player.y
-        self.shooting_player.x, self.shooting_player.y = other_object.x, other_object.y
+        temp_x, temp_y = tuple((self.shooting_player.x, self.shooting_player.y))
+        self.shooting_player.x, self.shooting_player.y = tuple((other_object.x, other_object.y))
         other_object.x, other_object.y = temp_x, temp_y
+        # Tämä tarvitaan että viewscreen pysyy mukana paikanvaihdoksessa
+        self.parent.calc_viewscreen_rect()
         self.update_rect()
         other_object.update_rect()
-        self.kill()
+        self.kill_pending = 1
 
+
+class Bouncer(BulletSprite):
+    """ Pomppii, räjähtää vähän """
+    cooldown = 2000
+    mass = 0.2
+    speed = 10
+    explosion_force = 5
+    explosion_radius = 25
+    number_of_bounces = 5
+    image_file = 'gfx/bullet_10.png'
+
+    def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
+        BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
+                              image_file=self.image_file, heading=heading, speed=self.speed)
+        self._bounce_counter = 0
+
+    def collided_with_wall(self):
+        pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
+        randomvalue = random.uniform(-0.5, 0.5)
+        self.move_vector.set_direction(self.move_vector.get_direction() - math.pi + randomvalue)
+        effect.Explosion(image_file='gfx/explosion_30.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
+                         explosion_force=self.explosion_force)
+        self._bounce_counter += 1
+        if self._bounce_counter > self.number_of_bounces:
+            self.kill_pending = 1
+
+    def collided_with(self, other_object):
+        pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
+        self.apply_collision_to_move_vector(other_object)
+        effect.Explosion(image_file='gfx/explosion_30.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
+                         explosion_force=self.explosion_force)
+        self._bounce_counter += 1
+        if self._bounce_counter > self.number_of_bounces:
+            self.kill_pending = 1
 

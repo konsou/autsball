@@ -3,17 +3,17 @@ import cPickle
 
 # Yleisiä muuttujia
 WINDOW_SIZE = (800, 600)
-SCREEN_CENTER_POINT = (WINDOW_SIZE[0] // 2, WINDOW_SIZE[1] // 2)
+WINDOW_CENTER_POINT = (WINDOW_SIZE[0] // 2, WINDOW_SIZE[1] // 2)
 GRAPHICS_FPS = 30
 PHYSICS_FPS = 60
 
 
+#because...
 class Modes:
-    MainMenu, SettingsMenu, Practice, MultiplayerLobby = range(4)
+    MainMenu, SettingsMenu, Practice, PlayerMenu,  MultiplayerLobby, ReadyLobby, MultiplayerGame = range(7)
 
 
 class Settings:
-
     settings_file = 'settings.pkl'
     data = {
         'music_on': True,

@@ -3,7 +3,7 @@ import pygame
 import random
 import tinytag
 import groups
-from assets import assets
+from constants import *
 
 
 """
@@ -43,6 +43,7 @@ class MusicPlayer(pygame.sprite.Sprite):
     """
     def __init__(self, pos='topleft', shuffle=1, screen='menu', group=None, window_size=(800, 600)):
         pygame.sprite.Sprite.__init__(self, group)
+        self.group = group
         self._shuffle = shuffle
         self._screen = screen
 
@@ -66,6 +67,7 @@ class MusicPlayer(pygame.sprite.Sprite):
 
         # Fadeout - counter alkaa counter_startista ja vähentää siitä
         # Muuttaa alfa-arvoa jos counter on välillä 0...255
+        # Tämä siis infoblurbin fadeouttia, ei musiikin
         self._fadeout_counter = 0
         self._fadeout_counter_start = 1000
         self._fadeout_decrement = 5
@@ -91,50 +93,62 @@ class MusicPlayer(pygame.sprite.Sprite):
         self._volume = volume
         pygame.mixer.music.set_volume(self._volume)
 
+    def _set_screen(self, screen):
+        self._screen = screen
+        self.next()
+
     volume = property(_get_volume, _set_volume)
+    screen = property(None, _set_screen)
 
     def play(self):
         """ 
         Soittaa playlist[]:issä olevan playlist_pointer:in määrittämän tähän ruutuun validin biisin. 
         Jos soittolista on käyty loppuun niin aloitetaan alusta (shufflettaen jos niin määritetty).
         """
-        try:
-            current_song = self.playlist[self.playlist_pointer]
-        except IndexError:
-            # Jos playlist on loppu niin aletaan alusta
-            if self._shuffle:
-                self.shuffle_playlist()
-            self.playlist_pointer = 0
-            current_song = self.playlist[0]
+        if Settings.data['music_on']:
+            try:
+                current_song = self.playlist[self.playlist_pointer]
+            except IndexError:
+                # Jos playlist on loppu niin aletaan alusta
+                if self._shuffle:
+                    self.shuffle_playlist()
+                self.playlist_pointer = 0
+                current_song = self.playlist[0]
 
-        # Tarkastetaan onko biisi validi tähän ruutuun
-        if self._screen in current_song.allowed_screens:
-            pygame.mixer.music.load(current_song.filename)
-            pygame.mixer.music.play()
-            # Näytetään infoblurb
-            self.now_playing(current_song)
-            # print("Now playing:", current_song.filename, current_song.title, current_song.artist)
-        else:
-            # Song not allowed in this screen. Next!
-            self.next()
+            # Tarkastetaan onko biisi validi tähän ruutuun
+            if self._screen in current_song.allowed_screens:
+                pygame.mixer.music.load(current_song.filename)
+                pygame.mixer.music.play()
+                # Näytetään infoblurb
+                self.now_playing(current_song)
+                # print("Now playing:", current_song.filename, current_song.title, current_song.artist)
+            else:
+                # Song not allowed in this screen. Next!
+                self.next()
 
     def update(self):
         """ Tämä laskee infoblurbin fadeoutin """
-        if self._fadeout_counter > 0:
-            self._fadeout_counter -= self._fadeout_decrement
-            # Jos _fadeout_counter on välillä 0..255 niin asetetaan alpha siitä
-            if 255 >= self._fadeout_counter >= 0:
-                self.image.set_alpha(self._fadeout_counter)
+        if self in self.group:
+            if self._fadeout_counter > 0:
+                self._fadeout_counter -= self._fadeout_decrement
+                # Jos _fadeout_counter on välillä 0..255 niin asetetaan alpha siitä
+                if 255 >= self._fadeout_counter >= 0:
+                    self.image.set_alpha(self._fadeout_counter)
             # Kuva tyhjäksi kun ollaan päästy nollaan
             if self._fadeout_counter <= 0:
                 self.image = pygame.Surface((0, 0))
                 self.rect = self.image.get_rect()
+                self.kill()
 
     def stop(self):
         pygame.mixer.music.stop()
+        self._fadeout_counter = 0
 
     def now_playing(self, current_song):
         """ Näyttää soivan biisin tiedot ruudulla (infoblurb)"""
+        # Lisätään takaisin ryhmään että grafiikat päivittyy
+        self.add(self.group)
+
         # Tekstit
         line1 = "Now playing:"
         line2 = current_song.title
@@ -178,10 +192,6 @@ class MusicPlayer(pygame.sprite.Sprite):
             self.rect.bottomleft = (self.screen_border_margin, self._window_size[1] - self.screen_border_margin)
         else:
             self.rect.bottomright = (self._window_size[0] - self.screen_border_margin, self._window_size[1] - self.screen_border_margin)
-
-    def set_screen(self, screen):
-        self._screen = screen
-        self.next()
 
     def shuffle_playlist(self):
         random.shuffle(self.playlist)

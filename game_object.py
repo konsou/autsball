@@ -4,8 +4,10 @@ import vector
 import math
 import copy
 import types
+import sound
+import assets
 from colors import *
-from assets import assets, assets_rot, assets_mask, assets_rot_mask
+# from assets import assets, assets_rot, assets_mask, assets_rot_mask
 
 
 class GameObject(pygame.sprite.Sprite):
@@ -88,7 +90,7 @@ class GameObject(pygame.sprite.Sprite):
             self._animation_images = []
             self._animation_image_filenames = []
             for current_image in image_file:
-                self._animation_images.append(assets[current_image])
+                self._animation_images.append(assets.assets[current_image])
                 self._animation_image_filenames.append(current_image)
             self.image = self._animation_images[0]
             self.image_filename = self._animation_image_filenames[0]
@@ -100,12 +102,12 @@ class GameObject(pygame.sprite.Sprite):
         # Jos animaatio ei enabloitu niin jatketaan normaalisti
         else:
             # Jos on annettu kuvatiedosto niin luetaan se
-            self.image = assets[image_file]
+            self.image = assets.assets[image_file]
             self.image_filename = image_file
             self._animation_enabled = 0
 
         # bitmask collision detectionia varten
-        self.mask = assets_mask[self.image_filename]
+        self.mask = assets.assets_mask[self.image_filename]
 
         # Tämä tarvitaan rotaatioita varten
         self.original_image = self.image
@@ -138,12 +140,15 @@ class GameObject(pygame.sprite.Sprite):
             self.attached_ball.detach()
             self.detach()
 
-    def update_rect(self):
+    def update_rect(self, viewscreen_rect=None):
         """ 
         Päivittää objektin rectin ottamaan huomioon viewscreenin 
         Tämä metodi on tärkeää muistaa kutsua kun liikuttelee objektia! Muuten sekoaa. 
         """
         if not self.is_centered_on_screen:
+            if self.viewscreen_rect is None:
+                self.viewscreen_rect = viewscreen_rect
+
             self.rect.center = (self.x - self.viewscreen_rect[0],
                                 self.y - self.viewscreen_rect[1])
 
@@ -194,8 +199,8 @@ class GameObject(pygame.sprite.Sprite):
     def rot_self_image_keep_size(self, angle):
         """ Muuttaa kuvaksi oikean esiladatun ja -rotatoidun kuvan """
         angle = int(angle)  # tällä sallitaan floatit handlingiin
-        self.image = assets_rot[self.image_filename][angle]
-        self.mask = assets_rot_mask[self.image_filename][angle]
+        self.image = assets.assets_rot[self.image_filename][angle]
+        self.mask = assets.assets_rot_mask[self.image_filename][angle]
 
     def check_out_of_bounds(self):
         """ Pitää objektin pelialueen sisällä """
@@ -249,9 +254,9 @@ class GameObject(pygame.sprite.Sprite):
 
         return wall_collision
 
-    def check_collision_with_group(self, group):
+    def check_collision_with_group(self, group, collided=pygame.sprite.collide_mask):
         """ Tarkastaa törmääkö objekti ryhmässä oleviin toisiin objekteihin. """
-        collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=pygame.sprite.collide_mask)
+        collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=collided)
         for colliding_object in collide_list:
             # Emme halua törmätä itseemme
             # Skippaamme myös jo käsitellyt kollisiot
@@ -271,7 +276,7 @@ class GameObject(pygame.sprite.Sprite):
         """ Tämä on tarkoitus overwritettaa jos haluaa kustomia törmäyskäyttäytymistä """
         # Soitetaan seinääntörmäysääni jos nopeus yli 3 ja on liikkunut viime kerrasta
         if self.move_vector.get_speed() > 3 and self.x != self.x_previous and self.y != self.y_previous:
-            self.force_play_sound(self.wall_collide_sound)
+            sound.force_play_sound(self.wall_collide_sound)
 
         # Vauhti loppuu kuin seinään
         self.move_vector.set_speed(0)
@@ -296,13 +301,13 @@ class GameObject(pygame.sprite.Sprite):
         self.move_vector.set_direction(angle_to_other - math.pi)
         # other_object.move_vector.set_direction(angle_to_other)
 
-        # speed1 = self.move_vector.get_speed()
-        speed2 = other_object.move_vector.get_speed()
+        speed1 = self.move_vector.get_speed()
+        # speed2 = other_object.move_vector.get_speed()
         mass1 = self.mass
         mass2 = other_object.mass
-        speed1_new = (mass2 / mass1) * speed2
-        # speed2_new = (mass1 / mass2) * speed1
-        self.move_vector.set_speed(speed1_new)
+        # speed1_new = (mass2 / mass1) * speed2
+        speed2_new = (mass1 / mass2) * speed1
+        self.move_vector.set_speed(speed2_new)
         # Yritetään estää toisen sisään menemistä
         self.x, self.y = self.x_previous, self.y_previous
         # other_object.move_vector.set_speed(speed2_new)
@@ -314,15 +319,6 @@ class GameObject(pygame.sprite.Sprite):
     def distance(self, other_object):
         """ Laskee etäisyyden toiseen GameObjectiin. Käyttää neliöjuurta eli oletettavasti hitaampi kuin yllä. """
         return math.hypot(self.x - other_object.x, self.y - other_object.y)
-
-    def force_play_sound(self, sound, duration=0):
-        """ 
-        Soitetaan määritetty ääni jos se on olemassa, pakotetaan sille kanava auki
-        Kanavan auki pakottamisessa on se idea että jos on hirveesti ääniä jo soimassa niin uudet äänet soi silti
-        TODO: siirrä järkevämpään paikkaan
-        """
-        if sound is not None:
-            pygame.mixer.find_channel(True).play(sound, duration)
 
 
 def get_angle_difference(angle1, angle2, degrees=0):

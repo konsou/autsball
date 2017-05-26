@@ -4,11 +4,13 @@ import game
 import menu_background_action
 import music
 import effect
+from server import Server
+from client import Client
 from pygame.locals import *
 from colors import *
 from constants import *
-from assets import assets, assets_rot, load_assets
-from ui_components import Button, ButtonGroup, LabelImageText, Checkbox, CheckboxGroup, Slider
+from assets import assets, load_assets
+from ui_components import Button, ButtonGroup, LabelImageText, Checkbox, CheckboxGroup, Slider, ShipSelectionImage
 
 
 def debug_run():
@@ -16,7 +18,7 @@ def debug_run():
     pygame.display.set_caption("Menu test")
     clock = pygame.time.Clock()
 
-    window.fill((0, 0, 0))
+    window.fill(BLACK)
 
     # Ladataan settingsit
     # TODO: Siirrä asetusten lataus assettien latauksen kanssa samaan?
@@ -27,6 +29,8 @@ def debug_run():
     music_player_group = pygame.sprite.Group()
     main_menu_group = ButtonGroup()
     settings_group = pygame.sprite.Group()
+    ready_lobby_group = pygame.sprite.Group()
+    player_menu_group = pygame.sprite.Group()
 
     # Music
     # HUOM! Inittien järjestys tärkeä!
@@ -34,11 +38,9 @@ def debug_run():
     # 2) pygamen init
     pygame.mixer.pre_init(frequency=22050, size=-16, channels=2, buffer=1024)
     pygame.init()
-    # pygame.mixer.init()
     music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
     music_player.volume = Settings.data['music_volume']
-    if Settings.data['music_on']:
-        music_player.play()
+    music_player.play()
 
     # Assettien esilataus
     load_assets(window)
@@ -58,35 +60,86 @@ def debug_run():
     multiplayer_button = Button(Rect(275, 310, 270, 50), surface_images=['gfx/UI_multiplayer_button_normal.png',
                                                                          'gfx/UI_multiplayer_button_down.png',
                                                                          'gfx/UI_multiplayer_button_highlight.png'])
-    settings_button = Button(Rect(275, 370, 195, 50), surface_images=['gfx/UI_settings_button_normal.png',
+    player_button = Button(Rect(285, 375, 270, 50), surface_images=['gfx/UI_player_button_normal.png',
+                                                                         'gfx/UI_player_button_down.png',
+                                                                         'gfx/UI_player_button_highlight.png'])
+    settings_button = Button(Rect(275, 430, 195, 50), surface_images=['gfx/UI_settings_button_normal.png',
                                                                       'gfx/UI_settings_button_down.png',
                                                                       'gfx/UI_settings_button_highlight.png'])
-    quit_button = Button(Rect(275, 430, 135, 50), surface_images=['gfx/UI_quit_button_normal.png',
+    quit_button = Button(Rect(275, 490, 195, 50), surface_images=['gfx/UI_quit_button_normal.png',
                                                                   'gfx/UI_quit_button_down.png',
                                                                   'gfx/UI_quit_button_highlight.png'])
     main_menu_group.add(practice_button)
     main_menu_group.add(multiplayer_button)
+    main_menu_group.add(player_button)
     main_menu_group.add(settings_button)
     main_menu_group.add(quit_button)
 
+    #MultiplayerLobby
+    create_game_button = Button(Rect(50, 200, 250, 70), 'Create')
+    join_game_button = Button(Rect(50, 300, 250, 70), 'Join')
+    back_from_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
+
+    #ReadyLobby
+    LabelImageText(group=ready_lobby_group, image_text='ready', position=(155, 400))
+    ready_checkbox = Checkbox(group=ready_lobby_group, checked=False, position=(300, 405))
+    start_game_button = Button(Rect(50, 300, 250, 70), 'Start')
+    main_menu_from_ready_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
+
+    #Player menu
+    settings_background = assets['gfx/UI_settings_background.png']
+    LabelImageText(group=player_menu_group, image_text='ready', position=(250, 40))
+    #LabelImageText(group=player_menu_group, image_text='ready', position=(100, 160))
+
+
+    ShipSelectionImage(group=player_menu_group, image_text='ship1_red_20px', position=(200, 340))
+    ShipSelectionImage(group=player_menu_group, image_text='ship_fatship_red_32', position=(250, 340))
+    ShipSelectionImage(group=player_menu_group, image_text='ship_muumi_32', position=(300, 340))
+    ShipSelectionImage(group=player_menu_group, image_text='ship_rocket_red_84', position=(350, 300))
+    ShipSelectionImage(group=player_menu_group, image_text='ship_roosa', position=(400, 340))
+    ShipSelectionImage(group=player_menu_group, image_text='ship_fast_green_32', position=(450, 340))
+    ship_selection_checkbox_group = CheckboxGroup()
+    ship_selection_1_checkbox = Checkbox(group=player_menu_group, checked=False, position=(200, 385),
+                                    checkbox_group=ship_selection_checkbox_group)
+    ship_selection_2_checkbox = Checkbox(group=player_menu_group, checked=False, position=(250, 385),
+                                    checkbox_group=ship_selection_checkbox_group)
+    ship_selection_3_checkbox = Checkbox(group=player_menu_group, checked=False, position=(300, 385),
+                                    checkbox_group=ship_selection_checkbox_group)
+    ship_selection_4_checkbox = Checkbox(group=player_menu_group, checked=True, position=(350, 385),
+                                     checkbox_group=ship_selection_checkbox_group)
+    ship_selection_5_checkbox = Checkbox(group=player_menu_group, checked=False, position=(400, 385),
+                                    checkbox_group=ship_selection_checkbox_group)
+    ship_selection_6_checkbox = Checkbox(group=player_menu_group, checked=False, position=(450, 385),
+                                    checkbox_group=ship_selection_checkbox_group)
+    ship_selection_7_checkbox = Checkbox(group=player_menu_group, checked=True, position=(550, 385),
+                                     checkbox_group=ship_selection_checkbox_group)
+
+    ship_selection_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
+    player_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
+                                                                               'gfx/UI_back_button_down.png',
+                                                                               'gfx/UI_back_button_highlight.png'])
+
+    # player_name_field = Input_box()
+    screen = pygame.display.set_mode((800, 600))
+
+
     active_mode = Modes.MainMenu
     practice_game = None
+    multiplayer_game = None
+    client_wait_for_player_data_after_start = False
 
     # Background action
-    background_action = menu_background_action.BackgroundAction()
-    # Tämä tummentaa tausta-actionin
-    darken_surface = pygame.Surface((WINDOW_SIZE[0], WINDOW_SIZE[1]))
-    darken_surface.set_alpha(128)
+    background_action = menu_background_action.BackgroundAction(window, darken=1)
 
     # Settings menu
     settings_background = assets['gfx/UI_settings_background.png']
     LabelImageText(group=settings_group, image_text='settings', position=(250, 40))
     LabelImageText(group=settings_group, image_text='music', position=(100, 160))
-    music_checkbox = Checkbox(group=settings_group, checked=Settings.data['music_on'], position=(350, 160))
+    music_checkbox = Checkbox(group=settings_group, checked=Settings.data['music_on'], position=(390, 200))
     LabelImageText(group=settings_group, image_text='volume', position=(140, 200))
     music_volume_slider = Slider(group=settings_group, position=(350, 210), value=music_player.volume)
     LabelImageText(group=settings_group, image_text='sounds', position=(100, 240))
-    sounds_checkbox = Checkbox(group=settings_group, checked=Settings.data['sounds_on'], position=(350, 240))
+    sounds_checkbox = Checkbox(group=settings_group, checked=Settings.data['sounds_on'], position=(390, 285))
     LabelImageText(group=settings_group, image_text='volume', position=(140, 280))
     sound_volume_slider = Slider(group=settings_group, position=(350, 290), value=Settings.data['sound_volume'])
     LabelImageText(group=settings_group, image_text='effects', position=(100, 380))
@@ -108,6 +161,10 @@ def debug_run():
                                                                                'gfx/UI_back_button_down.png',
                                                                                'gfx/UI_back_button_highlight.png'])
 
+    # Multiplayer stuff
+    server_object = None
+    client_object = None
+
     running = True
     while running:
 
@@ -117,19 +174,22 @@ def debug_run():
                     active_mode = Modes.Practice
                     window.fill(BLACK)
                     # Lopetetaan background action
-                    background_action.kill_me()
+                    background_action.destroy()
                     del background_action
                     music_player.stop()
 
-                    practice_game = game.AUTSBallGame()
-                    practice_game.add_player(0, team='red', ship_name='Teafighter')
+                    practice_game = game.AUTSBallGame(window, level_name='Vertical Challenge')
+                    practice_game.add_player(0, team='red', ship_name='FastShip')
                     practice_game.add_player(1, team='green')
                     practice_game.add_player(2, team='red')
                     practice_game.add_player(3, team='green')
                     practice_game.start()
                 if 'click' in multiplayer_button.handleEvent(event):
-                    print('multiplayer button clicked')
-                    #active_mode = Modes.MultiplayerLobby
+                    active_mode = Modes.MultiplayerLobby
+                    window.fill(BLACK)
+                if 'click' in player_button.handleEvent(event):
+                    active_mode = Modes.PlayerMenu
+                    window.fill(BLACK)
                 if 'click' in settings_button.handleEvent(event):
                     active_mode = Modes.SettingsMenu
                 if 'click' in quit_button.handleEvent(event):
@@ -138,13 +198,13 @@ def debug_run():
                 if 'click' in settings_back_button.handleEvent(event):
                     active_mode = Modes.MainMenu
                 if 'click' in music_checkbox.handleEvent(event):
+                    # Tallennetaan arvo settings-tiedostoon
+                    Settings.data['music_on'] = music_checkbox.checked
+                    Settings.save()
                     if music_checkbox.checked:
                         music_player.play()
                     else:
                         music_player.stop()
-                    # Tallennetaan arvo settings-tiedostoon
-                    Settings.data['music_on'] = music_checkbox.checked
-                    Settings.save()
                 for event_string in music_volume_slider.handleEvent(event):
                     if event_string is 'drag':
                         music_player.volume = music_volume_slider.value
@@ -197,29 +257,51 @@ def debug_run():
                 if event.type == KEYUP:
                     if event.key == K_ESCAPE:
                         practice_game.destroy()
-                        #groups.empty_groups()
                         del practice_game
                         active_mode = Modes.MainMenu
                         window.fill(BLACK)
-                        background_action = menu_background_action.BackgroundAction()
+                        background_action = menu_background_action.BackgroundAction(window=window, darken=1)
                         static_visual_components_group.draw(window)
                         #music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
                         if Settings.data['music_on']:
                             music_player.play()
-                            music_player.set_screen('menu')
+                            music_player.screen = 'menu'
             if event.type == pygame.QUIT:
                 running = False
             if event.type == music.MUSIC_FINISHED:
                 music_player.next()
 
+            if active_mode == Modes.MultiplayerLobby:
+                if 'click' in back_from_lobby_button.handleEvent(event):
+                    active_mode = Modes.MainMenu
+                    window.fill(BLACK)
+
+                if 'click' in create_game_button.handleEvent(event):
+                    active_mode = Modes.ReadyLobby
+                    window.fill(BLACK)
+                    server_object = Server()
+
+                if 'click' in join_game_button.handleEvent(event):
+                    client_object = Client()
+
+                    while not client_object.try_to_join_server(clock):
+                        pass
+
+                    window.fill(BLACK)
+                    active_mode = Modes.ReadyLobby
+
+                if 'click' in multiplayer_button.handleEvent(event):
+                    active_mode = Modes.MultiplayerLobby
+                    #tähän pelaajan nimen kysely
+                    #window.fill(BLACK)
+                if 'click' in quit_button.handleEvent(event):
+                    running = False
+
         if active_mode == Modes.MainMenu:
             window.fill(0)
 
-            menu_background_action.background_group.update()
+            background_action.update()
             music_player_group.update()
-
-            menu_background_action.background_group.draw(window)
-            window.blit(darken_surface, (0, 0))
 
             static_visual_components_group.draw(window)
             main_menu_group.draw(window)
@@ -232,11 +314,9 @@ def debug_run():
         elif active_mode == Modes.SettingsMenu:
             window.fill(0)
 
-            menu_background_action.background_group.update()
+            background_action.update()
             music_player_group.update()
 
-            menu_background_action.background_group.draw(window)
-            window.blit(darken_surface, (0, 0))
             window.blit(settings_background, (0, 0))
 
             settings_group.draw(window)
@@ -249,6 +329,108 @@ def debug_run():
             clock.tick(GRAPHICS_FPS)
         elif active_mode == Modes.Practice:
             practice_game.update()
+
+        elif active_mode == Modes.PlayerMenu:
+            if 'click' in player_back_button.handleEvent(event):
+                active_mode = Modes.MainMenu
+
+            window.fill(0)
+
+            background_action.update()
+            music_player_group.update()
+
+            window.blit(settings_background, (0, 0))
+
+            player_menu_group.draw(window)
+            player_back_button.draw(window)
+            music_player_group.draw(window)
+
+           # effect.antialiasing(window, graphic_quality=Settings.data['graphic_quality'])
+
+            pygame.display.update()
+            clock.tick(GRAPHICS_FPS)
+
+        elif active_mode == Modes.MultiplayerLobby:
+            window.fill(0)
+
+            background_action.update()
+            music_player_group.update()
+            static_visual_components_group.draw(window)
+
+            create_game_button.draw(window)
+            join_game_button.draw(window)
+            back_from_lobby_button.draw(window)
+
+            pygame.display.update()
+            clock.tick(GRAPHICS_FPS)
+
+        elif active_mode == Modes.ReadyLobby:
+            window.fill(0)
+
+            background_action.update()
+            music_player_group.update()
+            static_visual_components_group.draw(window)
+
+            ready_lobby_group.draw(window)
+            if server_object is not None:
+                start_game_button.draw(window)
+                main_menu_from_ready_lobby_button.draw(window)
+            else:
+                main_menu_from_ready_lobby_button.draw(window)
+
+            if 'click' in main_menu_from_ready_lobby_button.handleEvent(event):
+                active_mode = Modes.MainMenu
+                window.fill(BLACK)
+
+            if server_object is not None:
+                if 'click' in start_game_button.handleEvent(event):
+                    if server_object is not None:
+                        active_mode = Modes.MultiplayerGame
+                        # Lopetetaan background action
+                        background_action.destroy()
+                        del background_action
+                        music_player.stop()
+                        window.fill(BLACK)
+                        pygame.display.flip()
+
+                        multiplayer_game = game.AUTSBallGame(window)
+                        server_object.start_game(multiplayer_game, clock)
+
+            if server_object is not None:
+                server_object.update(clock)
+            elif client_object is not None:
+                if client_object.wait_for_server_start_game() and not client_wait_for_player_data_after_start:
+                    multiplayer_game = game.AUTSBallGame(window, client=True)
+                    multiplayer_game.local_player_id = client_object.client_id
+                    client_wait_for_player_data_after_start = True
+                elif client_wait_for_player_data_after_start:
+                    if client_object.wait_for_player_data_after_start(multiplayer_game):
+                        window.fill(BLACK)
+
+                        # Lopetetaan background action
+                        background_action.destroy()
+                        del background_action
+                        music_player.stop()
+
+                        multiplayer_game.start()
+                        active_mode = Modes.MultiplayerGame
+
+            if 'click' in ready_checkbox.handleEvent(event):
+                pass
+
+            pygame.display.update()
+            clock.tick(GRAPHICS_FPS)
+
+        elif active_mode == Modes.MultiplayerGame:
+            if server_object is not None:
+                server_object.update(clock)
+                #multiplayer_game.update()
+            elif client_object is not None:
+                client_object.send_input()
+                server_updates = client_object.get_server_updates()
+                #print server_updates
+                multiplayer_game.update(server_updates=server_updates)
+                clock.tick(GRAPHICS_FPS)
 
     pygame.quit()
 

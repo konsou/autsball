@@ -31,11 +31,15 @@ class BallSprite(game_object.GameObject):
         self.is_ball = 1
 
         # SFX
-        self.wall_collide_sound = assets['sfx/thump4.wav']
-        self.bullet_collide_sound = assets['sfx/metal_thud_3.wav']
+        if not self.parent.demogame:
+            self.wall_collide_sound = assets['sfx/thump4.wav']
+            self.bullet_collide_sound = assets['sfx/metal_thud_3.wav']
+        else:
+            self.wall_collide_sound = None
+            self.bullet_collide_sound = None
 
     def __repr__(self):
-        return "<BALL>"
+        return "<BallSprite>"
 
     def update(self, viewscreen_rect, player_group=groups.PlayerGroup, bullet_group=groups.BulletGroup):
         """ Päivittää palloa. Vaatii viewscreen_rect:in että osaa laskea näyttämisen oikein. """
@@ -109,7 +113,11 @@ class BallSprite(game_object.GameObject):
         apply_collision = 1
         # Jos törmäävä objekti on pelaaja ja palloa ei vielä ole liitetty pelaajaan niin liitetään
         if other_object in groups.PlayerGroup:
-            if self.attached_player is None:
+            # Jos pallo on ammuttu äskettäin niin ei törmätä
+            if pygame.time.get_ticks() - other_object.ball_shot_at < other_object.ball_immunity_time:
+                apply_collision = 0
+
+            if self.attached_player is None and apply_collision == 1:
                 self.attach_to_player(other_object)
                 self.tether = effect.TetherSprite(attached_ball=self, attached_player=other_object)
 
