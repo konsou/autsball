@@ -89,8 +89,8 @@ def debug_run():
 
     #Player menu
     settings_background = assets['gfx/UI_settings_background.png']
-    LabelImageText(group=settings_group, image_text='ready', position=(250, 40))
-    LabelImageText(group=settings_group, image_text='ready', position=(100, 160))
+    LabelImageText(group=player_menu_group, image_text='ready', position=(250, 40))
+    #LabelImageText(group=player_menu_group, image_text='ready', position=(100, 160))
 
 
     ShipSelectionImage(group=player_menu_group, image_text='ship1_red_20px', position=(200, 340))
@@ -135,11 +135,11 @@ def debug_run():
     settings_background = assets['gfx/UI_settings_background.png']
     LabelImageText(group=settings_group, image_text='settings', position=(250, 40))
     LabelImageText(group=settings_group, image_text='music', position=(100, 160))
-    music_checkbox = Checkbox(group=settings_group, checked=Settings.data['music_on'], position=(350, 160))
+    music_checkbox = Checkbox(group=settings_group, checked=Settings.data['music_on'], position=(370, 200))
     LabelImageText(group=settings_group, image_text='volume', position=(140, 200))
     music_volume_slider = Slider(group=settings_group, position=(350, 210), value=music_player.volume)
     LabelImageText(group=settings_group, image_text='sounds', position=(100, 240))
-    sounds_checkbox = Checkbox(group=settings_group, checked=Settings.data['sounds_on'], position=(350, 240))
+    sounds_checkbox = Checkbox(group=settings_group, checked=Settings.data['sounds_on'], position=(370, 285))
     LabelImageText(group=settings_group, image_text='volume', position=(140, 280))
     sound_volume_slider = Slider(group=settings_group, position=(350, 290), value=Settings.data['sound_volume'])
     LabelImageText(group=settings_group, image_text='effects', position=(100, 380))
@@ -148,13 +148,13 @@ def debug_run():
     LabelImageText(group=settings_group, image_text='med', position=(470, 340))
     LabelImageText(group=settings_group, image_text='high', position=(570, 340))
     effects_checkbox_group = CheckboxGroup()
-    effects_off_checkbox = Checkbox(group=settings_group, checked=False, position=(310, 385),
+    effects_off_checkbox = Checkbox(group=settings_group, checked=False, position=(330, 425),
                                     checkbox_group=effects_checkbox_group)
-    effects_low_checkbox = Checkbox(group=settings_group, checked=False, position=(400, 385),
+    effects_low_checkbox = Checkbox(group=settings_group, checked=False, position=(430, 425),
                                     checkbox_group=effects_checkbox_group)
-    effects_med_checkbox = Checkbox(group=settings_group, checked=False, position=(490, 385),
+    effects_med_checkbox = Checkbox(group=settings_group, checked=False, position=(520, 425),
                                     checkbox_group=effects_checkbox_group)
-    effects_high_checkbox = Checkbox(group=settings_group, checked=True, position=(590, 385),
+    effects_high_checkbox = Checkbox(group=settings_group, checked=True, position=(620, 425),
                                      checkbox_group=effects_checkbox_group)
     effects_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
     settings_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
