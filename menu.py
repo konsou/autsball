@@ -97,6 +97,7 @@ def debug_run():
     ShipSelectionImage(group=player_menu_group, image_text='ship_muumi_32', position=(300, 340))
     ShipSelectionImage(group=player_menu_group, image_text='ship_rocket_red_84', position=(350, 300))
     ShipSelectionImage(group=player_menu_group, image_text='ship_roosa', position=(400, 340))
+    ShipSelectionImage(group=player_menu_group, image_text='ship_fast_green_32', position=(450, 340))
     ship_selection_checkbox_group = CheckboxGroup()
     ship_selection_1_checkbox = Checkbox(group=player_menu_group, checked=False, position=(200, 385),
                                     checkbox_group=ship_selection_checkbox_group)
@@ -178,7 +179,7 @@ def debug_run():
                     music_player.stop()
 
                     practice_game = game.AUTSBallGame(window, level_name='Vertical Challenge')
-                    practice_game.add_player(0, team='red', ship_name='Muumi')
+                    practice_game.add_player(0, team='red', ship_name='FastShip')
                     practice_game.add_player(1, team='green')
                     practice_game.add_player(2, team='red')
                     practice_game.add_player(3, team='green')
