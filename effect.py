@@ -57,6 +57,7 @@ class TetherSprite(EffectSprite):
         self.effect_type = 'tether'
 
     def update(self, viewscreen_rect):
+        """ Tämä on aika raskas koska rotatoi, zoomaa ja laskee maskin uusiksi joka framessa """
         self.viewscreen_rect = viewscreen_rect
         ball_player_distance = self.attached_player.distance(self.attached_ball)
         ball_player_angle = game_object.get_angle_in_radians((self.attached_player.x, self.attached_player.y),
@@ -69,6 +70,18 @@ class TetherSprite(EffectSprite):
         # rect.center laitetaan pallon ja pelaajan puoliväliin
         self.rect.center = ((self.attached_player.rect.center[0] + self.attached_ball.rect.center[0]) // 2,
                             (self.attached_player.rect.center[1] + self.attached_ball.rect.center[1]) // 2)
+
+        # Lasketaan maski joka framella uusiksi kun sekä koko että rotaatio muuttuu
+        self.mask = pygame.mask.from_surface(self.image)
+
+        self.check_collision_with_group(groups.BulletGroup)
+
+    def collided_with(self, other_object):
+        """ Bullettiin törmäys tuhoaa tetherin """
+        if other_object in groups.BulletGroup:
+            for ball in groups.BallGroup:
+                ball.detach()
+            self.kill()
 
 
 class Explosion(EffectSprite):
@@ -125,7 +138,7 @@ class SmokeEffect(EffectSprite):
                               attached_player=attached_player, offset=offset)
         self.parent = parent
         self.viewscreen_rect = viewscreen_rect
-        if self.parent is not None and type(parent).__name__ is not 'BackgroundAction':
+        if self.parent is not None:
             self.x, self.y = start_position
             self.first_image = True
             self.gravity_affects = 1

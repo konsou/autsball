@@ -48,15 +48,21 @@ class BulletSprite(game_object.GameObject):
 
         self.is_bullet = 1
         self.group = group
+        self.kill_pending = 0
 
         # SFX
         if not self.parent.demogame:
-            self.wall_collide_sound = pygame.mixer.Sound(file='sfx/thump3.wav')
+            self.wall_collide_sound = assets['sfx/thump3.wav']
             self.wall_collide_sound.set_volume(1)
         else:
             self.wall_collide_sound = None
 
+    def __repr__(self):
+        return "<BulletSprite>"
+
     def update(self, viewscreen_rect):
+        if self.kill_pending:
+            self.kill()
         self.viewscreen_rect = viewscreen_rect
         self.update_movement()
         self.animate()
@@ -82,28 +88,20 @@ class BulletSprite(game_object.GameObject):
             self.y = 0
             self.kill()
 
-    def get_non_alpha_pixels(self):
-        pixels = []
-        for x in range(0, self.image.get_width()):
-            for y in range(0, self.image.get_height()):
-                if self.image.get_at((x, y)).a > 0:
-                    pixels.append([x, y])
-        return pixels
-
     def collided_with_wall(self):
         """ 
         Tämä tapahtuu kun ammus törmää seinään 
         """
         # Tuhoaa seinää törmätessä ja myös itsensä
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
-        self.kill()
+        self.kill_pending = 1
 
     def collided_with(self, other_object):
         """ 
         Tämä tapahtuu kun ammus törmää toiseen peliobjektiin. Vakiona vain tuhotaan ammus. Voi overrideta
         kustomikäyttäytymisen mahdollistamiseksi.
         """
-        self.kill()
+        self.kill_pending = 1
 
 
 class BasicShot(BulletSprite):
@@ -133,7 +131,7 @@ class GreenLaser(BulletSprite):
         # self.gravity_affects = 0
 
     def collided_with_wall(self):
-        self.kill()
+        self.kill_pending = 1
 
 
 class DumbFire(BulletSprite):
@@ -154,13 +152,13 @@ class DumbFire(BulletSprite):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
         effect.Explosion(image_file='gfx/explosion_50.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
-        self.kill()
+        self.kill_pending = 1
 
     def collided_with(self, other_object):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
         effect.Explosion(image_file='gfx/explosion_50.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
-        self.kill()
+        self.kill_pending = 1
 
 
 class Dirtball(BulletSprite):
@@ -168,7 +166,7 @@ class Dirtball(BulletSprite):
     cooldown = 3000
     mass = 0.2
     speed = 10
-    image_file = 'gfx/bullet_10.png'
+    image_file = 'gfx/bullet_dirtball_16.png'
 
     def __init__(self, shooting_player=None, parent=None, level=None, group=groups.BulletGroup, heading=0):
         BulletSprite.__init__(self, shooting_player=shooting_player, parent=parent, level=level, group=group,
@@ -177,11 +175,11 @@ class Dirtball(BulletSprite):
 
     def collided_with_wall(self):
         pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
-        self.kill()
+        self.kill_pending = 1
 
     def collided_with(self, other_object):
         pygame.draw.circle(self.level.image, BROWN, (self.x, self.y), 20)
-        self.kill()
+        self.kill_pending = 1
 
 
 class Switcher(BulletSprite):
@@ -197,7 +195,7 @@ class Switcher(BulletSprite):
 
     def collided_with_wall(self):
         """ Mitään ei tapahdu seinätörmäyksessä """
-        self.kill()
+        self.kill_pending = 1
 
     def collided_with(self, other_object):
         """ 
@@ -210,7 +208,7 @@ class Switcher(BulletSprite):
         self.parent.calc_viewscreen_rect()
         self.update_rect()
         other_object.update_rect()
-        self.kill()
+        self.kill_pending = 1
 
 
 class Bouncer(BulletSprite):
@@ -236,7 +234,7 @@ class Bouncer(BulletSprite):
                          explosion_force=self.explosion_force)
         self._bounce_counter += 1
         if self._bounce_counter > self.number_of_bounces:
-            self.kill()
+            self.kill_pending = 1
 
     def collided_with(self, other_object):
         pygame.draw.circle(self.level.image, BLACK, (self.x, self.y), self.size - 1)
@@ -245,5 +243,5 @@ class Bouncer(BulletSprite):
                          explosion_force=self.explosion_force)
         self._bounce_counter += 1
         if self._bounce_counter > self.number_of_bounces:
-            self.kill()
+            self.kill_pending = 1
 

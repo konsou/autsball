@@ -41,8 +41,7 @@ def debug_run():
     pygame.init()
     music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
     music_player.volume = Settings.data['music_volume']
-    if Settings.data['music_on']:
-        music_player.play()
+    music_player.play()
 
     # Assettien esilataus
     load_assets(window)
