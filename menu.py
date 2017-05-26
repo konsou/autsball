@@ -4,7 +4,6 @@ import game
 import menu_background_action
 import music
 import effect
-import json
 from server import Server
 from client import Client
 from pygame.locals import *
@@ -16,7 +15,7 @@ from ui_components import Button, ButtonGroup, LabelImageText, Checkbox, Checkbo
 
 def debug_run():
     window = pygame.display.set_mode((WINDOW_SIZE[0], WINDOW_SIZE[1]))
-    pygame.display.set_caption("AUTSBall")
+    pygame.display.set_caption("Menu test")
     clock = pygame.time.Clock()
 
     window.fill(BLACK)
@@ -135,11 +134,11 @@ def debug_run():
     settings_background = assets['gfx/UI_settings_background.png']
     LabelImageText(group=settings_group, image_text='settings', position=(250, 40))
     LabelImageText(group=settings_group, image_text='music', position=(100, 160))
-    music_checkbox = Checkbox(group=settings_group, checked=Settings.data['music_on'], position=(370, 200))
+    music_checkbox = Checkbox(group=settings_group, checked=Settings.data['music_on'], position=(390, 200))
     LabelImageText(group=settings_group, image_text='volume', position=(140, 200))
     music_volume_slider = Slider(group=settings_group, position=(350, 210), value=music_player.volume)
     LabelImageText(group=settings_group, image_text='sounds', position=(100, 240))
-    sounds_checkbox = Checkbox(group=settings_group, checked=Settings.data['sounds_on'], position=(370, 285))
+    sounds_checkbox = Checkbox(group=settings_group, checked=Settings.data['sounds_on'], position=(390, 285))
     LabelImageText(group=settings_group, image_text='volume', position=(140, 280))
     sound_volume_slider = Slider(group=settings_group, position=(350, 290), value=Settings.data['sound_volume'])
     LabelImageText(group=settings_group, image_text='effects', position=(100, 380))
@@ -148,13 +147,13 @@ def debug_run():
     LabelImageText(group=settings_group, image_text='med', position=(470, 340))
     LabelImageText(group=settings_group, image_text='high', position=(570, 340))
     effects_checkbox_group = CheckboxGroup()
-    effects_off_checkbox = Checkbox(group=settings_group, checked=False, position=(330, 425),
+    effects_off_checkbox = Checkbox(group=settings_group, checked=False, position=(310, 385),
                                     checkbox_group=effects_checkbox_group)
-    effects_low_checkbox = Checkbox(group=settings_group, checked=False, position=(430, 425),
+    effects_low_checkbox = Checkbox(group=settings_group, checked=False, position=(400, 385),
                                     checkbox_group=effects_checkbox_group)
-    effects_med_checkbox = Checkbox(group=settings_group, checked=False, position=(520, 425),
+    effects_med_checkbox = Checkbox(group=settings_group, checked=False, position=(490, 385),
                                     checkbox_group=effects_checkbox_group)
-    effects_high_checkbox = Checkbox(group=settings_group, checked=True, position=(620, 425),
+    effects_high_checkbox = Checkbox(group=settings_group, checked=True, position=(590, 385),
                                      checkbox_group=effects_checkbox_group)
     effects_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
     settings_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
@@ -367,11 +366,7 @@ def debug_run():
         elif active_mode == Modes.ReadyLobby:
             window.fill(0)
 
-            # Badfix
-            try:
-                background_action.update()
-            except UnboundLocalError:
-                pass
+            background_action.update()
             music_player_group.update()
             static_visual_components_group.draw(window)
 
@@ -404,17 +399,17 @@ def debug_run():
                 server_object.update(clock)
             elif client_object is not None:
                 if client_object.wait_for_server_start_game() and not client_wait_for_player_data_after_start:
-                    # Lopetetaan background action
-                    background_action.destroy()
-                    del background_action
-                    music_player.stop()
-
                     multiplayer_game = game.AUTSBallGame(window, client=True)
                     multiplayer_game.local_player_id = client_object.client_id
                     client_wait_for_player_data_after_start = True
                 elif client_wait_for_player_data_after_start:
                     if client_object.wait_for_player_data_after_start(multiplayer_game):
                         window.fill(BLACK)
+
+                        # Lopetetaan background action
+                        background_action.destroy()
+                        del background_action
+                        music_player.stop()
 
                         multiplayer_game.start()
                         active_mode = Modes.MultiplayerGame
@@ -431,13 +426,10 @@ def debug_run():
                 #multiplayer_game.update()
             elif client_object is not None:
                 client_object.send_input()
-                try:
-                    server_updates = client_object.get_server_updates()[0]
-                except TypeError:
-                    server_updates = None
-                # print server_updates
+                server_updates = client_object.get_server_updates()
+                #print server_updates
                 multiplayer_game.update(server_updates=server_updates)
-                # clock.tick(GRAPHICS_FPS)
+                clock.tick(GRAPHICS_FPS)
 
     pygame.quit()
 
