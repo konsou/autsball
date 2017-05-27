@@ -101,7 +101,7 @@ def debug_run():
     for name in root.findall('ship'):
         name = name.get('name')
         ship_list.append(name)
-    print ship_list # debuggausta varten
+    print ship_list[1]
     ship_amount = ship_list.__len__()
 
         #Luodaan aluksille valintarivi ja tuodaan kuvat
@@ -109,18 +109,14 @@ def debug_run():
     ship_selection_checkbox_list = []
 
     for i in range(ship_amount):
-        ShipSelectionImage(group=player_menu_group, image_text='FastShip_green', position=(200 + 50*i, 340))
+        ShipSelectionImage(group=player_menu_group, image_text=ship_list[i], position=(200 + 50*i, 340))
         ship_selection_checkbox_list.append(i)
         ship_selection_checkbox_list[i] = Checkbox(group=player_menu_group, checked=False, position=(200 + 50*i, 385),
                                     checkbox_group=ship_selection_checkbox_group)
 
-    ship_selection_checkbox_group.set_checked_index(Settings.data['ship_selection'])
-
     player_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
                                                                                'gfx/UI_back_button_down.png',
                                                                                'gfx/UI_back_button_highlight.png'])
-
-
 
     active_mode = Modes.MainMenu
     practice_game = None
@@ -344,48 +340,13 @@ def debug_run():
             player_back_button.draw(window)
             music_player_group.draw(window)
 
-# TODO: tähän looppi joka hoitaa alla olevan valikon dynaamisesti
-
-            if 'click' in ship_selection_checkbox_list[0].handleEvent(event):
-                 # Tallennetaan arvo settings-tiedostoon
-                Settings.data['ship_selection'] = 1
-                Settings.save()
-
-            if 'click' in ship_selection_checkbox_list[1].handleEvent(event):
-                # Tallennetaan arvo settings-tiedostoon
-                Settings.data['ship_selection'] = 2
-                Settings.save()
-
-            if 'click' in ship_selection_checkbox_list[2].handleEvent(event):
-                # Tallennetaan arvo settings-tiedostoon
-                Settings.data['ship_selection'] = 3
-                Settings.save()
-
-            if 'click' in ship_selection_checkbox_list[3].handleEvent(event):
-                # Tallennetaan arvo settings-tiedostoon
-                Settings.data['ship_selection'] = 4
-                Settings.save()
-
-            if 'click' in ship_selection_checkbox_list[4].handleEvent(event):
-                # Tallennetaan arvo settings-tiedostoon
-                Settings.data['ship_selection'] = 5
-                Settings.save()
-            if 'click' in ship_selection_checkbox_list[5].handleEvent(event):
-                # Tallennetaan arvo settings-tiedostoon
-                Settings.data['ship_selection'] = 6
-                Settings.save()
-
-            if 'click' in ship_selection_checkbox_list[6].handleEvent(event):
-                # Tallennetaan arvo settings-tiedostoon
-                Settings.data['ship_selection'] = 7
-                Settings.save()
-
-            if 'click' in ship_selection_checkbox_list[7].handleEvent(event):
-                # Tallennetaan arvo settings-tiedostoon
-                Settings.data['ship_selection'] = 8
-                Settings.save()
-
-           # effect.antialiasing(window, graphic_quality=Settings.data['graphic_quality'])
+            # tarkistetaan ship_selection checkboxeista
+            for i in range(ship_amount):
+                if 'click' in ship_selection_checkbox_list[i].handleEvent(event):
+                     # Tallennetaan arvo settings-tiedostoon
+                    Settings.data['ship_selection'] = i+1
+                    Settings.save()
+                    print Settings.data['ship_selection']
 
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
