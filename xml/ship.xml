@@ -268,10 +268,10 @@
             <!-- TODO: lisää player collide sound -->
         </sounds>
 
-        <handling>3</handling>
-        <max_thrust>0.4</max_thrust>
+        <handling>4</handling>
+        <max_thrust>2.0</max_thrust>
         <max_speed>10</max_speed>
-        <mass>1.5</mass>
+        <mass>0.7</mass>
         <cooldown_multiplier_basic>1</cooldown_multiplier_basic><!-- float -->
         <cooldown_multiplier_special>1</cooldown_multiplier_special><!-- float -->
         <recovery_time>1</recovery_time>
