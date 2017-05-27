@@ -6,6 +6,7 @@ import ui_components
 from constants import *
 from pygame.locals import *
 from colors import *
+from gloss import *
 
 
 """ 
@@ -40,13 +41,14 @@ DONT_ROTATE_IMAGES = ['menu_background_level.png', 'ball.png', 'ball_50.png', 'b
                       'bullet.png', 'bullet_5.png', 'bullet_10.png']
 
 
-def load_assets(window):
+def load_assets(window=None):
     if DEBUG_TEXT: start_time = time.time()
 
     # Latauskuva koska latauksissa voi kestää jonkin aikaa
-    loading_image = pygame.image.load('gfx/loading.png').convert()
-    window.blit(loading_image, loading_image.get_rect())
-    pygame.display.flip()
+    # TODO: Siirrä latauspalkin piirto Glossin omaan funktioon
+    #loading_image = pygame.image.load('gfx/loading.png').convert()
+    #window.blit(loading_image, loading_image.get_rect())
+    #pygame.display.flip()
 
     # Lasketaan tiedostojen määrä ja koot yhteensä
     files_size_total = 0
@@ -80,14 +82,18 @@ def load_assets(window):
                 file_size = os.stat(filepath).st_size
                 if DEBUG_TEXT: print "Loading %r... (size: %r kB)" % (filepath, round(file_size / 1024.0, 2))
                 # Tässä itse kuvan lataus. Vakiona aina convert_alpha().
-                assets[asset_key] = pygame.image.load(filepath).convert_alpha()
+                #assets[asset_key] = pygame.image.load(filepath).convert_alpha()
+                assets[asset_key] = Texture(filepath)
                 # Bitmaskiin lataus
-                assets_mask[asset_key] = pygame.mask.from_surface(assets[asset_key])
+                # TODO: Ratkaise tämä opengl:ssä jotenkin
+                #assets_mask[asset_key] = pygame.mask.from_surface(assets[asset_key])
                 # files_size_total += file_size
                 files_size_current += file_size
                 files_size_total_inc_rot += file_size
-                ui_components.draw_loading_bar(window, files_size_current, files_size_total)
+                # TODO: Siirrä latauspalkin piirto Glossin omaan funktioon
+                #ui_components.draw_loading_bar(window, files_size_current, files_size_total)
                 # number_of_files += 1
+                """ OpenGL-tekstuureja ei tarvitse esirotatoida
                 width = assets[asset_key].get_width()
                 height = assets[asset_key].get_height()
                 if DEBUG_TEXT: print "Loaded %r" % filepath
@@ -109,6 +115,7 @@ def load_assets(window):
                         number_of_rotations += 1
                         files_size_total_inc_rot += file_size
                     if DEBUG_TEXT: print "Rotations calculated"
+                """
             elif extension in INCLUDED_SOUND_EXTENSIONS:
                 # Ladataan äänitiedostot sitten
                 file_size = os.stat(filepath).st_size
@@ -118,7 +125,8 @@ def load_assets(window):
                 # files_size_total += file_size
                 files_size_current += file_size
                 files_size_total_inc_rot += file_size
-                ui_components.draw_loading_bar(window, files_size_current, files_size_total)
+                # TODO: Siirrä latauspalkin piirto Glossin omaan funktioon
+                #ui_components.draw_loading_bar(window, files_size_current, files_size_total)
                 # number_of_files += 1
                 if DEBUG_TEXT: print "Loaded %r" % filepath
                 # Äänitiedostoja emme rotatoi :)
