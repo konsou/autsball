@@ -344,7 +344,7 @@ def debug_run():
             for i in range(ship_amount):
                 if 'click' in ship_selection_checkbox_list[i].handleEvent(event):
                      # Tallennetaan arvo settings-tiedostoon
-                    Settings.data['ship_selection'] = i+1
+                    Settings.data['ship_selection'] = i
                     Settings.save()
                     print Settings.data['ship_selection']
 

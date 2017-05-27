@@ -92,7 +92,7 @@ class AUTSBallGame:
         except AttributeError:
             pass
 
-    def add_player(self, player_id=None, team=None, ship_name='V-Wing', special=None):
+    def add_player(self, player_id=None, team=None, ship_name='Fatship', special=None):
         # Lisää pelaajan pelaajalistaan
         if player_id is None:
             self.players[self.player_count] = player.PlayerSprite(player_id=player_id,
