@@ -109,9 +109,9 @@ def debug_run():
     ship_selection_checkbox_list = []
 
     for i in range(ship_amount):
-        ShipSelectionImage(group=player_menu_group, image_text=ship_list[i], position=(200 + 50*i, 340))
+        ShipSelectionImage(group=player_menu_group, image_text=ship_list[i], position=(200 + 50*i, 200))
         ship_selection_checkbox_list.append(i)
-        ship_selection_checkbox_list[i] = Checkbox(group=player_menu_group, checked=False, position=(200 + 50*i, 385),
+        ship_selection_checkbox_list[i] = Checkbox(group=player_menu_group, checked=False, position=(200 + 50*i, 245),
                                     checkbox_group=ship_selection_checkbox_group)
 
     player_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
