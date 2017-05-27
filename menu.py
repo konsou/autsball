@@ -174,7 +174,7 @@ def debug_run():
                     music_player.stop()
 
                     practice_game = game.AUTSBallGame(window, level_name='Vertical Challenge')
-                    practice_game.add_player(0, team='red', ship_name='FastShip')
+                    practice_game.add_player(0, team='red', ship_name=ship_list[Settings.data['ship_selection']])
                     practice_game.add_player(1, team='green')
                     practice_game.add_player(2, team='red')
                     practice_game.add_player(3, team='green')
