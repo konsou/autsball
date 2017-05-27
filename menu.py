@@ -97,6 +97,8 @@ def debug_run():
     ShipSelectionImage(group=player_menu_group, image_text='ship_muumi_32', position=(300, 340))
     ShipSelectionImage(group=player_menu_group, image_text='ship_rocket_red_84', position=(350, 300))
     ShipSelectionImage(group=player_menu_group, image_text='ship_roosa', position=(400, 340))
+    ShipSelectionImage(group=player_menu_group, image_text='ship_trademark_fighter_green', position=(450, 340))
+    ShipSelectionImage(group=player_menu_group, image_text='ship_fast_green_32', position=(500, 340))
     ship_selection_checkbox_group = CheckboxGroup()
     ship_selection_1_checkbox = Checkbox(group=player_menu_group, checked=False, position=(200, 385),
                                     checkbox_group=ship_selection_checkbox_group)
@@ -104,13 +106,15 @@ def debug_run():
                                     checkbox_group=ship_selection_checkbox_group)
     ship_selection_3_checkbox = Checkbox(group=player_menu_group, checked=False, position=(300, 385),
                                     checkbox_group=ship_selection_checkbox_group)
-    ship_selection_4_checkbox = Checkbox(group=player_menu_group, checked=True, position=(350, 385),
+    ship_selection_4_checkbox = Checkbox(group=player_menu_group, checked=False, position=(350, 385),
                                      checkbox_group=ship_selection_checkbox_group)
     ship_selection_5_checkbox = Checkbox(group=player_menu_group, checked=False, position=(400, 385),
                                     checkbox_group=ship_selection_checkbox_group)
     ship_selection_6_checkbox = Checkbox(group=player_menu_group, checked=False, position=(450, 385),
                                     checkbox_group=ship_selection_checkbox_group)
-    ship_selection_7_checkbox = Checkbox(group=player_menu_group, checked=True, position=(550, 385),
+    ship_selection_7_checkbox = Checkbox(group=player_menu_group, checked=False, position=(500, 385),
+                                     checkbox_group=ship_selection_checkbox_group)
+    ship_selection_8_checkbox = Checkbox(group=player_menu_group, checked=True, position=(550, 385),
                                      checkbox_group=ship_selection_checkbox_group)
 
     ship_selection_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
@@ -178,7 +182,7 @@ def debug_run():
                     music_player.stop()
 
                     practice_game = game.AUTSBallGame(window, level_name='Vertical Challenge')
-                    practice_game.add_player(0, team='red', ship_name='Muumi')
+                    practice_game.add_player(0, team='red', ship_name='FastShip')
                     practice_game.add_player(1, team='green')
                     practice_game.add_player(2, team='red')
                     practice_game.add_player(3, team='green')
