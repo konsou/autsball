@@ -59,9 +59,9 @@ class BackgroundAction(game.AUTSBallGame):
         self.add_player(0, team='red', ship_name='Teafighter', special=bullet.Bouncer)
         self.add_player(1, team='green', ship_name='LactoAcidShip', special=bullet.DumbFire)
         self.add_player(2, team='red', ship_name='Muumi', special=bullet.Switcher)
-        self.add_player(3, team='green', ship_name='V-Wing', special=bullet.DumbFire)
-        self.add_player(4, team='red', ship_name='V-Wing', special=bullet.Dirtball)
-        self.add_player(5, team='green', ship_name='Fatship', special=bullet.DumbFire)
+#        self.add_player(3, team='green', ship_name='V-Wing', special=bullet.DumbFire)
+ #       self.add_player(4, team='red', ship_name='V-Wing', special=bullet.Dirtball)
+  #      self.add_player(5, team='green', ship_name='Fatship', special=bullet.DumbFire)
 
         self.player_last_positions = {}
         for current_player in self.players:

@@ -206,7 +206,7 @@ class ShipSelectionImage(pygame.sprite.Sprite):
     def __init__(self, group=None, image_text=None, position=(0, 0)):
         pygame.sprite.Sprite.__init__(self, group)
         try:
-            self.image = assets.assets['gfx/%s.png' % image_text]
+            self.image = assets.assets['gfx/ship_%s.png' % image_text]
         except pygame.error:
             # Jos kuvaa ei löydy, käytä rendattua fonttia?
             self.image = pygame.Surface()

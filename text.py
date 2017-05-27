@@ -200,3 +200,13 @@ def read_xml(filename):
     root = tree.getroot()
     return root
 
+def read_ship_from_xml(filename):
+    tree = ET.parse(filename)
+    root = tree.getroot()
+#    root.read_xml(filename)
+#    ship_list = root.findall('ship')
+#    return ship_list[1]
+    for name in root.findall('ship'):
+        #rank = country.find('rank').text
+        name = name.get('name')
+        return name
