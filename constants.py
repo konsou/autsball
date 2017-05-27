@@ -20,7 +20,8 @@ class Settings:
         'music_volume': 1.0,
         'sounds_on': True,
         'sound_volume': 1.0,
-        'graphic_quality': 3
+        'graphic_quality': 3,
+        'ship_selection': 1
     }
 
     def __init__(self):

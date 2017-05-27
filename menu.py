@@ -92,6 +92,7 @@ def debug_run():
     #LabelImageText(group=player_menu_group, image_text='ready', position=(100, 160))
 
 
+# TODO: valinta dynaamiseksi. Alempana vastaava klikkauschekkailu, johon pitää myös tehdä muutokset.
     ShipSelectionImage(group=player_menu_group, image_text='ship1_red_20px', position=(200, 340))
     ShipSelectionImage(group=player_menu_group, image_text='ship_fatship_red_32', position=(250, 340))
     ShipSelectionImage(group=player_menu_group, image_text='ship_muumi_32', position=(300, 340))
@@ -116,14 +117,12 @@ def debug_run():
                                      checkbox_group=ship_selection_checkbox_group)
     ship_selection_8_checkbox = Checkbox(group=player_menu_group, checked=True, position=(550, 385),
                                      checkbox_group=ship_selection_checkbox_group)
+    ship_selection_checkbox_group.set_checked_index(Settings.data['ship_selection']) # TODO: selvitä miksi 'ship_selection' -key ei löydy dictistä
 
-    ship_selection_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
     player_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
                                                                                'gfx/UI_back_button_down.png',
                                                                                'gfx/UI_back_button_highlight.png'])
 
-    # player_name_field = Input_box()
-    screen = pygame.display.set_mode((800, 600))
 
 
     active_mode = Modes.MainMenu
@@ -347,6 +346,57 @@ def debug_run():
             player_menu_group.draw(window)
             player_back_button.draw(window)
             music_player_group.draw(window)
+
+# TODO: tähän looppi joka hoitaa alla olevan valikon dynaamisesti
+
+            # Tallennetaan arvo settings-tiedostoon
+            Settings.data['ship_selection'] = 0
+            Settings.save()
+        if 'click' in ship_selection_1_checkbox.handleEvent(event):
+
+            # Tallennetaan arvo settings-tiedostoon
+            Settings.data['ship_selection'] = 1
+            Settings.save()
+        if 'click' in ship_selection_2_checkbox.handleEvent(event):
+
+            # Tallennetaan arvo settings-tiedostoon
+            Settings.data['ship_selection'] = 2
+            Settings.save()
+        if 'click' in ship_selection_3_checkbox.handleEvent(event):
+
+            # Tallennetaan arvo settings-tiedostoon
+            Settings.data['ship_selection'] = 3
+            Settings.save()
+
+        if 'click' in ship_selection_4_checkbox.handleEvent(event):
+
+            # Tallennetaan arvo settings-tiedostoon
+            Settings.data['ship_selection'] = 4
+            Settings.save()
+
+        if 'click' in ship_selection_5_checkbox.handleEvent(event):
+
+            # Tallennetaan arvo settings-tiedostoon
+            Settings.data['ship_selection'] = 5
+            Settings.save()
+
+        if 'click' in ship_selection_6_checkbox.handleEvent(event):
+
+            # Tallennetaan arvo settings-tiedostoon
+            Settings.data['ship_selection'] = 6
+            Settings.save()
+
+        if 'click' in ship_selection_7_checkbox.handleEvent(event):
+
+            # Tallennetaan arvo settings-tiedostoon
+            Settings.data['ship_selection'] = 7
+            Settings.save()
+
+        if 'click' in ship_selection_8_checkbox.handleEvent(event):
+
+            # Tallennetaan arvo settings-tiedostoon
+            Settings.data['ship_selection'] = 8
+            Settings.save()
 
            # effect.antialiasing(window, graphic_quality=Settings.data['graphic_quality'])
 
