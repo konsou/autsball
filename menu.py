@@ -101,7 +101,6 @@ def debug_run():
     for name in root.findall('ship'):
         name = name.get('name')
         ship_list.append(name)
-    print ship_list[1]
     ship_amount = ship_list.__len__()
 
         #Luodaan aluksille valintarivi ja tuodaan kuvat
@@ -346,7 +345,6 @@ def debug_run():
                      # Tallennetaan arvo settings-tiedostoon
                     Settings.data['ship_selection'] = i
                     Settings.save()
-                    print Settings.data['ship_selection']
 
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
