@@ -1,5 +1,4 @@
 # -*- coding: utf8 -*-
-
 from network import *
 import json
 import pygame
@@ -18,19 +17,24 @@ class Client(object):
         self._local_player_id = None
 
     def try_to_join_server(self, clock):
-        response_message = self._network.client_listen()
+        # TODO: pitää käydä läpi koko network queue eikä vain viimeisintä viestiä?
+        print "Trying to join server"
+        response_message = self._network.get_latest_network_package()
+        # print response_message
         if response_message is not None and response_message[0] == 'Join me':
             self._server_address = response_message[1]
             self._network.client_send(self._acknowledgement_message, self._server_address)
             print "Joining server ", self._server_address
             while self._local_player_id is None:
-                data = self._network.client_listen()
-                if data is not None:
-                    if type(data[0]) is not StringType:
-                        if data[0]['client_id'] is not None:
-                            self._local_player_id = data[0]['client_id']
-                            print data[0]['client_id']
-                            return True
+                data = self._network.get_latest_network_package()[0]
+                print data
+                try:
+                    self._local_player_id = data['client_id']
+                    print "Got client ID from server:", data['client_id']
+                    return True
+                except (IndexError, TypeError):
+                    pass
+
         elif response_message is not None:
             print "Noob host"
             return False
@@ -38,7 +42,9 @@ class Client(object):
         clock.tick(10)
 
     def wait_for_server_start_game(self):
-        response_message = self._network.client_listen()
+        response_message = self._network.get_latest_network_package()
+        # print "Waiting for server to start game..."
+        # print "Server sent:", response_message
         if response_message is not None:
             if response_message[1] == self._server_address and response_message[0] == 'Start game':
                 print "Server started the game, wohoo!"
@@ -49,10 +55,11 @@ class Client(object):
             return False
 
     def wait_for_player_data_after_start(self, game_instance):
-        response_message = self._network.client_listen()
+        response_message = self._network.get_latest_network_package()
         if response_message is not None:
             if response_message[1] == self._server_address:
-                print "We got ships from server!"
+                print "We got ships from server! Here's the info:"
+                print response_message[0]
                 for player_id, info in response_message[0].iteritems():
                     game_instance.add_player(int(player_id), team=info[0], ship_name=info[1])
                     print "Added ship for player ", player_id
@@ -104,14 +111,6 @@ class Client(object):
         player_data_packet = json.dumps(pack_dict(player_keyboard_commands))
 
         self._network.client_send(player_data_packet, self._server_address)
-
-    def get_server_updates(self):
-        server_data = self._network.receive_queue.pop()  # Otetaan vain uusin tieto
-        self._network.receive_queue.clear()  # discardataan loput
-        if server_data is not None:
-            print server_data
-
-        return server_data
 
     def _get_client_id(self):
         return self._local_player_id

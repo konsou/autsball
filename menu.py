@@ -433,7 +433,7 @@ def debug_run():
             elif client_object is not None:
                 client_object.send_input()
                 try:
-                    server_updates = client_object.get_server_updates()[0]
+                    server_updates = client_object._network.get_latest_network_package(waitforit=0)[0]
                 except TypeError:
                     server_updates = None
                 # print server_updates

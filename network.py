@@ -1,10 +1,12 @@
 # -*- coding: utf8 -*-
 
+import pygame
 import socket
 import struct
 import json
 from thread import *
 from collections import deque
+from constants import *
 
 
 class Network(object):
@@ -24,7 +26,7 @@ class Network(object):
         ttl = struct.pack('b', 1)
         self._socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
         self.network_listening = 1
-        self.receive_queue = deque()
+        self.receive_queue = deque(maxlen=NETWORK_QUEUE_LENGTH)
         start_new_thread(self.network_listen, ('',))
 
 #Server
@@ -44,12 +46,43 @@ class Network(object):
                 pass
                 # print "Socket timeout when listening. Ignoring."
             else:
-                print('received {} from {}'.format(data, address))
+                # print('received {} from {}'.format(data, address))
                 try:
-                    recv_dict = json.loads(data)
+                    received_data = json.loads(data), address
                 except ValueError:
-                    recv_dict = data
-                self.receive_queue.append(recv_dict)
+                    received_data = data, address
+                self.receive_queue.append(received_data)
+
+    def get_latest_network_package(self, waitforit=1, wait_time=1000):
+        """ 
+        Hakee verkkojonosta uusimman vastaanotetun viestin. Jos ei ole viestejä ja waitforit==1 niin yrittää uudelleen
+        kunnes on kulunut wait_timen verran millisekunteja.
+        """
+        # print "Trying to get latest network package."
+        # print "waitforit={}, wait_time={}".format(waitforit, wait_time)
+        try_to_receive = 1
+        received_data = None
+
+        if waitforit:
+            start_time = pygame.time.get_ticks()
+            # print "Start time:", start_time
+
+        while try_to_receive:
+            try:
+                received_data = self.receive_queue.pop()  # Otetaan vain uusin tieto
+                try_to_receive = 0
+            except IndexError:
+                if waitforit and pygame.time.get_ticks() - start_time < wait_time:
+                    # Jos vielä on odotusaikaa jäljellä niin odotetaan vähän ja katsotaan uusiksi
+                    pygame.time.wait(5)
+                else:
+                    # Jos odotusaika on ohi niin poistutaan loopista
+                    try_to_receive = 0
+        # print "Received data:", received_data
+        return received_data
+
+    def get_all_network_packages(self):
+        return self.receive_queue
 
     # server kuuntelee client viestiä
     # palauttaa vastaanotetun datan ja clientin osoitteen

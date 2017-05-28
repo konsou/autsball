@@ -129,31 +129,30 @@ class AUTSBallGame:
                         self.quit_game = True
                     if event.type == music.MUSIC_FINISHED:
                         self.music_player.next()
-                if server_updates is None:
-                    #Tähän silmukka, jossa käydään clientiltä tulleet komennot pelaajittain läpi
-                    if not self._is_client:
-                        pressed_keys = pygame.key.get_pressed()
-                        if pressed_keys[K_UP]:
-                            self.players[self.local_player_id].accelerate()
-                        else:
-                            self.players[self.local_player_id].stop_acceleration()
-                        if pressed_keys[K_RIGHT]:
-                            self.players[self.local_player_id].rotate_right()
-                        if pressed_keys[K_LEFT]:
-                            self.players[self.local_player_id].rotate_left()
-                        if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
-                            self.players[self.local_player_id].shoot()
-                        if pressed_keys[K_LCTRL] or pressed_keys[K_RCTRL]:
-                            self.players[self.local_player_id].shoot_special()
-                        if pressed_keys[pygame.K_BACKSPACE]:
-                            self.players[self.local_player_id].recover()
+                #Tähän silmukka, jossa käydään clientiltä tulleet komennot pelaajittain läpi
+                if not self._is_client:
+                    pressed_keys = pygame.key.get_pressed()
+                    if pressed_keys[K_UP]:
+                        self.players[self.local_player_id].accelerate()
+                    else:
+                        self.players[self.local_player_id].stop_acceleration()
+                    if pressed_keys[K_RIGHT]:
+                        self.players[self.local_player_id].rotate_right()
+                    if pressed_keys[K_LEFT]:
+                        self.players[self.local_player_id].rotate_left()
+                    if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
+                        self.players[self.local_player_id].shoot()
+                    if pressed_keys[K_LCTRL] or pressed_keys[K_RCTRL]:
+                        self.players[self.local_player_id].shoot_special()
+                    if pressed_keys[pygame.K_BACKSPACE]:
+                        self.players[self.local_player_id].recover()
 
-                        # Spritejen päivitykset tässä
-                        groups.BulletGroup.update(self.viewscreen_rect)
-                        groups.BallGroup.update(self.viewscreen_rect)
-                        groups.PlayerGroup.update(self.viewscreen_rect)
-                        groups.EffectGroup.update(self.viewscreen_rect)
-                        groups.TextGroup.update()
+                    # Spritejen päivitykset tässä
+                    groups.BulletGroup.update(self.viewscreen_rect)
+                    groups.BallGroup.update(self.viewscreen_rect)
+                    groups.PlayerGroup.update(self.viewscreen_rect)
+                    groups.EffectGroup.update(self.viewscreen_rect)
+                    groups.TextGroup.update()
                 else:
                     # self.calc_viewscreen_rect()
                     # print "Server sent this info:"

@@ -39,8 +39,9 @@ class Server(object):
                 self._network.server_send_message(b"Join me")
 
                 # Kuunnellaan clienttien vastauksia
-                client_response = self._network.server_listen()
+                client_response = self._network.get_latest_network_package(waitforit=0)
                 if client_response is not None:
+                    print "Client response:", client_response
                     # Lisätään client listaan
                     if client_response[0].startswith("My name is:"):
                         client_name = client_response[0].split(":")[1]
