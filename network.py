@@ -3,6 +3,8 @@
 import socket
 import struct
 import json
+from thread import *
+from collections import deque
 
 
 class Network(object):
@@ -21,6 +23,9 @@ class Network(object):
         # set time-to-live for messages
         ttl = struct.pack('b', 1)
         self._socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
+        self.network_listening = 1
+        self.receive_queue = deque()
+        start_new_thread(self.network_listen, ('',))
 
 #Server
 
@@ -28,6 +33,23 @@ class Network(object):
     def server_send_message(self, message):
         #print('sending {!r}'.format(message))
         self._socket.sendto(message, self._server_multicast_group)
+
+    def network_listen(self, required_because_stupid_threading_function):
+        """ Tämä on tarkoitus ajaa taustathreadissa. Kuuntelee koko ajan viestejä. """
+        print "Network listen thread started."
+        while self.network_listening:
+            try:
+                data, address = self._socket.recvfrom(1024)
+            except socket.timeout:
+                pass
+                # print "Socket timeout when listening. Ignoring."
+            else:
+                print('received {} from {}'.format(data, address))
+                try:
+                    recv_dict = json.loads(data)
+                except ValueError:
+                    recv_dict = data
+                self.receive_queue.append(recv_dict)
 
     # server kuuntelee client viestiä
     # palauttaa vastaanotetun datan ja clientin osoitteen

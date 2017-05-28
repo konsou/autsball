@@ -106,9 +106,10 @@ class Client(object):
         self._network.client_send(player_data_packet, self._server_address)
 
     def get_server_updates(self):
-        server_data = self._network.client_listen()
-        # if server_data is not None:
-            # print server_data
+        server_data = self._network.receive_queue.pop()  # Otetaan vain uusin tieto
+        self._network.receive_queue.clear()  # discardataan loput
+        if server_data is not None:
+            print server_data
 
         return server_data
 
