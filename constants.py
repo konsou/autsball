@@ -14,6 +14,12 @@ class Modes:
     MainMenu, SettingsMenu, Practice, PlayerMenu,  MultiplayerLobby, ReadyLobby, MultiplayerGame = range(7)
 
 
+class NetworkMessageTypes:
+    """ Näiden maksimimäärä nykyisellä toteutuksella 9 """
+    (ServerHereIAm, ServerClientID, ServerShipInfo, ServerUpdates,
+     ClientMyNameIs, ClientReady, ClientUpdates) = range(7)
+
+
 class Settings:
 
     settings_file = 'settings.pkl'

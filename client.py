@@ -61,6 +61,8 @@ class Client(object):
                 print "We got ships from server! Here's the info:"
                 print response_message[0]
                 for player_id, info in response_message[0].iteritems():
+                    print "Player ID: {}, info: {}".format(player_id, info)
+                    #print "Player ID: {}, team: {}, ship_name: {}".format(player_id, info[0], info[1])
                     game_instance.add_player(int(player_id), team=info[0], ship_name=info[1])
                     print "Added ship for player ", player_id
                 return True
@@ -108,7 +110,7 @@ class Client(object):
 
         # pelaajan tiedot pakettiin
 
-        player_data_packet = json.dumps(pack_dict(player_keyboard_commands))
+        player_data_packet = json.dumps(pack_client_commands(player_keyboard_commands))
 
         self._network.client_send(player_data_packet, self._server_address)
 

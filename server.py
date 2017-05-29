@@ -37,7 +37,7 @@ class Server(object):
         if self._waiting_for_client_to_join:
             try:
                 # Lähetetään viesti clienteille, jotta ne saa tietää serverin osoitteen
-                self._network.server_send_message(b"Join me")
+                self._network.server_send_message(b"Join me", message_type=NetworkMessageTypes.ServerHereIAm)
 
                 # Kuunnellaan clienttien vastauksia
                 client_response = self._network.get_latest_network_package(waitforit=0)
@@ -67,7 +67,7 @@ class Server(object):
                 data_dict = self._network.get_latest_network_package()
                 if data_dict is not None:
                     if data_dict[1] in self._client_list:
-                        data_object = unpack_int(data_dict[0])
+                        data_object = unpack_client_commands(data_dict[0])
                         # TODO: lisää clientin input vaikuttamaan laskuihin
                         # client_inputs setissä keynä on clientin assignattu id ja valuena clientin lähettämät input tiedot
                         # tarkistetaan onko client lähettänyt jo inputit tässä syklissä
@@ -135,12 +135,6 @@ class Server(object):
         for index, player in self._game_instance.players.iteritems():
             player_infos[player.owning_player_id] = (player.team, player.ship_name)
         player_package = json.dumps(player_infos)
-        self._network.server_send_message(player_package)
-        clock.tick(60)
-        self._network.server_send_message(player_package)
-        clock.tick(60)
-        self._network.server_send_message(player_package)
-        clock.tick(60)
         self._network.server_send_message(player_package)
         clock.tick(1)
 

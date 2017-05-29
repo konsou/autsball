@@ -4,6 +4,7 @@ import pygame
 import socket
 import struct
 import json
+import copy
 from thread import *
 from collections import deque
 from constants import *
@@ -26,15 +27,9 @@ class Network(object):
         ttl = struct.pack('b', 1)
         self._socket.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, ttl)
         self.network_listening = 1
-        self.receive_queue = deque(maxlen=NETWORK_QUEUE_LENGTH)
+        self._receive_queue = deque(maxlen=NETWORK_QUEUE_LENGTH)
+        self._threading_lock = allocate_lock()
         start_new_thread(self.network_listen, ('',))
-
-#Server
-
-    # Lähetetään viesti kaikille clienteille
-    def server_send_message(self, message):
-        #print('sending {!r}'.format(message))
-        self._socket.sendto(message, self._server_multicast_group)
 
     def network_listen(self, required_because_stupid_threading_function):
         """ Tämä on tarkoitus ajaa taustathreadissa. Kuuntelee koko ajan viestejä ja tallentaa ne receive_queueen. """
@@ -51,10 +46,11 @@ class Network(object):
                     received_data = json.loads(data), address
                 except ValueError:
                     received_data = data, address
-                self.receive_queue.append(received_data)
+                with self._threading_lock:
+                    self._receive_queue.append(received_data)
 
     def get_latest_network_package(self, waitforit=0, wait_time=1000):
-        """ 
+        """
         Hakee verkkojonosta uusimman vastaanotetun viestin. Jos ei ole viestejä ja waitforit==1 niin yrittää uudelleen
         kunnes on kulunut wait_timen verran millisekunteja.
         """
@@ -69,7 +65,8 @@ class Network(object):
 
         while try_to_receive:
             try:
-                received_data = self.receive_queue.pop()  # Otetaan vain uusin tieto
+                with self._threading_lock:
+                    received_data = self._receive_queue.pop()  # Otetaan vain uusin tieto
                 try_to_receive = 0
             except IndexError:
                 if waitforit and pygame.time.get_ticks() - start_time < wait_time:
@@ -82,27 +79,21 @@ class Network(object):
         return received_data
 
     def get_all_network_packages(self):
-        return self.receive_queue
+        """ Palauttaa kopion receive_queuesta ja tyhjentää receive_queuen """
+        with self._threading_lock:
+            queue_copy = copy.copy(self._receive_queue)
+            self._receive_queue.clear()
+        return queue_copy
 
-    # server kuuntelee client viestiä
-    # palauttaa vastaanotetun datan ja clientin osoitteen
-    def server_listen(self):
-        try:
-            data, client = self._socket.recvfrom(1024)
-        except socket.timeout:
-            #print('socket timed out')
-            #pass
-            return None
-        else:
-            #print('received {!r} from {}'.format(data, client))
-            try:
-                recv_dict = json.loads(data)
-            except ValueError:
-                recv_dict = data
+# Server
 
-            return recv_dict, client
+    def server_send_message(self, message, message_type):
+        """ Lähetetään viesti kaikille clienteille """
+        message = bytes(message_type) + message
+        # print('sending {!r}'.format(message))
+        self._socket.sendto(message, self._server_multicast_group)
 
-#Client
+# Client
 
     # bindaus serveriin
     def bind_to_server(self, server_ip):
@@ -117,24 +108,9 @@ class Network(object):
             socket.IP_ADD_MEMBERSHIP,
             mreq)
 
-    # client listens for server messages
-    # Palauttaa datan ja osoitteen josta tuli (server)
-    def client_listen(self):
-        try:
-            data, address = self._socket.recvfrom(1024)
-        except socket.timeout:
-            return None
-        else:
-            #print('received {} from {}'.format(data, address))
-            try:
-                recv_dict = json.loads(data)
-            except ValueError:
-                recv_dict = data
 
-            return recv_dict, address
-
-    #Client lähettää viestin
     def client_send(self, message, address):
+        """  Client lähettää viestin """
         #print ('sending {!r}'.format(message))
         self._socket.sendto(message, address)
 
@@ -142,7 +118,7 @@ class Network(object):
         self._socket.close()
 
 
-def pack_dict(data_dict):
+def pack_client_commands(data_dict):
     """ Pakkaa pelaajan näppäinkomennot INTiksi:
     Player id - up - left - right - shoot_basic - shoot_special - recover  
     Esim: 3010101"""
@@ -153,7 +129,7 @@ def pack_dict(data_dict):
     return packed_int
 
 
-def unpack_int(packed_int):
+def unpack_client_commands(packed_int):
     """ Unpackaa pakatun intin takaisin dictiksi """
     keys = ['player_id', 'up', 'left', 'right', 'shoot_basic', 'shoot_special', 'recover']
     data_dict = {}
@@ -174,9 +150,9 @@ def debug_run():
                                 'shoot_special': 0,
                                 'recover': 1}
     print player_keyboard_commands
-    packed_int = pack_dict(player_keyboard_commands)
+    packed_int = pack_client_commands(player_keyboard_commands)
     print packed_int
-    print unpack_int(packed_int)
+    print unpack_client_commands(packed_int)
 
 
 if __name__ == '__main__':
