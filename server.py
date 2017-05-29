@@ -5,6 +5,7 @@ import json
 from constants import *
 import time
 
+
 class Server(object):
 
     def __init__(self):
@@ -63,7 +64,7 @@ class Server(object):
             client_inputs = {}
             while self._update_counter < self._update_interval:
                 # Kuunnellaan clientteja fixattu aika ja lasketaan sitten mitä tapahtuu kaikkien syötteille
-                data_dict = self._network.server_listen()
+                data_dict = self._network.get_latest_network_package()
                 if data_dict is not None:
                     if data_dict[1] in self._client_list:
                         data_object = unpack_int(data_dict[0])

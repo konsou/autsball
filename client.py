@@ -19,14 +19,14 @@ class Client(object):
     def try_to_join_server(self, clock):
         # TODO: pitää käydä läpi koko network queue eikä vain viimeisintä viestiä?
         print "Trying to join server"
-        response_message = self._network.get_latest_network_package()
+        response_message = self._network.get_latest_network_package(waitforit=1)
         # print response_message
         if response_message is not None and response_message[0] == 'Join me':
             self._server_address = response_message[1]
             self._network.client_send(self._acknowledgement_message, self._server_address)
             print "Joining server ", self._server_address
             while self._local_player_id is None:
-                data = self._network.get_latest_network_package()[0]
+                data = self._network.get_latest_network_package(waitforit=1)[0]
                 print data
                 try:
                     self._local_player_id = data['client_id']
@@ -42,7 +42,7 @@ class Client(object):
         clock.tick(10)
 
     def wait_for_server_start_game(self):
-        response_message = self._network.get_latest_network_package()
+        response_message = self._network.get_latest_network_package(waitforit=1)
         # print "Waiting for server to start game..."
         # print "Server sent:", response_message
         if response_message is not None:
@@ -55,9 +55,9 @@ class Client(object):
             return False
 
     def wait_for_player_data_after_start(self, game_instance):
-        response_message = self._network.get_latest_network_package()
+        response_message = self._network.get_latest_network_package(waitforit=1)
         if response_message is not None:
-            if response_message[1] == self._server_address:
+            if response_message[1] == self._server_address and response_message[0] != "Join me":
                 print "We got ships from server! Here's the info:"
                 print response_message[0]
                 for player_id, info in response_message[0].iteritems():

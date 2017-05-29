@@ -37,7 +37,7 @@ class Network(object):
         self._socket.sendto(message, self._server_multicast_group)
 
     def network_listen(self, required_because_stupid_threading_function):
-        """ Tämä on tarkoitus ajaa taustathreadissa. Kuuntelee koko ajan viestejä. """
+        """ Tämä on tarkoitus ajaa taustathreadissa. Kuuntelee koko ajan viestejä ja tallentaa ne receive_queueen. """
         print "Network listen thread started."
         while self.network_listening:
             try:
@@ -53,7 +53,7 @@ class Network(object):
                     received_data = data, address
                 self.receive_queue.append(received_data)
 
-    def get_latest_network_package(self, waitforit=1, wait_time=1000):
+    def get_latest_network_package(self, waitforit=0, wait_time=1000):
         """ 
         Hakee verkkojonosta uusimman vastaanotetun viestin. Jos ei ole viestejä ja waitforit==1 niin yrittää uudelleen
         kunnes on kulunut wait_timen verran millisekunteja.
