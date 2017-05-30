@@ -433,7 +433,8 @@ def debug_run():
             elif client_object is not None:
                 client_object.send_input()
                 try:
-                    server_updates = client_object._network.get_latest_network_package(waitforit=0)[0]
+                    # TODO: pakettityypin check
+                    server_updates = client_object._network.get_latest_network_package()[1:]
                 except TypeError:
                     server_updates = None
                 # print server_updates
@@ -443,4 +444,5 @@ def debug_run():
     pygame.quit()
 
 if __name__ == '__main__':
+    print "NetworkMessageTypes.ServerShipInfo:", NetworkMessageTypes.ServerShipInfo
     debug_run()

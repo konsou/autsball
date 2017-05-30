@@ -15,6 +15,7 @@ class Client(object):
         self._acknowledgement_message = b"My name is:%s" % self._player_name
         self._server_address = None
         self._local_player_id = None
+        self._game_started = False
 
     def try_to_join_server(self, clock):
         print "Trying to join server"
@@ -46,23 +47,29 @@ class Client(object):
         clock.tick(10)
 
     def wait_for_server_start_game(self):
-        response_messages = self._network.get_all_network_packages(NetworkMessageTypes.ServerStartGame)
-        # print "Waiting for server to start game..."
-        # print "Server sent:", response_message
-        for current_message in response_messages:
-            if current_message[2] == self._server_address:
-                print "Server started the game, wohoo!"
-                return True
+        if not self._game_started:
+            response_messages = self._network.get_all_network_packages(NetworkMessageTypes.ServerStartGame)
+            # print "Waiting for server to start game..."
+            # print "Server sent:", response_message
+            for current_message in response_messages:
+                if current_message[2] == self._server_address:
+                    self._game_started = True
+                    print "Server started the game, wohoo!"
+                    return True
+                else:
+                    return False
             else:
                 return False
         else:
-            return False
+            return True
 
     def wait_for_player_data_after_start(self, game_instance):
-        # print "Waiting for player data..."
+        print "Waiting for player data..."
         # response_messages = self._network.get_all_network_packages(NetworkMessageTypes.ServerShipInfo)
         # TODO: clientti ei vastaanota shippi-infoa jostain syystä
-        response_messages = self._network.get_all_network_packages()
+        print NetworkMessageTypes.ServerShipInfo
+        response_messages = self._network.get_all_network_packages(NetworkMessageTypes.ServerShipInfo)
+        print "wait_for_player_data_after_start - response_messages:", response_messages
         for current_message in response_messages:
             print "Got this info when waiting for player data:", current_message
             if current_message[2] == self._server_address:

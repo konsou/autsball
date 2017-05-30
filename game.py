@@ -157,7 +157,7 @@ class AUTSBallGame:
                     # self.calc_viewscreen_rect()
                     # print "Server sent this info:"
                     if server_updates is not None:
-                        # print server_updates
+                        print "IN GAME: server_updates:", server_updates
                         # print "Current players:", self.players
                         for server_update_key in server_updates:
                             #print server_update_key, server_updates[server_update_key]

@@ -42,7 +42,8 @@ class Network(object):
                 pass
                 # print "Socket timeout when listening. Ignoring."
             else:
-                # print('received {} from {}'.format(data, address))
+                # if int(data[0]) != NetworkMessageTypes.ServerHereIAm:
+                    # print('Receive thread received {} from {}'.format(data, address))
                 try:
                     received_data = int(data[0]), json.loads(data[1:]), address
                     # received_data = json.loads(data), address
@@ -87,39 +88,21 @@ class Network(object):
         Jos message_filter on asetettu (pitää olla joku constants -> NetworkMessageTypesistä) niin palauttaa vain
         sen tyyppiset viestit
         """
+        # print "get_all_network_packages called with message_filter:", message_filter
         queue_copy = deque()
         # Ensin asetetaan threading-lukko, kopioidaan network queue, tyhjennetään network queue
         with self._threading_lock:
             if message_filter is not None:
                 # print "in get_all_network_packages: trying to filter", message_filter
                 for current_item in self._receive_queue:
-                    # print "current_item:", current_item
-                    if current_item[0] == message_filter:
+                    print "current_item: {} | filter: {}".format(current_item, message_filter)
+                    if int(current_item[0]) == message_filter:
                         queue_copy.append(current_item)
             else:
                 queue_copy = copy.copy(self._receive_queue)
             self._receive_queue.clear()
 
-        # Filtteröidään jos niin halutaan - käytännössä poistetaan itemit jotka ei ole filtterissä
-        # Tämä tehty tässä kohtaa näin erikseen että minimoidaan thread-lukituksen aika
-        # if message_filter is not None:
-        #     for current_item in queue_copy:
-        #         print "in get_all_network_packages:"
-        #         print "current_item:", current_item
-        #         if queue_copy[current_item][0] != message_filter:
-        #             del queue_copy[current_item]
-        # print "queue_copy:", queue_copy
-
         return queue_copy
-
-    @staticmethod
-    def filter_packages(message_queue, message_type):
-        """ Käy läpi annetun pakettilistan ja palauttaa vain halutun tyyppiset paketit """
-        return_queue = deque()
-        for current_item in message_queue:
-            print message_queue[current_item]
-            return_queue.append(message_queue[current_item])
-        return return_queue
 
 
 # Server
