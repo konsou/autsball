@@ -17,36 +17,40 @@ class Client(object):
         self._local_player_id = None
 
     def try_to_join_server(self, clock):
-        # TODO: pitää käydä läpi koko network queue eikä vain viimeisintä viestiä?
         print "Trying to join server"
-        response_message = self._network.get_latest_network_package(waitforit=1)
-        # print response_message
-        if response_message is not None and response_message[0] == 'Join me':
-            self._server_address = response_message[1]
-            self._network.client_send(self._acknowledgement_message, self._server_address)
+        response_messages = self._network.get_all_network_packages(NetworkMessageTypes.ServerHereIAm)
+        # print "In try_to_join_server got this filtered response:"
+        # print response_messages
+        for current_message in response_messages:
+            # print "Current message:", current_message
+            self._server_address = current_message[2]
+            self._network.client_send(self._acknowledgement_message, self._server_address,
+                                      NetworkMessageTypes.ClientMyNameIs)
             print "Joining server ", self._server_address
             while self._local_player_id is None:
-                data = self._network.get_latest_network_package(waitforit=1)[0]
-                print data
-                try:
-                    self._local_player_id = data['client_id']
-                    print "Got client ID from server:", data['client_id']
-                    return True
-                except (IndexError, TypeError):
-                    pass
+                data = self._network.get_all_network_packages(NetworkMessageTypes.ServerClientID)
+                for current_piece_of_data in data:
+                    # print "current_piece_of_data:", current_piece_of_data
+                    # print "cliend ID:", current_piece_of_data[1]
+                    try:
+                        self._local_player_id = current_piece_of_data[1]['client_id']
+                        print "Got client ID from server:", current_piece_of_data[1]['client_id']
+                        return True
+                    except (IndexError, TypeError):
+                        pass
 
-        elif response_message is not None:
-            print "Noob host"
-            return False
+        # elif response_message is not None:
+        #     print "Noob host"
+        #     return False
 
         clock.tick(10)
 
     def wait_for_server_start_game(self):
-        response_message = self._network.get_latest_network_package(waitforit=1)
+        response_messages = self._network.get_all_network_packages(NetworkMessageTypes.ServerStartGame)
         # print "Waiting for server to start game..."
         # print "Server sent:", response_message
-        if response_message is not None:
-            if response_message[1] == self._server_address and response_message[0] == 'Start game':
+        for current_message in response_messages:
+            if current_message[2] == self._server_address:
                 print "Server started the game, wohoo!"
                 return True
             else:
@@ -55,12 +59,16 @@ class Client(object):
             return False
 
     def wait_for_player_data_after_start(self, game_instance):
-        response_message = self._network.get_latest_network_package(waitforit=1)
-        if response_message is not None:
-            if response_message[1] == self._server_address and response_message[0] != "Join me":
+        # print "Waiting for player data..."
+        # response_messages = self._network.get_all_network_packages(NetworkMessageTypes.ServerShipInfo)
+        # TODO: clientti ei vastaanota shippi-infoa jostain syystä
+        response_messages = self._network.get_all_network_packages()
+        for current_message in response_messages:
+            print "Got this info when waiting for player data:", current_message
+            if current_message[2] == self._server_address:
                 print "We got ships from server! Here's the info:"
-                print response_message[0]
-                for player_id, info in response_message[0].iteritems():
+                print current_message[1]
+                for player_id, info in current_message[1].iteritems():
                     print "Player ID: {}, info: {}".format(player_id, info)
                     #print "Player ID: {}, team: {}, ship_name: {}".format(player_id, info[0], info[1])
                     game_instance.add_player(int(player_id), team=info[0], ship_name=info[1])
@@ -112,7 +120,7 @@ class Client(object):
 
         player_data_packet = json.dumps(pack_client_commands(player_keyboard_commands))
 
-        self._network.client_send(player_data_packet, self._server_address)
+        self._network.client_send(player_data_packet, self._server_address, NetworkMessageTypes.ClientUpdates)
 
     def _get_client_id(self):
         return self._local_player_id

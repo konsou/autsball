@@ -40,25 +40,24 @@ class Server(object):
                 self._network.server_send_message(b"Join me", message_type=NetworkMessageTypes.ServerHereIAm)
 
                 # Kuunnellaan clienttien vastauksia
-                client_response = self._network.get_latest_network_package(waitforit=0)
-                if client_response is not None:
-                    print "Client response:", client_response
+                client_responses = self._network.get_all_network_packages(NetworkMessageTypes.ClientMyNameIs)
+                for current_message in client_responses:
+                    print "Client response:", current_message
                     # Lisätään client listaan
-                    if client_response[0].startswith("My name is:"):
-                        client_name = client_response[0].split(":")[1]
-                        client_id = {"client_id": self._client_id_counter}
-                        self._client_list.add(client_response[1])
-                        self._client_ip_id_combination[client_response[1][0]] = self._client_id_counter
-                        self._client_id_counter += 1
-                        print "Added client with ip ", client_response[1][0]
-                        print "Client name is %s" % client_name
-                        # Lähetetään pelaajalle sen oma id
-                        packet_to_client = json.dumps(client_id)
-                        self._network.client_send(packet_to_client, client_response[1])
-                    else:
-                        print "Not valid client, he said ", client_response
+                    client_name = current_message[1].split(":")[1]
+                    client_id = {"client_id": self._client_id_counter}
+                    self._client_list.add(current_message[2])
+                    self._client_ip_id_combination[current_message[2][0]] = self._client_id_counter
+                    self._client_id_counter += 1
+                    print "Added client with ip ", current_message[2][0]
+                    print "Client name is %s" % client_name
+                    # Lähetetään pelaajalle sen oma id
+                    packet_to_client = json.dumps(client_id)
+                    self._network.client_send(packet_to_client, current_message[2],
+                                              NetworkMessageTypes.ServerClientID)
             finally:
                 pass
+
         # Pelin sisällä
         elif self._in_game:
             client_inputs = {}
@@ -112,12 +111,12 @@ class Server(object):
                 update_information['players'][player_id]['heading'] = self._game_instance.players[player_id].heading
             packet_to_client = json.dumps(update_information)
             #print packet_to_client
-            self._network.server_send_message(packet_to_client)
+            self._network.server_send_message(packet_to_client, NetworkMessageTypes.ServerUpdates)
 
     def start_game(self, game_instance, clock):
         self._waiting_for_client_to_join = False
         self._in_game = True
-        self._network.server_send_message(b'Start game')
+        self._network.server_send_message(b'Start game', NetworkMessageTypes.ServerStartGame)
         self._game_instance = game_instance
         self._game_instance.local_player_id = 0
         i = 0
@@ -135,7 +134,9 @@ class Server(object):
         for index, player in self._game_instance.players.iteritems():
             player_infos[player.owning_player_id] = (player.team, player.ship_name)
         player_package = json.dumps(player_infos)
-        self._network.server_send_message(player_package)
+        print "player_package:", player_package
+        # TODO: clientti ei vastaanota shippi-infoa jostain syystä
+        self._network.server_send_message(player_package, NetworkMessageTypes.ServerShipInfo)
         clock.tick(1)
 
         # Aloita peli

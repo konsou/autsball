@@ -32,7 +32,8 @@ class Network(object):
         start_new_thread(self.network_listen, ('',))
 
     def network_listen(self, required_because_stupid_threading_function):
-        """ Tämä on tarkoitus ajaa taustathreadissa. Kuuntelee koko ajan viestejä ja tallentaa ne receive_queueen. """
+        """ Tämä on tarkoitus ajaa taustathreadissa. Kuuntelee koko ajan viestejä ja tallentaa ne receive_queueen.
+        Muoto: message_type, data, address """
         print "Network listen thread started."
         while self.network_listening:
             try:
@@ -43,10 +44,12 @@ class Network(object):
             else:
                 # print('received {} from {}'.format(data, address))
                 try:
-                    received_data = json.loads(data), address
+                    received_data = int(data[0]), json.loads(data[1:]), address
+                    # received_data = json.loads(data), address
                 except ValueError:
-                    received_data = data, address
+                    received_data = int(data[0]), data[1:], address
                 with self._threading_lock:
+                    # print "Received:", received_data
                     self._receive_queue.append(received_data)
 
     def get_latest_network_package(self, waitforit=0, wait_time=1000):
@@ -78,19 +81,54 @@ class Network(object):
         # print "Received data:", received_data
         return received_data
 
-    def get_all_network_packages(self):
-        """ Palauttaa kopion receive_queuesta ja tyhjentää receive_queuen """
+    def get_all_network_packages(self, message_filter=None):
+        """
+        Palauttaa kopion receive_queuesta ja tyhjentää receive_queuen
+        Jos message_filter on asetettu (pitää olla joku constants -> NetworkMessageTypesistä) niin palauttaa vain
+        sen tyyppiset viestit
+        """
+        queue_copy = deque()
+        # Ensin asetetaan threading-lukko, kopioidaan network queue, tyhjennetään network queue
         with self._threading_lock:
-            queue_copy = copy.copy(self._receive_queue)
+            if message_filter is not None:
+                # print "in get_all_network_packages: trying to filter", message_filter
+                for current_item in self._receive_queue:
+                    # print "current_item:", current_item
+                    if current_item[0] == message_filter:
+                        queue_copy.append(current_item)
+            else:
+                queue_copy = copy.copy(self._receive_queue)
             self._receive_queue.clear()
+
+        # Filtteröidään jos niin halutaan - käytännössä poistetaan itemit jotka ei ole filtterissä
+        # Tämä tehty tässä kohtaa näin erikseen että minimoidaan thread-lukituksen aika
+        # if message_filter is not None:
+        #     for current_item in queue_copy:
+        #         print "in get_all_network_packages:"
+        #         print "current_item:", current_item
+        #         if queue_copy[current_item][0] != message_filter:
+        #             del queue_copy[current_item]
+        # print "queue_copy:", queue_copy
+
         return queue_copy
+
+    @staticmethod
+    def filter_packages(message_queue, message_type):
+        """ Käy läpi annetun pakettilistan ja palauttaa vain halutun tyyppiset paketit """
+        return_queue = deque()
+        for current_item in message_queue:
+            print message_queue[current_item]
+            return_queue.append(message_queue[current_item])
+        return return_queue
+
 
 # Server
 
     def server_send_message(self, message, message_type):
         """ Lähetetään viesti kaikille clienteille """
         message = bytes(message_type) + message
-        # print('sending {!r}'.format(message))
+        if message_type != NetworkMessageTypes.ServerHereIAm:
+            print('sending {!r}'.format(message))
         self._socket.sendto(message, self._server_multicast_group)
 
 # Client
@@ -108,10 +146,10 @@ class Network(object):
             socket.IP_ADD_MEMBERSHIP,
             mreq)
 
-
-    def client_send(self, message, address):
+    def client_send(self, message, address, message_type):
         """  Client lähettää viestin """
-        #print ('sending {!r}'.format(message))
+        message = bytes(message_type) + message
+        print ('sending {!r}'.format(message))
         self._socket.sendto(message, address)
 
     def destroy(self):

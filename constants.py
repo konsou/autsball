@@ -16,8 +16,8 @@ class Modes:
 
 class NetworkMessageTypes:
     """ Näiden maksimimäärä nykyisellä toteutuksella 9 """
-    (ServerHereIAm, ServerClientID, ServerShipInfo, ServerUpdates,
-     ClientMyNameIs, ClientReady, ClientUpdates) = range(7)
+    (ServerHereIAm, ServerClientID, ServerStartGame, ServerShipInfo, ServerUpdates,
+     ClientMyNameIs, ClientReady, ClientUpdates) = range(8)
 
 
 class Settings:
@@ -28,7 +28,7 @@ class Settings:
         'music_volume': 1.0,
         'sounds_on': True,
         'sound_volume': 1.0,
-        'graphic_quality': 3
+        'graphic_quality': 1
     }
 
     def __init__(self):
