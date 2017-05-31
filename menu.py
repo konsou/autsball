@@ -433,9 +433,9 @@ def debug_run():
             elif client_object is not None:
                 client_object.send_input()
                 try:
-                    # TODO: pakettityypin check
-                    server_updates = client_object._network.get_latest_network_package()[1:]
-                except TypeError:
+                    server_updates = client_object._network.get_network_packages(NetworkMessageTypes.ServerUpdates)
+                    server_updates = server_updates[0][1]  # Otetaan vain yksi update-paketti ja sen dataosuus
+                except (TypeError, IndexError):
                     server_updates = None
                 # print server_updates
                 multiplayer_game.update(server_updates=server_updates)

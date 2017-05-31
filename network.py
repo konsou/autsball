@@ -32,8 +32,10 @@ class Network(object):
         start_new_thread(self.network_listen, ('',))
 
     def network_listen(self, required_because_stupid_threading_function):
-        """ Tämä on tarkoitus ajaa taustathreadissa. Kuuntelee koko ajan viestejä ja tallentaa ne receive_queueen.
-        Muoto: message_type, data, address """
+        """
+        Tämä on tarkoitus ajaa taustathreadissa. Kuuntelee koko ajan viestejä ja tallentaa ne receive_queueen.
+        Muoto: message_type (INT), data (BYTES), address (TUPLE)
+        """
         print "Network listen thread started."
         while self.network_listening:
             try:
@@ -53,51 +55,22 @@ class Network(object):
                     # print "Received:", received_data
                     self._receive_queue.append(received_data)
 
-    def get_latest_network_package(self, waitforit=0, wait_time=1000):
-        """
-        Hakee verkkojonosta uusimman vastaanotetun viestin. Jos ei ole viestejä ja waitforit==1 niin yrittää uudelleen
-        kunnes on kulunut wait_timen verran millisekunteja.
-        """
-        # print "Trying to get latest network package."
-        # print "waitforit={}, wait_time={}".format(waitforit, wait_time)
-        try_to_receive = 1
-        received_data = None
-
-        if waitforit:
-            start_time = pygame.time.get_ticks()
-            # print "Start time:", start_time
-
-        while try_to_receive:
-            try:
-                with self._threading_lock:
-                    received_data = self._receive_queue.pop()  # Otetaan vain uusin tieto
-                try_to_receive = 0
-            except IndexError:
-                if waitforit and pygame.time.get_ticks() - start_time < wait_time:
-                    # Jos vielä on odotusaikaa jäljellä niin odotetaan vähän ja katsotaan uusiksi
-                    pygame.time.wait(5)
-                else:
-                    # Jos odotusaika on ohi niin poistutaan loopista
-                    try_to_receive = 0
-        # print "Received data:", received_data
-        return received_data
-
-    def get_all_network_packages(self, message_filter=None):
+    def get_network_packages(self, message_filter=None):
         """
         Palauttaa kopion receive_queuesta ja tyhjentää receive_queuen
-        Jos message_filter on asetettu (pitää olla joku constants -> NetworkMessageTypesistä) niin palauttaa vain
-        sen tyyppiset viestit
+        Jos message_filter on asetettu (pitää olla joku constants -> NetworkMessageTypesistä)
+        niin palauttaa vain sen tyyppiset viestit
         """
-        # print "get_all_network_packages called with message_filter:", message_filter
+        # print "get_network_packages called with message_filter:", message_filter
         queue_copy = deque()
         # Ensin asetetaan threading-lukko, kopioidaan network queue, tyhjennetään network queue
         with self._threading_lock:
             if message_filter is not None:
-                # print "in get_all_network_packages: trying to filter", message_filter
+                # print "in get_network_packages: trying to filter", message_filter
                 for current_item in self._receive_queue:
-                    print "current_item: {} | filter: {}".format(current_item, message_filter)
+                    # print "current_item: {} | filter: {}".format(current_item, message_filter)
                     if int(current_item[0]) == message_filter:
-                        queue_copy.append(current_item)
+                        queue_copy.append(copy.copy(current_item))
             else:
                 queue_copy = copy.copy(self._receive_queue)
             self._receive_queue.clear()
@@ -132,7 +105,7 @@ class Network(object):
     def client_send(self, message, address, message_type):
         """  Client lähettää viestin """
         message = bytes(message_type) + message
-        print ('sending {!r}'.format(message))
+        # print ('sending {!r}'.format(message))
         self._socket.sendto(message, address)
 
     def destroy(self):

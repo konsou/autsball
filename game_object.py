@@ -145,9 +145,10 @@ class GameObject(pygame.sprite.Sprite):
         Päivittää objektin rectin ottamaan huomioon viewscreenin 
         Tämä metodi on tärkeää muistaa kutsua kun liikuttelee objektia! Muuten sekoaa. 
         """
+        if viewscreen_rect is not None:
+            self.viewscreen_rect = viewscreen_rect
+
         if not self.is_centered_on_screen:
-            if self.viewscreen_rect is None:
-                self.viewscreen_rect = viewscreen_rect
 
             self.rect.center = (self.x - self.viewscreen_rect[0],
                                 self.y - self.viewscreen_rect[1])

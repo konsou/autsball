@@ -124,6 +124,7 @@ class AUTSBallGame:
         if self.is_running:
             # Tämä estää errorin quitattaessa
             if self.quit_game is False:
+                # print "------- NEW FRAME -------"
                 for event in pygame.event.get():
                     if event.type == QUIT:
                         self.quit_game = True
@@ -157,7 +158,7 @@ class AUTSBallGame:
                     # self.calc_viewscreen_rect()
                     # print "Server sent this info:"
                     if server_updates is not None:
-                        print "IN GAME: server_updates:", server_updates
+                        # print "IN GAME: server_updates:", server_updates
                         # print "Current players:", self.players
                         for server_update_key in server_updates:
                             #print server_update_key, server_updates[server_update_key]
@@ -169,6 +170,17 @@ class AUTSBallGame:
                                     self.players[current_player_int].heading = server_updates[server_update_key][current_player]['heading']
                                     self.players[current_player_int].update_rect(self.viewscreen_rect)
                                     self.players[current_player_int].rot_self_image_keep_size(self.players[current_player_int].heading)
+                        self.ball.x, self.ball.y = server_updates['ball']['pos']
+                        self.ball.update_rect(self.viewscreen_rect)
+                        # print "BALL:"
+                        # print "x: {} y: {} rect.center: {}".format(self.ball.x, self.ball.y, self.ball.rect.center)
+                        # print "viewscreen_rect: {}".format(self.viewscreen_rect)
+                        # print "LOCAL PLAYER:"
+                        # print "id: {}, x: {} y: {} team:{} rect.center: {}".format(self.local_player_id,
+                        #                                                            self.players[self.local_player_id].x,
+                        #                                                            self.players[self.local_player_id].y,
+                        #                                                            self.players[self.local_player_id].team,
+                        #                                                            self.players[self.local_player_id].rect.center)
                     # groups.PlayerGroup.update(self.viewscreen_rect)
                     # print groups.PlayerGroup
 

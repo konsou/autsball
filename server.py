@@ -40,7 +40,7 @@ class Server(object):
                 self._network.server_send_message(b"Join me", message_type=NetworkMessageTypes.ServerHereIAm)
 
                 # Kuunnellaan clienttien vastauksia
-                client_responses = self._network.get_all_network_packages(NetworkMessageTypes.ClientMyNameIs)
+                client_responses = self._network.get_network_packages(NetworkMessageTypes.ClientMyNameIs)
                 for current_message in client_responses:
                     print "Client response:", current_message
                     # Lisätään client listaan
@@ -63,15 +63,19 @@ class Server(object):
             client_inputs = {}
             while self._update_counter < self._update_interval:
                 # Kuunnellaan clientteja fixattu aika ja lasketaan sitten mitä tapahtuu kaikkien syötteille
-                data_dict = self._network.get_latest_network_package()
+                try:
+                    data_dict = self._network.get_network_packages(NetworkMessageTypes.ClientUpdates)[0]
+                except IndexError:
+                    data_dict = None
                 if data_dict is not None:
-                    if data_dict[1] in self._client_list:
-                        data_object = unpack_client_commands(data_dict[0])
+                    print data_dict
+                    if data_dict[2] in self._client_list:
+                        data_object = unpack_client_commands(data_dict[1])
                         # TODO: lisää clientin input vaikuttamaan laskuihin
                         # client_inputs setissä keynä on clientin assignattu id ja valuena clientin lähettämät input tiedot
                         # tarkistetaan onko client lähettänyt jo inputit tässä syklissä
-                        if self._client_ip_id_combination[data_dict[1][0]] not in client_inputs:
-                            client_inputs[self._client_ip_id_combination[data_dict[1][0]]] = data_object
+                        if self._client_ip_id_combination[data_dict[2][0]] not in client_inputs:
+                            client_inputs[self._client_ip_id_combination[data_dict[2][0]]] = data_object
                             # print "Got client inputs from ", data_dict[1][0]
                             # print "Client input is ", data_object
                         #else:
@@ -104,11 +108,14 @@ class Server(object):
             # TODO: Päivitetään tiedot clienteille
             update_information = {}
             update_information['players'] = {}
+            update_information['ball'] = {}
             for player_id in self._game_instance.players:
                 update_information['players'][player_id] = {}
                 update_information['players'][player_id]['x'] = self._game_instance.players[player_id].x
                 update_information['players'][player_id]['y'] = self._game_instance.players[player_id].y
                 update_information['players'][player_id]['heading'] = self._game_instance.players[player_id].heading
+            update_information['ball']['pos'] = self._game_instance.ball.x, self._game_instance.ball.y
+
             packet_to_client = json.dumps(update_information)
             #print packet_to_client
             self._network.server_send_message(packet_to_client, NetworkMessageTypes.ServerUpdates)
