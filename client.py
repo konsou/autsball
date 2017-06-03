@@ -9,9 +9,9 @@ from types import *
 class Client(object):
 
     def __init__(self, player_name="Nemo"):
-        self._network = Network()
+        self.network = Network()
         self._player_name = player_name
-        self._network.bind_to_server('')
+        self.network.bind_to_server('')
         self._acknowledgement_message = b"My name is:%s" % self._player_name
         self._server_address = None
         self._local_player_id = None
@@ -19,17 +19,17 @@ class Client(object):
 
     def try_to_join_server(self, clock):
         print "Trying to join server"
-        response_messages = self._network.get_network_packages(NetworkMessageTypes.ServerHereIAm)
+        response_messages = self.network.get_network_packages(NetworkMessageTypes.ServerHereIAm)
         # print "In try_to_join_server got this filtered response:"
         # print response_messages
         for current_message in response_messages:
             # print "Current message:", current_message
             self._server_address = current_message[2]
-            self._network.client_send(self._acknowledgement_message, self._server_address,
-                                      NetworkMessageTypes.ClientMyNameIs)
+            self.network.client_send(self._acknowledgement_message, self._server_address,
+                                     NetworkMessageTypes.ClientMyNameIs)
             print "Joining server ", self._server_address
             while self._local_player_id is None:
-                data = self._network.get_network_packages(NetworkMessageTypes.ServerClientID)
+                data = self.network.get_network_packages(NetworkMessageTypes.ServerClientID)
                 for current_piece_of_data in data:
                     # print "current_piece_of_data:", current_piece_of_data
                     # print "cliend ID:", current_piece_of_data[1]
@@ -48,7 +48,7 @@ class Client(object):
 
     def wait_for_server_start_game(self):
         if not self._game_started:
-            response_messages = self._network.get_network_packages(NetworkMessageTypes.ServerStartGame)
+            response_messages = self.network.get_network_packages(NetworkMessageTypes.ServerStartGame)
             # print "Waiting for server to start game..."
             # print "Server sent:", response_message
             for current_message in response_messages:
@@ -65,10 +65,10 @@ class Client(object):
 
     def wait_for_player_data_after_start(self, game_instance):
         print "Waiting for player data..."
-        # response_messages = self._network.get_network_packages(NetworkMessageTypes.ServerShipInfo)
+        # response_messages = self.network.get_network_packages(NetworkMessageTypes.ServerShipInfo)
         # TODO: clientti ei vastaanota shippi-infoa jostain syystä
         print NetworkMessageTypes.ServerShipInfo
-        response_messages = self._network.get_network_packages(NetworkMessageTypes.ServerShipInfo)
+        response_messages = self.network.get_network_packages(NetworkMessageTypes.ServerShipInfo)
         print "wait_for_player_data_after_start - response_messages:", response_messages
         for current_message in response_messages:
             print "Got this info when waiting for player data:", current_message
@@ -127,7 +127,7 @@ class Client(object):
 
         player_data_packet = json.dumps(pack_client_commands(player_keyboard_commands))
 
-        self._network.client_send(player_data_packet, self._server_address, NetworkMessageTypes.ClientUpdates)
+        self.network.client_send(player_data_packet, self._server_address, NetworkMessageTypes.ClientUpdates)
 
     def _get_client_id(self):
         return self._local_player_id

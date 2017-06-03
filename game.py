@@ -23,6 +23,10 @@ class AUTSBallGame:
         self.is_running = False
         self.local_player_id = 0
         self._is_client = client
+        self.server_updates = None
+        self.server_object = None
+        self.client_object = None
+        self._game_event_list = []
 
         # Pygamen inittejä
         # HUOM! Inittien järjestys tärkeä!
@@ -70,7 +74,10 @@ class AUTSBallGame:
         # Ladataan numerokuvat
         text.init_scores()
 
-    def start(self):
+    def start(self, server_object=None, client_object=None):
+        self.server_object = server_object
+        self.client_object = client_object
+
         if not self.is_running:
             self.is_running = True
 
@@ -120,59 +127,94 @@ class AUTSBallGame:
         # Poistaa pelaajan pelaajalistasta ja palauttaa kyseisen pelaajan tai Nonen jos pelaajaa ei löydy
         return self.players.pop(player_id, None)
 
+    def add_event(self, event_type, event_info):
+        """ Lisää eventin lähetettäväksi clienteille. Tämä toistaiseksi ainakin käytössä vain jos peli on serveri. """
+        # TODO: siirrä server.py?
+        if self.server_object is not None:
+            self._game_event_list.append((event_type, event_info))
+
+    def get_events(self):
+        # TODO: siirrä client.py?
+        return self._game_event_list
+
+    def execute_events(self, event_list):
+        """ Toteuttaa serverin lähettämät eventit pelissä """
+        for current_event in event_list:
+            # print "Got an event from server: {}".format(current_event)
+            if current_event[0] == GameEventTypes.ShootBasic or current_event[0] == GameEventTypes.ShootBall:
+                self.players[current_event[1]].shoot()
+            elif current_event[0] == GameEventTypes.ShootSpecial:
+                self.players[current_event[1]].shoot_special()
+            elif current_event[0] == GameEventTypes.Goal:
+                self.score(current_event[1])
+
+    def clear_events(self):
+        self._game_event_list = []
+
     def update(self, server_updates=None):
+        self.server_updates = server_updates
+        # self.clear_events()
+
         if self.is_running:
             # Tämä estää errorin quitattaessa
             if self.quit_game is False:
                 # print "------- NEW FRAME -------"
+                # print "Server updates:"
+                # print server_updates
                 for event in pygame.event.get():
                     if event.type == QUIT:
                         self.quit_game = True
                     if event.type == music.MUSIC_FINISHED:
                         self.music_player.next()
-                #Tähän silmukka, jossa käydään clientiltä tulleet komennot pelaajittain läpi
+
+                pressed_keys = pygame.key.get_pressed()
+
+                if pressed_keys[K_UP]:
+                    self.players[self.local_player_id].accelerate()
+                else:
+                    self.players[self.local_player_id].stop_acceleration()
+                if pressed_keys[K_RIGHT]:
+                    self.players[self.local_player_id].rotate_right()
+                if pressed_keys[K_LEFT]:
+                    self.players[self.local_player_id].rotate_left()
+                if pressed_keys[pygame.K_BACKSPACE]:
+                    self.players[self.local_player_id].recover()
+
                 if not self._is_client:
-                    pressed_keys = pygame.key.get_pressed()
-                    if pressed_keys[K_UP]:
-                        self.players[self.local_player_id].accelerate()
-                    else:
-                        self.players[self.local_player_id].stop_acceleration()
-                    if pressed_keys[K_RIGHT]:
-                        self.players[self.local_player_id].rotate_right()
-                    if pressed_keys[K_LEFT]:
-                        self.players[self.local_player_id].rotate_left()
+
                     if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
                         self.players[self.local_player_id].shoot()
                     if pressed_keys[K_LCTRL] or pressed_keys[K_RCTRL]:
                         self.players[self.local_player_id].shoot_special()
-                    if pressed_keys[pygame.K_BACKSPACE]:
-                        self.players[self.local_player_id].recover()
 
                     # Spritejen päivitykset tässä
-                    groups.BulletGroup.update(self.viewscreen_rect)
                     groups.BallGroup.update(self.viewscreen_rect)
                     groups.PlayerGroup.update(self.viewscreen_rect)
-                    groups.EffectGroup.update(self.viewscreen_rect)
-                    groups.TextGroup.update()
+
                 else:
                     # self.calc_viewscreen_rect()
                     # print "Server sent this info:"
                     if server_updates is not None:
                         # print "IN GAME: server_updates:", server_updates
                         # print "Current players:", self.players
-                        for server_update_key in server_updates:
-                            #print server_update_key, server_updates[server_update_key]
-                            if server_update_key == 'players':
-                                for current_player in server_updates[server_update_key]:
-                                    current_player_int = int(current_player)
-                                    self.players[current_player_int].x = server_updates[server_update_key][current_player]['x']
-                                    self.players[current_player_int].y = server_updates[server_update_key][current_player]['y']
-                                    self.players[current_player_int].heading = server_updates[server_update_key][current_player]['heading']
-                                    self.players[current_player_int].update_rect(self.viewscreen_rect)
-                                    self.players[current_player_int].rot_self_image_keep_size(self.players[current_player_int].heading)
+                        for current_player in server_updates['players']:
+                            current_player_int = int(current_player)
+                            self.players[current_player_int].x = server_updates['players'][current_player]['x']
+                            self.players[current_player_int].y = server_updates['players'][current_player]['y']
+                            self.players[current_player_int].heading = server_updates['players'][current_player]['heading']
+                            self.players[current_player_int].thrust = server_updates['players'][current_player]['thrust']
+                            if self.players[current_player_int].thrust > 0:
+                                self.players[current_player_int].accelerate()
+                            else:
+                                self.players[current_player_int].stop_acceleration()
+                            self.players[current_player_int].update_rect(self.viewscreen_rect)
+                            self.players[current_player_int].rot_self_image_keep_size(self.players[current_player_int].heading)
                         self.ball.x, self.ball.y = server_updates['ball']['pos']
                         self.ball.update_rect(self.viewscreen_rect)
-                        # print "BALL:"
+                        self.execute_events(server_updates['events'])
+
+
+                    # print "BALL:"
                         # print "x: {} y: {} rect.center: {}".format(self.ball.x, self.ball.y, self.ball.rect.center)
                         # print "viewscreen_rect: {}".format(self.viewscreen_rect)
                         # print "LOCAL PLAYER:"
@@ -187,6 +229,11 @@ class AUTSBallGame:
                 # print self.players[0].x, self.players[0].y, self.players[0].rect
                 # print self.players[1].x, self.players[1].y, self.players[1].rect
                 # self.window.blit(self.players[self.local_player_id].image, (390, 290))
+
+                groups.BulletGroup.update(self.viewscreen_rect)
+                groups.EffectGroup.update(self.viewscreen_rect)
+                groups.TextGroup.update()
+
                 # Lasketaan viewscreen- ja background rectit
                 self.calc_viewscreen_rect()
 
@@ -277,6 +324,7 @@ class AUTSBallGame:
             sound.force_play_sound(self.goal_green_sound)
         text.DisappearingText(clock=self.clock, pos=WINDOW_CENTER_POINT, text="GOAL!!!", ms_visible=2000,
                               color=goal_text_color, font_size=120, flashes=1)
+        self.add_event(GameEventTypes.Goal, scoring_team)
 
     def exit(self):
         """ Tähän voi laittaa jotain mitä tulee ennen poistumista """

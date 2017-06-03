@@ -9,15 +9,18 @@ PHYSICS_FPS = 60
 NETWORK_QUEUE_LENGTH = 30
 
 
-#because...
+# because...
 class Modes:
     MainMenu, SettingsMenu, Practice, PlayerMenu,  MultiplayerLobby, ReadyLobby, MultiplayerGame = range(7)
 
-
+# pattern has already formed, why change?
 class NetworkMessageTypes:
     """ Näiden maksimimäärä nykyisellä toteutuksella 9 """
     (ServerHereIAm, ServerClientID, ServerStartGame, ServerShipInfo, ServerUpdates,
      ClientMyNameIs, ClientReady, ClientUpdates) = range(8)
+
+class GameEventTypes:
+    ShootBasic, ShootSpecial, ShootBall, Goal = range(4)
 
 
 class Settings:

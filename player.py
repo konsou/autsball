@@ -227,35 +227,34 @@ class PlayerSprite(game_object.GameObject):
 
     def shoot(self):
         # Ammutaan perusammus
-        # Pelaajan nopeus vaikuttaa ammuksen vauhtiin
-        # TODO: uudista cooldownit - määritys bullet.py:ssä, aikaperusteinen
-        # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
-        if self._cooldown_counter > self.basic_shot.cooldown:
+        if self._cooldown_counter > self.basic_shot.cooldown or self.parent._is_client:
             # TODO: siirrä ääni bulletin ominaisuudeksi
             sound.force_play_sound(self.bullet_sound)
-            # TODO: siirrä näiden laskenta bulletin hoidettavaksi
             self.basic_shot(shooting_player=self, level=self.level, parent=self.parent,
-                             heading=self.heading)
+                            heading=self.heading)
             self._cooldown_counter = 0
+            self.parent.add_event(GameEventTypes.ShootBasic, self.owning_player_id)
 
         # Jos pallo on liitettynä niin ammutaan se
         if self.attached_ball is not None:
             self.attached_ball.shoot(direction=self.heading, speed=10)
             self.attached_ball.detach()
             sound.force_play_sound(self.ball_shoot_sound)
+            self.parent.add_event(GameEventTypes.ShootBall, self.owning_player_id)
 
     def shoot_special(self):
         """ Ammutaan erikoisammus """
-        # Asetetaan ammuksen alkupiste riittävän kauas pelaajasta ettei törmää saman tien siihen
-        if self._cooldown_counter_special > self.special.cooldown:
+        if self._cooldown_counter_special > self.special.cooldown or self.parent._is_client:
             sound.force_play_sound(self.bullet_sound)
             self.special(shooting_player=self, level=self.level, parent=self.parent,
                          heading=self.heading)
             self._cooldown_counter_special = 0
+            self.parent.add_event(GameEventTypes.ShootSpecial, self.owning_player_id)
 
     def recover(self):
         """ Aloittaa recovery-laskennan """
-        self._recovery_started_at = pygame.time.get_ticks()
+        if not self.parent._is_client:
+            self._recovery_started_at = pygame.time.get_ticks()
         if not self.parent.demogame:
             text.DisappearingText(clock=self.parent.clock, pos=WINDOW_CENTER_POINT, text="RECOVERING...",
                                   ms_visible=self._recovery_time * 1000, flashes=1, font_size=80, color=RED)

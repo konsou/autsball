@@ -61,29 +61,26 @@ class Server(object):
         # Pelin sisällä
         elif self._in_game:
             client_inputs = {}
-            while self._update_counter < self._update_interval:
-                # Kuunnellaan clientteja fixattu aika ja lasketaan sitten mitä tapahtuu kaikkien syötteille
-                try:
-                    data_dict = self._network.get_network_packages(NetworkMessageTypes.ClientUpdates)[0]
-                except IndexError:
-                    data_dict = None
-                if data_dict is not None:
-                    print data_dict
-                    if data_dict[2] in self._client_list:
-                        data_object = unpack_client_commands(data_dict[1])
-                        # TODO: lisää clientin input vaikuttamaan laskuihin
-                        # client_inputs setissä keynä on clientin assignattu id ja valuena clientin lähettämät input tiedot
-                        # tarkistetaan onko client lähettänyt jo inputit tässä syklissä
-                        if self._client_ip_id_combination[data_dict[2][0]] not in client_inputs:
-                            client_inputs[self._client_ip_id_combination[data_dict[2][0]]] = data_object
-                            # print "Got client inputs from ", data_dict[1][0]
-                            # print "Client input is ", data_object
-                        #else:
-                            #print 'client already sent input on this cycle'
+            try:
+                data_dict = self._network.get_network_packages(NetworkMessageTypes.ClientUpdates)[0]
+            except IndexError:
+                data_dict = None
+            if data_dict is not None:
+                # print data_dict
+                if data_dict[2] in self._client_list:
+                    data_object = unpack_client_commands(data_dict[1])
+                    # client_inputs dictissä keynä on clientin assignattu id ja valuena clientin lähettämät input tiedot
+                    # tarkistetaan onko client lähettänyt jo inputit tässä syklissä
+                    if self._client_ip_id_combination[data_dict[2][0]] not in client_inputs:
+                        client_inputs[self._client_ip_id_combination[data_dict[2][0]]] = data_object
+                        # print "Got client inputs from ", data_dict[1][0]
+                        # print "Client input is ", data_object
+                    #else:
+                        #print 'client already sent input on this cycle'
                 # clock.tick(PHYSICS_FPS)
-                self._update_counter += clock.get_time()
+                # self._update_counter += clock.get_time()
 
-            self._update_counter = 0
+            # self._update_counter = 0
 
             # TODO: Lasketaan pelin kulku ja muodostetaan paketti clienteille
             for current_id in client_inputs:
@@ -109,16 +106,22 @@ class Server(object):
             update_information = {}
             update_information['players'] = {}
             update_information['ball'] = {}
+            update_information['events'] = self._game_instance.get_events()
             for player_id in self._game_instance.players:
                 update_information['players'][player_id] = {}
                 update_information['players'][player_id]['x'] = self._game_instance.players[player_id].x
                 update_information['players'][player_id]['y'] = self._game_instance.players[player_id].y
                 update_information['players'][player_id]['heading'] = self._game_instance.players[player_id].heading
+                update_information['players'][player_id]['thrust'] = self._game_instance.players[player_id].thrust
             update_information['ball']['pos'] = self._game_instance.ball.x, self._game_instance.ball.y
+
+            self._game_instance.clear_events()
 
             packet_to_client = json.dumps(update_information)
             #print packet_to_client
             self._network.server_send_message(packet_to_client, NetworkMessageTypes.ServerUpdates)
+
+            clock.tick(PHYSICS_FPS)
 
     def start_game(self, game_instance, clock):
         self._waiting_for_client_to_join = False
@@ -142,12 +145,11 @@ class Server(object):
             player_infos[player.owning_player_id] = (player.team, player.ship_name)
         player_package = json.dumps(player_infos)
         print "player_package:", player_package
-        # TODO: clientti ei vastaanota shippi-infoa jostain syystä
         self._network.server_send_message(player_package, NetworkMessageTypes.ServerShipInfo)
         clock.tick(1)
 
         # Aloita peli
-        self._game_instance.start()
+        self._game_instance.start(server_object=self)
 
     def shutdown(self):
         self._in_game = False

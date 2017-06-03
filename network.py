@@ -84,7 +84,8 @@ class Network(object):
         """ Lähetetään viesti kaikille clienteille """
         message = bytes(message_type) + message
         if message_type != NetworkMessageTypes.ServerHereIAm:
-            print('sending {!r}'.format(message))
+            # print('sending {!r}'.format(message))
+            pass
         self._socket.sendto(message, self._server_multicast_group)
 
 # Client
