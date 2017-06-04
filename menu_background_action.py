@@ -44,14 +44,14 @@ class BackgroundAction(game.AUTSBallGame):
         self.darken_surface = pygame.Surface(WINDOW_SIZE)
         self.darken_surface.set_alpha(128)
 
-        if self.current_level.background_image is not None:
+        if self.level.background_image is not None:
             # generoidaan taustakuva
             self.background_image = pygame.Surface(WINDOW_SIZE)
             surface_rect = self.background_image.get_rect()
-            image_rect = self.current_level.background_image.get_rect()
+            image_rect = self.level.background_image.get_rect()
             for x in range(0, surface_rect.width, image_rect.width):
                 for y in range(0, surface_rect.height, image_rect.height):
-                    self.background_image.blit(self.current_level.background_image, (x, y))
+                    self.background_image.blit(self.level.background_image, (x, y))
 
         self.goal_green_pos = 50, 300
         self.goal_red_pos = 750, 300
@@ -69,7 +69,7 @@ class BackgroundAction(game.AUTSBallGame):
 
         credits_text = text.make_credits_string()
         self.credits = text.ScrollingText(y_pos=590, screen_size_x=800, text=credits_text, scroll_speed=3)
-        self.mouse = Mouse(level=self.current_level, parent=self, group=groups.EffectGroup, follows=self.credits,
+        self.mouse = Mouse(level=self.level, parent=self, group=groups.EffectGroup, follows=self.credits,
                            x_offset=48, y_offset=-3)
 
         self.start()
@@ -152,7 +152,7 @@ class BackgroundAction(game.AUTSBallGame):
         self.window.blit(self.background_image, (0, 0))
 
         # Piirretään level
-        self.window.blit(self.current_level.image, (0, 0))
+        self.window.blit(self.level.image, (0, 0))
 
         # Bullettien, pelaajan, pallon piirrot
         groups.BulletGroup.draw(self.window)

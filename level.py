@@ -10,8 +10,10 @@ from assets import assets, assets_rot, load_assets
 class Level(pygame.sprite.Sprite):
     """ Level-classi. Käytännössä vain taustakuva, logiikka tapahtuu muualla. """
     # def __init__(self, image_file=None, image=None, group=groups.LevelGroup, background_image_file=None):
-    def __init__(self, level_name=None, group=groups.LevelGroup, colorkey=BLACK):
+    def __init__(self, parent=None, level_name=None, group=groups.LevelGroup, colorkey=BLACK):
         pygame.sprite.Sprite.__init__(self, group)
+
+        self.parent = parent
 
         # Ladataan levelin tiedot xml-filestä.
         root = text.read_xml('xml/level.xml')
@@ -22,7 +24,7 @@ class Level(pygame.sprite.Sprite):
         self.name = level_name
 
         # Level-kuva
-        # self.image = pygame.image.load(current_level.find('images/level-image').text).convert()
+        # self.image = pygame.image.load(level.find('images/level-image').text).convert()
         self.image = assets[current_level.find('images/level-image').text]
         # Määritetään alpha pois (asset loaderi ottaa kaikkeen alphan vakiona päälle) että voi laittaa colorkeyn
         self.image.set_alpha(None)
@@ -87,3 +89,16 @@ class Level(pygame.sprite.Sprite):
             self.player_spawns['green'].append((int(current_spawn.attrib['x']), int(current_spawn.attrib['y'])))
         for current_spawn in current_level.find('ball_spawns'):
             self.ball_spawns.append((int(current_spawn.attrib['x']), int(current_spawn.attrib['y'])))
+
+    def draw_to_level(self, pos, radius, color=BLACK, force=0):
+        """
+        Piirtää level-backgroundiin ympyrän seuraavilla ehdoilla:
+        -peli ei ole client TAI
+        -kutsuttu force=1 (käytännössä peliobjektin execute_events)
+        """
+        if not self.parent._is_client:
+            pygame.draw.circle(self.image, color, pos, radius)
+            self.parent.add_event(GameEventTypes.DestroyLevel, (pos, radius))
+        elif force == 1:
+            pygame.draw.circle(self.image, color, pos, radius)
+

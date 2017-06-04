@@ -5,6 +5,7 @@ import sound
 import groups
 import level
 import player
+import bullet
 import ball
 import text
 import effect
@@ -52,15 +53,15 @@ class AUTSBallGame:
             self.goal_red_sound = None
 
         # Instansioidaan leveli
-        self.current_level = level.Level(level_name=level_name)
-        self.gravity = self.current_level.gravity
+        self.level = level.Level(level_name=level_name, parent=self)
+        self.gravity = self.level.gravity
 
         # Instansioidaan pelaaja ja pallo
         self.players = {}
         self.player_count = 0
         self.player_count_team = {'red': 0, 'green': 0}
 
-        self.ball = ball.BallSprite(level=self.current_level, parent=self)
+        self.ball = ball.BallSprite(level=self.level, parent=self)
 
         self.viewscreen_rect = None
         self.background_view_rect = None
@@ -103,20 +104,20 @@ class AUTSBallGame:
         if player_id is None:
             self.players[self.player_count] = player.PlayerSprite(player_id=player_id,
                                                                   team=team,
-                                                                  level=self.current_level,
+                                                                  level=self.level,
                                                                   parent=self,
                                                                   ship_name=ship_name,
-                                                                  spawn_point=self.current_level.player_spawns[team][
+                                                                  spawn_point=self.level.player_spawns[team][
                                                                               self.player_count_team[team]],
                                                                   special=special)
 
         else:
             self.players[player_id] = player.PlayerSprite(player_id=player_id,
                                                           team=team,
-                                                          level=self.current_level,
+                                                          level=self.level,
                                                           parent=self,
                                                           ship_name=ship_name,
-                                                          spawn_point=self.current_level.player_spawns[team][
+                                                          spawn_point=self.level.player_spawns[team][
                                                                       self.player_count_team[team]],
                                                           special=special)
 
@@ -138,15 +139,23 @@ class AUTSBallGame:
         return self._game_event_list
 
     def execute_events(self, event_list):
-        """ Toteuttaa serverin lähettämät eventit pelissä """
+        """
+        Toteuttaa serverin lähettämät eventit pelissä
+        Rakenne: event_type, event_info
+        event_type on joku constants -> GameEventTypesistä
+        event_info on vapaamuotoista dataa joka liittyy eventiin jotenkin
+        """
         for current_event in event_list:
             # print "Got an event from server: {}".format(current_event)
-            if current_event[0] == GameEventTypes.ShootBasic or current_event[0] == GameEventTypes.ShootBall:
+            if current_event[0] == GameEventTypes.ShootBasic:
+                # event_type: empuvan pelaajan numero
                 self.players[current_event[1]].shoot()
             elif current_event[0] == GameEventTypes.ShootSpecial:
                 self.players[current_event[1]].shoot_special()
             elif current_event[0] == GameEventTypes.Goal:
                 self.score(current_event[1])
+            elif current_event[0] == GameEventTypes.DestroyLevel:
+                self.level.draw_to_level((current_event[1][0][0], current_event[1][0][1]), current_event[1][1], force=1)
 
     def clear_events(self):
         self._game_event_list = []
@@ -213,23 +222,6 @@ class AUTSBallGame:
                         self.ball.update_rect(self.viewscreen_rect)
                         self.execute_events(server_updates['events'])
 
-
-                    # print "BALL:"
-                        # print "x: {} y: {} rect.center: {}".format(self.ball.x, self.ball.y, self.ball.rect.center)
-                        # print "viewscreen_rect: {}".format(self.viewscreen_rect)
-                        # print "LOCAL PLAYER:"
-                        # print "id: {}, x: {} y: {} team:{} rect.center: {}".format(self.local_player_id,
-                        #                                                            self.players[self.local_player_id].x,
-                        #                                                            self.players[self.local_player_id].y,
-                        #                                                            self.players[self.local_player_id].team,
-                        #                                                            self.players[self.local_player_id].rect.center)
-                    # groups.PlayerGroup.update(self.viewscreen_rect)
-                    # print groups.PlayerGroup
-
-                # print self.players[0].x, self.players[0].y, self.players[0].rect
-                # print self.players[1].x, self.players[1].y, self.players[1].rect
-                # self.window.blit(self.players[self.local_player_id].image, (390, 290))
-
                 groups.BulletGroup.update(self.viewscreen_rect)
                 groups.EffectGroup.update(self.viewscreen_rect)
                 groups.TextGroup.update()
@@ -258,10 +250,10 @@ class AUTSBallGame:
                                      self.background_view_rect[1]-WINDOW_SIZE[1]//2,
                                      self.background_view_rect[2],
                                      self.background_view_rect[3])
-        self.window.blit(self.current_level.off_level_surface, off_level_rect)
+        self.window.blit(self.level.off_level_surface, off_level_rect)
 
         # Piirretään levelistä vain viewscreenin kokoinen alue, pelaaja keskellä
-        self.window.blit(self.current_level.image, self.background_view_rect)
+        self.window.blit(self.level.image, self.background_view_rect)
 
         # Bullettien, pelaajan, pallon piirrot
         groups.BulletGroup.draw(self.window)
@@ -347,7 +339,7 @@ if __name__ == '__main__':
     load_assets(window)
 
     game = AUTSBallGame(window)
-    game.add_player(0, team='red', ship_name='Trademark Fighter')
+    game.add_player(0, team='red', ship_name='Trademark Fighter', special=bullet.Dirtball)
     game.add_player(1, team='green', ship_name='Muumi')
     game.add_player(2, team='red', ship_name='Rocket')
     game.add_player(3, team='green', ship_name='Fatship')
