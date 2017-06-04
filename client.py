@@ -129,6 +129,32 @@ class Client(object):
 
         self.network.client_send(player_data_packet, self._server_address, NetworkMessageTypes.ClientUpdates)
 
+    def get_server_updates(self):
+        """
+        Hakee ja palauttaa kaikki viime framen jälkeen tulleet server update -paketit
+        Jos niitä ei ole yhtään niin palauttaa None
+        Jos niitä on useampia niin tekee näin:
+            * positiotiedot otetaan viimeisimmästä paketista
+            * event-tiedot yhdistetään kaikista paketeista
+        """
+        server_updates_all = self.network.get_network_packages(NetworkMessageTypes.ServerUpdates)
+
+        try:
+            # Otetaan vain viimeisimmän päivityspaketin dataosuus
+            server_updates = server_updates_all.pop()[1]
+        except IndexError:
+            server_updates = None
+
+        # Lisätään eventsit lopuista paketeista jos niitä on
+        # TODO: KAATAA PELIN, KORJAA
+        if len(server_updates_all) > 1:
+            print "Got more than one server update packet. Adding their events."
+            for current_package in server_updates_all:
+                print "current_package:", current_package
+                server_updates['events'].append(current_package[1]['events'])
+
+        return server_updates
+
     def _get_client_id(self):
         return self._local_player_id
 

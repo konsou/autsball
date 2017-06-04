@@ -432,15 +432,15 @@ def debug_run():
                 #multiplayer_game.update()
             elif client_object is not None:
                 client_object.send_input()
-                try:
-                    server_updates = client_object.network.get_network_packages(NetworkMessageTypes.ServerUpdates)
-                    server_updates = server_updates.pop()[1]  # Otetaan vain viimeisin update-paketti ja sen dataosuus
-                    # TODO: koordinaatteihin riittää katsoa viimeisin paketti mutta eventit pitää käydä läpi kaikista
-                    # vastaanotetuista paketeista!
-                except (TypeError, IndexError):
-                    server_updates = None
+                # try:
+                #     server_updates = client_object.network.get_network_packages(NetworkMessageTypes.ServerUpdates)
+                #     server_updates = server_updates.pop()[1]  # Otetaan vain viimeisin update-paketti ja sen dataosuus
+                #     # TODO: koordinaatteihin riittää katsoa viimeisin paketti mutta eventit pitää käydä läpi kaikista
+                #     # vastaanotetuista paketeista!
+                # except (TypeError, IndexError):
+                #     server_updates = None
                 # print server_updates
-                multiplayer_game.update(server_updates=server_updates)
+                multiplayer_game.update(server_updates=client_object.get_server_updates())
                 # clock.tick(GRAPHICS_FPS)
 
     pygame.quit()

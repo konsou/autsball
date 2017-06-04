@@ -120,8 +120,8 @@ class Server(object):
             packet_to_client = json.dumps(update_information)
             #print packet_to_client
             self._network.server_send_message(packet_to_client, NetworkMessageTypes.ServerUpdates)
-
-            clock.tick(PHYSICS_FPS)
+            # clock.tick(120)
+            # clock.tick(PHYSICS_FPS)
 
     def start_game(self, game_instance, clock):
         self._waiting_for_client_to_join = False
