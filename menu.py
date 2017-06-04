@@ -434,7 +434,9 @@ def debug_run():
                 client_object.send_input()
                 try:
                     server_updates = client_object.network.get_network_packages(NetworkMessageTypes.ServerUpdates)
-                    server_updates = server_updates.pop()[1]  # Otetaan vain yksi update-paketti ja sen dataosuus
+                    server_updates = server_updates.pop()[1]  # Otetaan vain viimeisin update-paketti ja sen dataosuus
+                    # TODO: koordinaatteihin riittää katsoa viimeisin paketti mutta eventit pitää käydä läpi kaikista
+                    # vastaanotetuista paketeista!
                 except (TypeError, IndexError):
                     server_updates = None
                 # print server_updates
@@ -444,5 +446,4 @@ def debug_run():
     pygame.quit()
 
 if __name__ == '__main__':
-    print "NetworkMessageTypes.ServerShipInfo:", NetworkMessageTypes.ServerShipInfo
     debug_run()
