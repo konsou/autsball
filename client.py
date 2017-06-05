@@ -147,7 +147,7 @@ class Client(object):
 
         # Lisätään eventsit lopuista paketeista jos niitä on
         # TODO: KAATAA PELIN, KORJAA
-        if len(server_updates_all) > 1:
+        if len(server_updates_all) > 0:
             print "Got more than one server update packet. Adding their events."
             for current_package in server_updates_all:
                 print "current_package:", current_package
@@ -160,16 +160,17 @@ class Client(object):
 
     client_id = property(_get_client_id)
 
-#Testauksen tässä vaiheessa clientiltä lähetetään ainostaan player_id, ja näppäimistökomennot.
-#Myöhemmin lisätään clientin oma ennustava grafiikan laskenta, jota korjataan serveriltä tulevalla tiedolla.
 # Testauksen tässä vaiheessa clientiltä lähetetään ainostaan player_id, ja näppäimistökomennot.
 # Myöhemmin lisätään clientin oma ennustava grafiikan laskenta, jota korjataan serveriltä tulevalla tiedolla.
-# Eihän serveriä kiinnosta mitä client laskee? Näkisin, että serveriltä tulee koordinaatit ja nopeusvektori. Niiden pitäisi riittää clientille
+# Testauksen tässä vaiheessa clientiltä lähetetään ainostaan player_id, ja näppäimistökomennot.
+# Myöhemmin lisätään clientin oma ennustava grafiikan laskenta, jota korjataan serveriltä tulevalla tiedolla.
+# Eihän serveriä kiinnosta mitä client laskee? Näkisin, että serveriltä tulee koordinaatit ja nopeusvektori.
+# Niiden pitäisi riittää clientille
 
 
-#pelaajan tiedot
-#pelaajan nimeä ei varmaankaan tarvitse lähetttää joka kerta, id riittää
-#pelaajan komennot dictionaryyn, koska on voitava ottaa yhtäaikaa useampia komentoja vastaan
+# pelaajan tiedot
+# pelaajan nimeä ei varmaankaan tarvitse lähetttää joka kerta, id riittää
+# pelaajan komennot dictionaryyn, koska on voitava ottaa yhtäaikaa useampia komentoja vastaan
 """
 
 # TODO: Lähetä vain komentojen muutokset (keyup/keydown) liikenteen vähentämiseksi
