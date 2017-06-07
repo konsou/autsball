@@ -296,6 +296,8 @@ class AUTSBallGame:
 
     def calc_viewscreen_rect(self):
         """ Laskee viewscreen_rectin ja background_view_rectin """
+        print self.players
+        print self.local_player_id
         # Viewscreen rect: viewscreen absoluuttisissa koordinaateissa
         self.viewscreen_rect = pygame.Rect((self.players[self.local_player_id].x - WINDOW_SIZE[0] // 2,
                                             self.players[self.local_player_id].y - WINDOW_SIZE[1] // 2,

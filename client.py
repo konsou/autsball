@@ -36,9 +36,11 @@ class Client(object):
                     try:
                         self._local_player_id = current_piece_of_data[1]['client_id']
                         print "Got client ID from server:", current_piece_of_data[1]['client_id']
+                        # TODO: joskus jumahtaa johonkin tähän kohtaan näennäisen randomilla kun joinaa
                         return True
                     except (IndexError, TypeError):
-                        pass
+                        # Tässä oli pass, vaihdettu return False - katsotaan auttaako yllä mainittuun jumiin
+                        return False
 
         # elif response_message is not None:
         #     print "Noob host"
@@ -66,8 +68,6 @@ class Client(object):
     def wait_for_player_data_after_start(self, game_instance):
         print "Waiting for player data..."
         # response_messages = self.network.get_network_packages(NetworkMessageTypes.ServerShipInfo)
-        # TODO: clientti ei vastaanota shippi-infoa jostain syystä
-        print NetworkMessageTypes.ServerShipInfo
         response_messages = self.network.get_network_packages(NetworkMessageTypes.ServerShipInfo)
         print "wait_for_player_data_after_start - response_messages:", response_messages
         for current_message in response_messages:
@@ -136,6 +136,7 @@ class Client(object):
         Jos niitä on useampia niin tekee näin:
             * positiotiedot otetaan viimeisimmästä paketista
             * event-tiedot yhdistetään kaikista paketeista
+        Tässä toteutuksessa on riskiä osittaisesta off-syncistä lagitilanteissa mutta ei varmaan kovin iso ongelma
         """
         server_updates_all = self.network.get_network_packages(NetworkMessageTypes.ServerUpdates)
 
