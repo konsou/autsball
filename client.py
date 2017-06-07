@@ -147,12 +147,14 @@ class Client(object):
             server_updates = None
 
         # Lisätään eventsit lopuista paketeista jos niitä on
-        # TODO: KAATAA PELIN, KORJAA
         if len(server_updates_all) > 0:
-            print "Got more than one server update packet. Adding their events."
+            # print "Got more than one server update packet. Adding their events (if any)."
             for current_package in server_updates_all:
-                print "current_package:", current_package
-                server_updates['events'].append(current_package[1]['events'])
+                # print "current_package:", current_package
+                # print "current_package[1]['events']", current_package[1]['events']
+                for current_event in current_package[1]['events']:
+                    server_updates['events'].append(current_event)
+                    # print "Adding event:", current_event
 
         return server_updates
 

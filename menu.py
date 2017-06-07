@@ -402,7 +402,7 @@ def debug_run():
                         server_object.start_game(multiplayer_game, clock)
 
             if server_object is not None:
-                server_object.update(clock)
+                server_object.update()
             elif client_object is not None:
                 if client_object.wait_for_server_start_game() and not client_wait_for_player_data_after_start:
                     # Lopetetaan background action
@@ -428,20 +428,11 @@ def debug_run():
 
         elif active_mode == Modes.MultiplayerGame:
             if server_object is not None:
-                server_object.update(clock)
-                #multiplayer_game.update()
+                server_object.update()
             elif client_object is not None:
+                # TODO: client kun ampuu niin bulletit tulee välillä ei-intuitiivisesta kohtaa
                 client_object.send_input()
-                # try:
-                #     server_updates = client_object.network.get_network_packages(NetworkMessageTypes.ServerUpdates)
-                #     server_updates = server_updates.pop()[1]  # Otetaan vain viimeisin update-paketti ja sen dataosuus
-                #     # TODO: koordinaatteihin riittää katsoa viimeisin paketti mutta eventit pitää käydä läpi kaikista
-                #     # vastaanotetuista paketeista!
-                # except (TypeError, IndexError):
-                #     server_updates = None
-                # print server_updates
                 multiplayer_game.update(server_updates=client_object.get_server_updates())
-                # clock.tick(GRAPHICS_FPS)
 
     pygame.quit()
 
