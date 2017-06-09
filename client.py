@@ -142,7 +142,7 @@ class Client(object):
         try:
             # Otetaan vain viimeisimmän päivityspaketin dataosuus
             server_updates = server_updates_all.pop()[1]
-        except IndexError:
+        except (IndexError, AttributeError):
             server_updates = None
 
         # Lisätään eventsit lopuista paketeista jos niitä on
