@@ -21,6 +21,7 @@ class Server(object):
         self._client_ip_id_combination[server_local_ip] = self._client_id_counter
         self._client_id_counter += 1
         print "Server created, local client joined"
+        print "client_ip_id_combination:", self._client_ip_id_combination
 
         # Aloitetaan clienttien odotus
         self._waiting_for_client_to_join = True
@@ -32,7 +33,7 @@ class Server(object):
         # Game instance
         self._game_instance = None
 
-    def update(self, clock):
+    def update(self):
         # Lobby-vaihe
         if self._waiting_for_client_to_join:
             try:
@@ -51,6 +52,11 @@ class Server(object):
                     self._client_id_counter += 1
                     print "Added client with ip ", current_message[2][0]
                     print "Client name is %s" % client_name
+                    # print "client_ip_id_combination:", self._client_ip_id_combination
+                    # HUOMIO: Kun testaa omalla koneella ilman nettiyhteyttä ja koneella ei ole muita
+                    # IP-osoitteita kuin 127.0.0.1 niin clientti overrideaa serverin local clientin ja peli
+                    # kaatuu kun se käynnistetään
+
                     # Lähetetään pelaajalle sen oma id
                     packet_to_client = json.dumps(client_id)
                     self._network.client_send(packet_to_client, current_message[2],
@@ -82,6 +88,8 @@ class Server(object):
 
             # self._update_counter = 0
 
+            self._game_instance.update()
+
             # TODO: Lasketaan pelin kulku ja muodostetaan paketti clienteille
             for current_id in client_inputs:
                 #print current_id, client_inputs[current_id]
@@ -99,8 +107,6 @@ class Server(object):
                     self._game_instance.players[current_id].shoot_special()
                 if client_inputs[current_id]['recover']:
                     self._game_instance.players[current_id].recover()
-
-            self._game_instance.update()
 
             # TODO: Päivitetään tiedot clienteille
             update_information = {}
@@ -130,11 +136,15 @@ class Server(object):
         self._game_instance = game_instance
         self._game_instance.local_player_id = 0
         i = 0
+        print "Starting game..."
+        print "client_ip_id_combination:", self._client_ip_id_combination
+
         for ip, player_id in self._client_ip_id_combination.iteritems():
             if i % 2:
                 team = "green"
             else:
                 team = "red"
+            print "Adding player {} {}".format(player_id, team)
             self._game_instance.add_player(player_id, team=team)
             i += 1
         clock.tick(2)

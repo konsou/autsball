@@ -36,9 +36,11 @@ class Client(object):
                     try:
                         self._local_player_id = current_piece_of_data[1]['client_id']
                         print "Got client ID from server:", current_piece_of_data[1]['client_id']
+                        # TODO: joskus jumahtaa johonkin tähän kohtaan näennäisen randomilla kun joinaa
                         return True
                     except (IndexError, TypeError):
-                        pass
+                        # Tässä oli pass, vaihdettu return False - katsotaan auttaako yllä mainittuun jumiin
+                        return False
 
         # elif response_message is not None:
         #     print "Noob host"
@@ -66,8 +68,6 @@ class Client(object):
     def wait_for_player_data_after_start(self, game_instance):
         print "Waiting for player data..."
         # response_messages = self.network.get_network_packages(NetworkMessageTypes.ServerShipInfo)
-        # TODO: clientti ei vastaanota shippi-infoa jostain syystä
-        print NetworkMessageTypes.ServerShipInfo
         response_messages = self.network.get_network_packages(NetworkMessageTypes.ServerShipInfo)
         print "wait_for_player_data_after_start - response_messages:", response_messages
         for current_message in response_messages:
@@ -136,6 +136,7 @@ class Client(object):
         Jos niitä on useampia niin tekee näin:
             * positiotiedot otetaan viimeisimmästä paketista
             * event-tiedot yhdistetään kaikista paketeista
+        Tässä toteutuksessa on riskiä osittaisesta off-syncistä lagitilanteissa mutta ei varmaan kovin iso ongelma
         """
         server_updates_all = self.network.get_network_packages(NetworkMessageTypes.ServerUpdates)
 
@@ -146,12 +147,14 @@ class Client(object):
             server_updates = None
 
         # Lisätään eventsit lopuista paketeista jos niitä on
-        # TODO: KAATAA PELIN, KORJAA
         if len(server_updates_all) > 0:
-            print "Got more than one server update packet. Adding their events."
+            # print "Got more than one server update packet. Adding their events (if any)."
             for current_package in server_updates_all:
-                print "current_package:", current_package
-                server_updates['events'].append(current_package[1]['events'])
+                # print "current_package:", current_package
+                # print "current_package[1]['events']", current_package[1]['events']
+                for current_event in current_package[1]['events']:
+                    server_updates['events'].append(current_event)
+                    # print "Adding event:", current_event
 
         return server_updates
 
