@@ -119,6 +119,7 @@ class Server(object):
                 update_information['players'][player_id]['y'] = self._game_instance.players[player_id].y
                 update_information['players'][player_id]['heading'] = self._game_instance.players[player_id].heading
                 update_information['players'][player_id]['thrust'] = self._game_instance.players[player_id].thrust
+                update_information['players'][player_id]['move_vector'] = self._game_instance.players[player_id].move_vector.get_vx_vy()
             update_information['ball']['pos'] = self._game_instance.ball.x, self._game_instance.ball.y
 
             self._game_instance.clear_events()

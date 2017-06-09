@@ -232,8 +232,7 @@ class PlayerSprite(game_object.GameObject):
 
     def shoot(self):
         # Ammutaan perusammus
-        # TODO: uudista cooldownit - määritys bullet.py:ssä, aikaperusteinen
-        if self._cooldown_counter > self.basic_shot.cooldown:
+        if self._cooldown_counter > self.basic_shot.cooldown or self.parent._is_client:
             # TODO: siirrä ääni bulletin ominaisuudeksi
             sound.force_play_sound(self.bullet_sound)
             self.basic_shot(shooting_player=self, level=self.level, parent=self.parent,
@@ -247,7 +246,7 @@ class PlayerSprite(game_object.GameObject):
             self.attached_ball.detach()
             sound.force_play_sound(self.ball_shoot_sound)
             self.ball_shot_at = pygame.time.get_ticks()
-            self.parent.add_event(GameEventTypes.ShootBall, self.owning_player_id)
+            self.parent.add_event(GameEventTypes.ShootBasic, self.owning_player_id)
 
     def shoot_special(self):
         """ Ammutaan erikoisammus """

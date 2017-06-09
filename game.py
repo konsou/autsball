@@ -212,6 +212,7 @@ class AUTSBallGame:
                             self.players[current_player_int].y = server_updates['players'][current_player]['y']
                             self.players[current_player_int].heading = server_updates['players'][current_player]['heading']
                             self.players[current_player_int].thrust = server_updates['players'][current_player]['thrust']
+                            self.players[current_player_int].move_vector.set_vx_vy(*server_updates['players'][current_player]['move_vector'])
                             if self.players[current_player_int].thrust > 0:
                                 self.players[current_player_int].accelerate()
                             else:
