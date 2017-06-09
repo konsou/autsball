@@ -199,4 +199,3 @@ def read_xml(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
     return root
-

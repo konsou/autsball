@@ -255,9 +255,9 @@ class GameObject(pygame.sprite.Sprite):
 
         return wall_collision
 
-    def check_collision_with_group(self, group):
+    def check_collision_with_group(self, group, collided=pygame.sprite.collide_mask):
         """ Tarkastaa törmääkö objekti ryhmässä oleviin toisiin objekteihin. """
-        collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=pygame.sprite.collide_mask)
+        collide_list = pygame.sprite.spritecollide(self, group, dokill=False, collided=collided)
         for colliding_object in collide_list:
             # Emme halua törmätä itseemme
             # Skippaamme myös jo käsitellyt kollisiot
@@ -302,13 +302,13 @@ class GameObject(pygame.sprite.Sprite):
         self.move_vector.set_direction(angle_to_other - math.pi)
         # other_object.move_vector.set_direction(angle_to_other)
 
-        # speed1 = self.move_vector.get_speed()
-        speed2 = other_object.move_vector.get_speed()
+        speed1 = self.move_vector.get_speed()
+        # speed2 = other_object.move_vector.get_speed()
         mass1 = self.mass
         mass2 = other_object.mass
-        speed1_new = (mass2 / mass1) * speed2
-        # speed2_new = (mass1 / mass2) * speed1
-        self.move_vector.set_speed(speed1_new)
+        # speed1_new = (mass2 / mass1) * speed2
+        speed2_new = (mass1 / mass2) * speed1
+        self.move_vector.set_speed(speed2_new)
         # Yritetään estää toisen sisään menemistä
         self.x, self.y = self.x_previous, self.y_previous
         # other_object.move_vector.set_speed(speed2_new)

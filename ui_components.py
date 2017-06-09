@@ -206,7 +206,7 @@ class ShipSelectionImage(pygame.sprite.Sprite):
     def __init__(self, group=None, image_text=None, position=(0, 0)):
         pygame.sprite.Sprite.__init__(self, group)
         try:
-            self.image = assets.assets['gfx/%s.png' % image_text]
+            self.image = assets.assets['gfx/ship_%s_green.png' % image_text]
         except pygame.error:
             # Jos kuvaa ei löydy, käytä rendattua fonttia?
             self.image = pygame.Surface()
@@ -567,7 +567,7 @@ def draw_loading_bar(window, current, total, bar_width=400, bar_height=30, pos=(
     color - väri  
     """
     # TODO: muuta tämäkin classiksi
-    current = float(current)  # vaatii tämän ettei tee integer divisionia
+    current = max(0, float(current))  # vaatii tämän ettei tee integer divisionia
     width = min(bar_width, int(current / total * bar_width))  # lasketaan loading barin leveys
     height = bar_height
     loading_bar_surface = pygame.Surface((width, height))

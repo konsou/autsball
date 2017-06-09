@@ -4,7 +4,7 @@ import game
 import menu_background_action
 import music
 import effect
-import json
+import text
 from server import Server
 from client import Client
 from pygame.locals import *
@@ -41,8 +41,7 @@ def debug_run():
     pygame.init()
     music_player = music.MusicPlayer(pos='bottomright', screen='menu', group=music_player_group)
     music_player.volume = Settings.data['music_volume']
-    if Settings.data['music_on']:
-        music_player.play()
+    music_player.play()
 
     # Assettien esilataus
     load_assets(window)
@@ -89,40 +88,34 @@ def debug_run():
     main_menu_from_ready_lobby_button = Button(Rect(50, 480, 250, 70), 'Main Menu')
 
     #Player menu
+
+
     settings_background = assets['gfx/UI_settings_background.png']
     LabelImageText(group=player_menu_group, image_text='ready', position=(250, 40))
     #LabelImageText(group=player_menu_group, image_text='ready', position=(100, 160))
 
 
-    ShipSelectionImage(group=player_menu_group, image_text='ship1_red_20px', position=(200, 340))
-    ShipSelectionImage(group=player_menu_group, image_text='ship_fatship_red_32', position=(250, 340))
-    ShipSelectionImage(group=player_menu_group, image_text='ship_muumi_32', position=(300, 340))
-    ShipSelectionImage(group=player_menu_group, image_text='ship_rocket_red_84', position=(350, 300))
-    ShipSelectionImage(group=player_menu_group, image_text='ship_roosa', position=(400, 340))
-    ship_selection_checkbox_group = CheckboxGroup()
-    ship_selection_1_checkbox = Checkbox(group=player_menu_group, checked=False, position=(200, 385),
-                                    checkbox_group=ship_selection_checkbox_group)
-    ship_selection_2_checkbox = Checkbox(group=player_menu_group, checked=False, position=(250, 385),
-                                    checkbox_group=ship_selection_checkbox_group)
-    ship_selection_3_checkbox = Checkbox(group=player_menu_group, checked=False, position=(300, 385),
-                                    checkbox_group=ship_selection_checkbox_group)
-    ship_selection_4_checkbox = Checkbox(group=player_menu_group, checked=True, position=(350, 385),
-                                     checkbox_group=ship_selection_checkbox_group)
-    ship_selection_5_checkbox = Checkbox(group=player_menu_group, checked=False, position=(400, 385),
-                                    checkbox_group=ship_selection_checkbox_group)
-    ship_selection_6_checkbox = Checkbox(group=player_menu_group, checked=False, position=(450, 385),
-                                    checkbox_group=ship_selection_checkbox_group)
-    ship_selection_7_checkbox = Checkbox(group=player_menu_group, checked=True, position=(550, 385),
-                                     checkbox_group=ship_selection_checkbox_group)
+        #Luetaan kaikki alusten nimet xml-tiedostosta
+    ship_list = []
+    root = text.read_xml('xml/ship.xml')
+    for name in root.findall('ship'):
+        name = name.get('name')
+        ship_list.append(name)
+    ship_amount = ship_list.__len__()
 
-    ship_selection_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
+        #Luodaan aluksille valintarivi ja tuodaan kuvat
+    ship_selection_checkbox_group = CheckboxGroup()
+    ship_selection_checkbox_list = []
+
+    for i in range(ship_amount):
+        ShipSelectionImage(group=player_menu_group, image_text=ship_list[i], position=(200 + 50*i, 200))
+        ship_selection_checkbox_list.append(i)
+        ship_selection_checkbox_list[i] = Checkbox(group=player_menu_group, checked=False, position=(200 + 50*i, 245),
+                                    checkbox_group=ship_selection_checkbox_group)
+
     player_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
                                                                                'gfx/UI_back_button_down.png',
                                                                                'gfx/UI_back_button_highlight.png'])
-
-    # player_name_field = Input_box()
-    screen = pygame.display.set_mode((800, 600))
-
 
     active_mode = Modes.MainMenu
     practice_game = None
@@ -151,11 +144,11 @@ def debug_run():
     effects_checkbox_group = CheckboxGroup()
     effects_off_checkbox = Checkbox(group=settings_group, checked=False, position=(330, 425),
                                     checkbox_group=effects_checkbox_group)
-    effects_low_checkbox = Checkbox(group=settings_group, checked=False, position=(430, 425),
+    effects_low_checkbox = Checkbox(group=settings_group, checked=False, position=(420, 425),
                                     checkbox_group=effects_checkbox_group)
-    effects_med_checkbox = Checkbox(group=settings_group, checked=False, position=(520, 425),
+    effects_med_checkbox = Checkbox(group=settings_group, checked=False, position=(510, 425),
                                     checkbox_group=effects_checkbox_group)
-    effects_high_checkbox = Checkbox(group=settings_group, checked=True, position=(620, 425),
+    effects_high_checkbox = Checkbox(group=settings_group, checked=True, position=(610, 425),
                                      checkbox_group=effects_checkbox_group)
     effects_checkbox_group.set_checked_index(Settings.data['graphic_quality'])
     settings_back_button = Button(rect=Rect(100, 475, 90, 60), surface_images=['gfx/UI_back_button_normal.png',
@@ -180,7 +173,7 @@ def debug_run():
                     music_player.stop()
 
                     practice_game = game.AUTSBallGame(window, level_name='Vertical Challenge')
-                    practice_game.add_player(0, team='red', ship_name='Muumi')
+                    practice_game.add_player(0, team='red', ship_name=ship_list[Settings.data['ship_selection']])
                     practice_game.add_player(1, team='green')
                     practice_game.add_player(2, team='red')
                     practice_game.add_player(3, team='green')
@@ -346,7 +339,12 @@ def debug_run():
             player_back_button.draw(window)
             music_player_group.draw(window)
 
-           # effect.antialiasing(window, graphic_quality=Settings.data['graphic_quality'])
+            # tarkistetaan ship_selection checkboxeista
+            for i in range(ship_amount):
+                if 'click' in ship_selection_checkbox_list[i].handleEvent(event):
+                     # Tallennetaan arvo settings-tiedostoon
+                    Settings.data['ship_selection'] = i
+                    Settings.save()
 
             pygame.display.update()
             clock.tick(GRAPHICS_FPS)
@@ -368,11 +366,7 @@ def debug_run():
         elif active_mode == Modes.ReadyLobby:
             window.fill(0)
 
-            # Badfix
-            try:
-                background_action.update()
-            except UnboundLocalError:
-                pass
+            background_action.update()
             music_player_group.update()
             static_visual_components_group.draw(window)
 
@@ -405,17 +399,17 @@ def debug_run():
                 server_object.update()
             elif client_object is not None:
                 if client_object.wait_for_server_start_game() and not client_wait_for_player_data_after_start:
-                    # Lopetetaan background action
-                    background_action.destroy()
-                    del background_action
-                    music_player.stop()
-
                     multiplayer_game = game.AUTSBallGame(window, client=True)
                     multiplayer_game.local_player_id = client_object.client_id
                     client_wait_for_player_data_after_start = True
                 elif client_wait_for_player_data_after_start:
                     if client_object.wait_for_player_data_after_start(multiplayer_game):
                         window.fill(BLACK)
+
+                        # Lopetetaan background action
+                        background_action.destroy()
+                        del background_action
+                        music_player.stop()
 
                         multiplayer_game.start()
                         active_mode = Modes.MultiplayerGame

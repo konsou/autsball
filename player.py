@@ -118,7 +118,9 @@ class PlayerSprite(game_object.GameObject):
         self._max_acceleration = self.max_thrust / self.mass
         self.cooldown_multiplier_basic = float(current_ship.find('cooldown_multiplier_basic').text)
         self.cooldown_multiplier_special = float(current_ship.find('cooldown_multiplier_special').text)
-        self._cooldown_after_ball_shot = 60
+        self._cooldown_after_ball_shot = 1000  # millisekuntia
+        self.ball_immunity_time = 300  # ms
+        self.ball_shot_at = 0
         self._cooldown_counter = self.basic_shot.cooldown
         self._cooldown_counter_special = self.special.cooldown
         self._recovery_time = float(current_ship.find('recovery_time').text)  # sekunteja jopa!
@@ -150,9 +152,9 @@ class PlayerSprite(game_object.GameObject):
         self._cooldown_counter_special += self.parent.clock.get_time()
 
         # Jos on pallo kytkettynä niin lisätään paljon cooldownia
-        # TODO: laita toimimaan uudestaan
-        # if self.attached_ball is not None:
-        #     self._cooldown_counter = self._cooldown_after_ball_shot
+        if self.attached_ball is not None:
+            self._cooldown_counter = self._cooldown_after_ball_shot * -1
+            self._cooldown_counter_special = self._cooldown_after_ball_shot * -1
 
         if self._recovery_started_at != 0:
             if (pygame.time.get_ticks() - self._recovery_started_at) // 1000 > self._recovery_time - 1:
@@ -170,6 +172,9 @@ class PlayerSprite(game_object.GameObject):
                 apply_collision = 0
             # Emme myöskään törmää palloon jos kukaan ei ole napannut sitä
             elif other_object.attached_player is None:
+                apply_collision = 0
+            # Jos pallo on ammuttu äskettäin niin ei törmätä
+            if pygame.time.get_ticks() - self.ball_shot_at > self.ball_immunity_time:
                 apply_collision = 0
 
         if apply_collision:
@@ -227,7 +232,8 @@ class PlayerSprite(game_object.GameObject):
 
     def shoot(self):
         # Ammutaan perusammus
-        if self._cooldown_counter > self.basic_shot.cooldown or self.parent._is_client:
+        # TODO: uudista cooldownit - määritys bullet.py:ssä, aikaperusteinen
+        if self._cooldown_counter > self.basic_shot.cooldown:
             # TODO: siirrä ääni bulletin ominaisuudeksi
             sound.force_play_sound(self.bullet_sound)
             self.basic_shot(shooting_player=self, level=self.level, parent=self.parent,
@@ -240,6 +246,7 @@ class PlayerSprite(game_object.GameObject):
             self.attached_ball.shoot(direction=self.heading, speed=10)
             self.attached_ball.detach()
             sound.force_play_sound(self.ball_shoot_sound)
+            self.ball_shot_at = pygame.time.get_ticks()
             self.parent.add_event(GameEventTypes.ShootBall, self.owning_player_id)
 
     def shoot_special(self):

@@ -24,13 +24,13 @@ class GameEventTypes:
 
 
 class Settings:
-
     settings_file = 'settings.pkl'
     data = {
         'music_on': True,
         'music_volume': 1.0,
         'sounds_on': True,
         'sound_volume': 1.0,
+        'ship_selection': 1
         'graphic_quality': 1
     }
 
