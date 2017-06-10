@@ -20,7 +20,7 @@ class NetworkMessageTypes:
      ClientMyNameIs, ClientReady, ClientUpdates) = range(8)
 
 class GameEventTypes:
-    ShootBasic, ShootSpecial, Goal, DestroyLevel = range(4)
+    ShootBasic, ShootSpecial, Goal, PaintLevel, AttachBall, DetachBall = range(6)
 
 
 class Settings:

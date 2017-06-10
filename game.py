@@ -99,7 +99,7 @@ class AUTSBallGame:
         except AttributeError:
             pass
 
-    def add_player(self, player_id=None, team=None, ship_name='Fatship', special=None):
+    def add_player(self, player_id=None, team=None, ship_name='LactoAcidShip', special=bullet.Dirtball):
         # Lisää pelaajan pelaajalistaan
         if player_id is None:
             self.players[self.player_count] = player.PlayerSprite(player_id=player_id,
@@ -128,7 +128,7 @@ class AUTSBallGame:
         # Poistaa pelaajan pelaajalistasta ja palauttaa kyseisen pelaajan tai Nonen jos pelaajaa ei löydy
         return self.players.pop(player_id, None)
 
-    def add_event(self, event_type, event_info):
+    def add_event(self, event_type, event_info=None):
         """ Lisää eventin lähetettäväksi clienteille. Tämä toistaiseksi ainakin käytössä vain jos peli on serveri. """
         # TODO: siirrä server.py?
         if self.server_object is not None:
@@ -146,7 +146,7 @@ class AUTSBallGame:
         event_info on vapaamuotoista dataa joka liittyy eventiin jotenkin
         """
         for current_event in event_list:
-            # print "Got an event from server: {}".format(current_event)
+            print "Got an event from server: {}".format(current_event)
             if current_event[0] == GameEventTypes.ShootBasic:
                 # event_type: empuvan pelaajan numero
                 self.players[current_event[1]].shoot()
@@ -154,8 +154,15 @@ class AUTSBallGame:
                 self.players[current_event[1]].shoot_special()
             elif current_event[0] == GameEventTypes.Goal:
                 self.score(current_event[1])
-            elif current_event[0] == GameEventTypes.DestroyLevel:
-                self.level.draw_to_level((current_event[1][0][0], current_event[1][0][1]), current_event[1][1], force=1)
+            elif current_event[0] == GameEventTypes.PaintLevel:
+                self.level.draw_to_level(pos=(current_event[1][0][0], current_event[1][0][1]),
+                                         radius=current_event[1][1],
+                                         color=current_event[1][2],
+                                         force=1)
+            elif current_event[0] == GameEventTypes.AttachBall:
+                self.ball.attach_to_player(self.players[current_event[1]])
+            elif current_event[0] == GameEventTypes.DetachBall:
+                self.ball.detach(force=1)
 
     def clear_events(self):
         self._game_event_list = []

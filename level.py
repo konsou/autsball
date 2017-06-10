@@ -98,7 +98,7 @@ class Level(pygame.sprite.Sprite):
         """
         if not self.parent._is_client:
             pygame.draw.circle(self.image, color, pos, radius)
-            self.parent.add_event(GameEventTypes.DestroyLevel, (pos, radius))
+            self.parent.add_event(GameEventTypes.PaintLevel, (pos, radius, color))
         elif force == 1:
             pygame.draw.circle(self.image, color, pos, radius)
 

@@ -28,12 +28,13 @@ class BulletSprite(game_object.GameObject):
                                         level=level, parent=parent)
 
         self.heading = heading
+        self._first_frame = 1
 
         # Lasketaan bulletin aloituspiste niin ettei ole aluksen sisällä.
         # Tässä viilaamisen varaa vielä jos haluaa perfektoida mutta toimii aika hyvin
-        self.x = int((shooting_player.radius + self.radius + 2) * math.sin(math.radians(self.heading))
+        self.x = int((shooting_player.radius + self.radius + speed * 2) * math.sin(math.radians(self.heading))
                      * -1 + shooting_player.x)
-        self.y = int((shooting_player.radius + self.radius + 2) * math.cos(math.radians(self.heading))
+        self.y = int((shooting_player.radius + self.radius + speed * 2) * math.cos(math.radians(self.heading))
                      * -1 + shooting_player.y)
 
         self.shooting_player = shooting_player
@@ -64,7 +65,10 @@ class BulletSprite(game_object.GameObject):
         if self.kill_pending:
             self.kill()
         self.viewscreen_rect = viewscreen_rect
-        self.update_movement()
+        if not self._first_frame:
+            self.update_movement()
+        else:
+            self._first_frame = 0
         self.animate()
         if self.rotate:
             self.rot_self_image_keep_size(self.heading)
@@ -228,8 +232,9 @@ class Bouncer(BulletSprite):
 
     def collided_with_wall(self):
         self.parent.level.draw_to_level((self.x, self.y), self.size - 1)
-        randomvalue = random.uniform(-0.5, 0.5)
-        self.move_vector.set_direction(self.move_vector.get_direction() - math.pi + randomvalue)
+        # Poistettu randomius, aiheuttaa hankaluuksia multiplayerissä
+        # randomvalue = random.uniform(-0.5, 0.5)
+        self.move_vector.set_direction(self.move_vector.get_direction() - math.pi)
         effect.Explosion(image_file='gfx/explosion_30.png', pos=(self.x, self.y), explosion_radius=self.explosion_radius,
                          explosion_force=self.explosion_force)
         self._bounce_counter += 1

@@ -88,7 +88,6 @@ class Server(object):
 
             # self._update_counter = 0
 
-            self._game_instance.update()
 
             # TODO: Lasketaan pelin kulku ja muodostetaan paketti clienteille
             for current_id in client_inputs:
@@ -107,6 +106,8 @@ class Server(object):
                     self._game_instance.players[current_id].shoot_special()
                 if client_inputs[current_id]['recover']:
                     self._game_instance.players[current_id].recover()
+
+            self._game_instance.update()
 
             # TODO: Päivitetään tiedot clienteille
             update_information = {}
@@ -138,7 +139,7 @@ class Server(object):
         self._game_instance.local_player_id = 0
         i = 0
         print "Starting game..."
-        print "client_ip_id_combination:", self._client_ip_id_combination
+        # print "client_ip_id_combination:", self._client_ip_id_combination
 
         for ip, player_id in self._client_ip_id_combination.iteritems():
             if i % 2:

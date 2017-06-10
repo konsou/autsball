@@ -6,6 +6,7 @@ import vector
 import groups
 import effect
 from colors import *
+from constants import *
 from assets import assets, assets_rot
 
 
@@ -97,35 +98,41 @@ class BallSprite(game_object.GameObject):
         """
         self.attached_player = player
         player.attach_ball(self)
+        self.tether = effect.TetherSprite(attached_ball=self, attached_player=player)
 
-    def detach(self):
+    def detach(self, force=0):
         """ Tämä metodi poistaa liitoksen pelaajaan. """
         if self.attached_player is not None:
-            self.attached_player.detach()
-            self.attached_player = None
-            self.tether.destroy()
+            if self.parent.server_object is not None:
+                self.parent.add_event(GameEventTypes.DetachBall)
+            if not self.parent._is_client or force:
+                self.attached_player.detach()
+                self.attached_player = None
+                self.tether.destroy()
 
     def collided_with(self, other_object):
         """
         Jos other_object on pelaaja ja palloa ei vielä ole liitetty pelaajaan niin tehdään liitos
         Emme törmäile pelaajaan, joka on liitettynä
         """
-        apply_collision = 1
-        # Jos törmäävä objekti on pelaaja ja palloa ei vielä ole liitetty pelaajaan niin liitetään
-        if other_object in groups.PlayerGroup:
-            # Jos pallo on ammuttu äskettäin niin ei törmätä
-            if pygame.time.get_ticks() - other_object.ball_shot_at < other_object.ball_immunity_time:
-                apply_collision = 0
+        if not self.parent._is_client:
+            apply_collision = 1
+            # Jos törmäävä objekti on pelaaja ja palloa ei vielä ole liitetty pelaajaan niin liitetään
+            if other_object in groups.PlayerGroup:
+                # Jos pallo on ammuttu äskettäin niin ei törmätä
+                if pygame.time.get_ticks() - other_object.ball_shot_at < other_object.ball_immunity_time:
+                    apply_collision = 0
 
-            if self.attached_player is None and apply_collision == 1:
-                self.attach_to_player(other_object)
-                self.tether = effect.TetherSprite(attached_ball=self, attached_player=other_object)
+                if self.attached_player is None and apply_collision == 1:
+                    if self.parent.server_object is not None:
+                        self.parent.add_event(GameEventTypes.AttachBall, other_object.owning_player_id)
+                    self.attach_to_player(other_object)
 
-            if other_object == self.attached_player:
-                apply_collision = 0
+                if other_object == self.attached_player:
+                    apply_collision = 0
 
-        if apply_collision:
-            self.apply_collision_to_move_vector(other_object)
+            if apply_collision:
+                self.apply_collision_to_move_vector(other_object)
 
     def is_in_goal(self, point_color):
         """ Kun pallo menee maaliin niin tulee maali. Loogista. """
