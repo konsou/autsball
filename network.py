@@ -34,7 +34,7 @@ class Network(object):
     def network_listen(self, required_because_stupid_threading_function):
         """
         Tämä on tarkoitus ajaa taustathreadissa. Kuuntelee koko ajan viestejä ja tallentaa ne receive_queueen.
-        Muoto: message_type (INT), data (BYTES), address (TUPLE)
+        Viestien muoto: message_type (INT), data (BYTES), address (TUPLE)
         """
         print "Network listen thread started."
         while self.network_listening:
@@ -43,6 +43,9 @@ class Network(object):
             except socket.timeout:
                 pass
                 # print "Socket timeout when listening. Ignoring."
+            except socket.error:
+                print "Connection lost"
+                self.network_listening = False
             else:
                 # if int(data[0]) != NetworkMessageTypes.ServerHereIAm:
                     # print('Receive thread received {} from {}'.format(data, address))

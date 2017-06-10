@@ -9,7 +9,9 @@ import bullet
 import ball
 import text
 import effect
+import pickup
 import ui_components
+import random
 from pygame.locals import *
 from colors import *
 from constants import *
@@ -199,6 +201,9 @@ class AUTSBallGame:
                     self.players[self.local_player_id].recover()
 
                 if not self._is_client:
+                    # Spawnataan pickuppeja
+                    if random.randint(0, 360) == 0:
+                        pickup.spawn_random_pickup(self, self.level)
 
                     if pressed_keys[K_LSHIFT] or pressed_keys[K_RSHIFT]:
                         self.players[self.local_player_id].shoot()
@@ -233,6 +238,7 @@ class AUTSBallGame:
                         self.execute_events(server_updates['events'])
 
                 groups.BulletGroup.update(self.viewscreen_rect)
+                groups.PickupGroup.update(self.viewscreen_rect)
                 groups.EffectGroup.update(self.viewscreen_rect)
                 groups.TextGroup.update()
 
@@ -267,7 +273,8 @@ class AUTSBallGame:
         # Piirretään levelistä vain viewscreenin kokoinen alue, pelaaja keskellä
         self.window.blit(self.level.image, self.background_view_rect)
 
-        # Bullettien, pelaajan, pallon piirrot
+        # Piirrot
+        groups.PickupGroup.draw(self.window)
         groups.BulletGroup.draw(self.window)
         groups.BallGroup.draw(self.window)
         groups.PlayerGroup.draw(self.window)

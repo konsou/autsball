@@ -74,7 +74,7 @@ class GameObject(pygame.sprite.Sprite):
         self.viewscreen_rect = None
 
     def __repr__(self):
-        return "<GAME OBJECT>"
+        return "<GameObject>"
 
     def load_image(self, image_file=None, frames_per_image=5):
         """ 

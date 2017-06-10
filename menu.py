@@ -424,7 +424,6 @@ def debug_run():
             if server_object is not None:
                 server_object.update()
             elif client_object is not None:
-                # TODO: client kun ampuu niin bulletit tulee välillä ei-intuitiivisesta kohtaa
                 client_object.send_input()
                 multiplayer_game.update(server_updates=client_object.get_server_updates())
 

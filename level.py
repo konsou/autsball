@@ -102,3 +102,5 @@ class Level(pygame.sprite.Sprite):
         elif force == 1:
             pygame.draw.circle(self.image, color, pos, radius)
 
+    def get_color_at(self, pos):
+        return self.image.get_at(pos)

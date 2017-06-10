@@ -6,6 +6,7 @@ PlayerGroup = pygame.sprite.Group()
 LevelGroup = pygame.sprite.Group()
 BulletGroup = pygame.sprite.Group()
 BallGroup = pygame.sprite.Group()
+PickupGroup = pygame.sprite.Group()
 EffectGroup = pygame.sprite.Group()
 TextGroup = pygame.sprite.Group()
 
