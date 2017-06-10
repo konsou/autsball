@@ -161,6 +161,8 @@ class AUTSBallGame:
         self._game_event_list = []
 
     def update(self, server_updates=None):
+        # if server_updates is None:
+        #     print "Server updates was None"
         self.server_updates = server_updates
         # self.clear_events()
 
@@ -246,12 +248,14 @@ class AUTSBallGame:
         # Ruutu tyhjäksi
         self.window.fill(BLACK)
 
-        # Piirretään levelin ulkopuolinen tuhoutumaton alue
-        off_level_rect = pygame.Rect(self.background_view_rect[0]-WINDOW_SIZE[0]//2,
-                                     self.background_view_rect[1]-WINDOW_SIZE[1]//2,
-                                     self.background_view_rect[2],
-                                     self.background_view_rect[3])
-        self.window.blit(self.level.off_level_surface, off_level_rect)
+        # Jos gfx-taso on minimissä niin ei piirretä taustoja
+        if Settings.data['graphic_quality'] > 0:
+            # Piirretään levelin ulkopuolinen tuhoutumaton alue
+            off_level_rect = pygame.Rect(self.background_view_rect[0]-WINDOW_SIZE[0]//2,
+                                         self.background_view_rect[1]-WINDOW_SIZE[1]//2,
+                                         self.background_view_rect[2],
+                                         self.background_view_rect[3])
+            self.window.blit(self.level.off_level_surface, off_level_rect)
 
         # Piirretään levelistä vain viewscreenin kokoinen alue, pelaaja keskellä
         self.window.blit(self.level.image, self.background_view_rect)
@@ -264,6 +268,7 @@ class AUTSBallGame:
         groups.TextGroup.draw(self.window)
 
         # HUD
+        # TODO: siirrä jonnekin nätimpään paikkaan pois tästä
         text.show_text(self.window, (10, 70), "FPS: " + str(round(self.clock.get_fps(), 2)))
         text.show_score(self.window, (50, 10), self.score_green, team=0)
         text.show_score(self.window, (700, 10), self.score_red, team=1)
